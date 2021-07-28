@@ -1,0 +1,21 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hc.bookkeeping.modules.bkeeping.mapper.AccountBookMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hc.bookkeeping.modules.bkeeping.entity.AccountBook">
+        <id column="id" property="id" />
+        <result column="name" property="name" />
+        <result column="describe" property="describe" />
+        <result column="user_id" property="userId" />
+        <result column="image" property="image" />
+        <result column="sort" property="sort" />
+        <result column="is_default" property="isDefault" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        id, name, describe, user_id, image, sort, is_default
+    </sql>
+
+</mapper>

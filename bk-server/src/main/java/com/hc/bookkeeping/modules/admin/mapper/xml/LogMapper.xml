@@ -1,0 +1,32 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hc.bookkeeping.modules.admin.mapper.LogMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hc.bookkeeping.modules.admin.entity.Log">
+        <id column="id" property="id" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+        <result column="type" property="type" />
+        <result column="title" property="title" />
+        <result column="ip" property="ip" />
+        <result column="browser" property="browser" />
+        <result column="user_agent" property="userAgent" />
+        <result column="request_uri" property="requestUri" />
+        <result column="method" property="method" />
+        <result column="params" property="params" />
+        <result column="request_time" property="requestTime" />
+        <result column="execute_time" property="executeTime" />
+        <result column="response" property="response" />
+        <result column="exception" property="exception" />
+        <result column="level" property="level" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by,
+        create_time,
+        id, type, title, ip, browser, user_agent, request_uri, method, params, request_time, execute_time, response, exception, level
+    </sql>
+
+</mapper>

@@ -1,0 +1,46 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!DOCTYPE mapper PUBLIC "-//mybatis.org//DTD Mapper 3.0//EN" "http://mybatis.org/dtd/mybatis-3-mapper.dtd">
+<mapper namespace="com.hc.bookkeeping.modules.admin.mapper.MenuMapper">
+
+    <!-- 通用查询映射结果 -->
+    <resultMap id="BaseResultMap" type="com.hc.bookkeeping.modules.admin.entity.Menu">
+        <id column="id" property="id" />
+        <result column="create_by" property="createBy" />
+        <result column="create_time" property="createTime" />
+        <result column="update_by" property="updateBy" />
+        <result column="update_time" property="updateTime" />
+        <result column="pid" property="pid" />
+        <result column="name" property="name" />
+        <result column="description" property="description" />
+        <result column="sort" property="sort" />
+        <result column="url" property="url" />
+        <result column="is_outside" property="isOutside" />
+        <result column="type" property="type" />
+        <result column="icon" property="icon" />
+        <result column="component_name" property="componentName" />
+        <result column="component" property="component" />
+        <result column="is_show" property="isShow" />
+        <result column="permission" property="permission" />
+    </resultMap>
+
+    <!-- 通用查询结果列 -->
+    <sql id="Base_Column_List">
+        create_by,
+        create_time,
+        update_by,
+        update_time,
+        id, pid, name, description, sort, url, is_outside, type, icon, component_name, component, is_show, permission
+    </sql>
+
+    <select id="getMenusByRoleId" resultType="com.hc.bookkeeping.modules.admin.entity.Menu">
+        SELECT
+        m.*
+        FROM sys_menu m, sys_role_menu r
+        WHERE m.id = r.menu_id
+        AND r.role_id IN
+        <foreach collection="roleId" item="id" index="index" open="(" close=")" separator=",">
+            #{id}
+        </foreach>
+        order by m.sort
+    </select>
+</mapper>
