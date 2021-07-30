@@ -13,30 +13,49 @@
 		{
 			"path": "pages/login/reg",
 			"style": {}
+		},
+		{
+			"path": "pages/mine/mine",
+			"style": {}
+		},
+		{
+			"path": "pages/bill/bill",
+			"style": {}
+		},
+		{
+			"path": "pages/statistics/statistics",
+			"style": {}
 		}
 	],
 	"tabBar": {
 		"color": "#7A7E83",
-		"selectedColor": "#3cc51f",
+		"selectedColor": "#EB5F70",
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{
 			"pagePath": "pages/index/index",
-			"iconPath": "static/logo.png",
-			"selectedIconPath": "static/logo.png",
+			"iconPath": "static/tabbar/shouye.png",
+			"selectedIconPath": "static/tabbar/shouye-select.png",
 			"text": "首页"
 		}, {
-			"pagePath": "pages/login/login",
-			"iconPath": "static/logo.png",
-			"selectedIconPath": "static/logo.png",
+			"pagePath": "pages/bill/bill",
+			"iconPath": "static/tabbar/zhangdan.png",
+			"selectedIconPath": "static/tabbar/zhangdan-select.png",
+			"text": "账单"
+		}, {
+			"pagePath": "pages/statistics/statistics",
+			"iconPath": "static/tabbar/baobiao.png",
+			"selectedIconPath": "static/tabbar/baobiao-select.png",
+			"text": "报表"
+		}, {
+			"pagePath": "pages/mine/mine",
+			"iconPath": "static/tabbar/yonghu.png",
+			"selectedIconPath": "static/tabbar/yonghu-select.png",
 			"text": "我的"
 		}]
 	},
 	"globalStyle": {
-		"navigationBarTextStyle": "black",
-		"navigationBarTitleText": "uni-app",
-		"navigationBarBackgroundColor": "#F8F8F8",
-		"backgroundColor": "#F8F8F8"
+		"navigationStyle":"custom"
 	},
 	"easycom": {
 		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"

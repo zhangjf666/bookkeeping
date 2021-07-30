@@ -1,49 +1,110 @@
 <template>
-	<view class="content">
-		<image class="logo" src="/static/logo.png"></image>
-		<view>
-			<text class="title">{{title}}</text>
+  <view class="content">
+    <view class="summary">
+      <view class="expense">
+        <view class="expense-title">本月支出 (元)</view>
+        <view class="expense-sum">￥1400005.2546</view>
+      </view>
+      <view class="income">
+        <view class="income-title">本月收入</view>
+        <view class="income-sum">￥15000.2546</view>
+      </view>
+    </view>
+    <view class="btn-add">
+      <button class="primary" type="primary" @tap="addRecord">记一笔</button>
+    </view>
+	<view class="recently">
+		<view class="title">近3日新增账单 {{record}} 笔</view>
+		<!-- 近3日账单 -->
+		<view class="record">
+
 		</view>
 	</view>
+  </view>
 </template>
 
 <script>
-	export default {
-		data() {
-			return {
-				title: 'Hello'
-			}
-		},
-		onLoad() {
+export default {
+  data() {
+    return {
+      record: 5,
+    };
+  },
+  onLoad() {
 
-		},
-		methods: {
-
-		}
-	}
+  },
+  methods: {
+    addRecord() {
+      console.log("1111");
+    },
+  },
+};
 </script>
 
-<style>
-	.content {
-		display: flex;
-		flex-direction: column;
-		align-items: center;
-		justify-content: center;
-	}
-
-	.logo {
-		height: 200rpx;
-		width: 200rpx;
-		margin: 200rpx auto 50rpx auto;
-	}
-
-	.text-area {
-		display: flex;
-		justify-content: center;
-	}
-
+<style lang="scss" scoped>
+.content {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+}
+.summary {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+  height: 480rpx;
+  background-color: #252569;
+  padding: 30rpx;
+  .income {
+    display: flex;
+    margin: 20rpx;
+    .income-title {
+      color: gainsboro;
+      font-size: 14rpx;
+    }
+    .income-sum {
+      margin-left: 20rpx;
+      font-size: 14rpx;
+      color: white;
+    }
+  }
+  .expense {
+    display: flex;
+    flex-direction: column;
+    margin-top: 160rpx;
+    .expense-title {
+      color: gainsboro;
+      font-size: 14rpx;
+      padding: 20rpx;
+    }
+    .expense-sum {
+      font-size: 80rpx;
+      color: white;
+    }
+  }
+}
+.btn-add {
+	display: flex;
+	width: 100%;
+  margin-top: 20rpx;
+  padding: 20rpx;
+}
+button.primary {
+  background-color: #EB5F70;
+  border-radius: 4rpx;
+  width: 100%;
+}
+.recently {
+	display: flex;
+	width: 100%;
+	flex-direction: column;
+	padding: 30rpx;
 	.title {
-		font-size: 36rpx;
-		color: #8f8f94;
+		font-size: 26rpx;
+		font-weight: bold;
 	}
+	.record {
+
+	}
+}
 </style>
