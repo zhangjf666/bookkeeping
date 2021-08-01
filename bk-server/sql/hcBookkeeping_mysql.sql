@@ -450,6 +450,8 @@ CREATE TABLE `income_expense` (
   `main_classify` BIGINT(20) NULL DEFAULT NULL COMMENT '主分类id',
   `sub_classify` BIGINT(20) NULL DEFAULT NULL COMMENT '子分类id',
   `is_credit_card` CHAR(1) NOT NULL DEFAULT '0' COMMENT '是否信用卡消费(0:否,1;是)',
+  `create_time`   datetime NOT NULL comment '创建时间',
+  `update_time`   datetime NOT NULL comment '更新时间',
   PRIMARY KEY (`id`)
 ) COMMENT '收入支出表';
 
