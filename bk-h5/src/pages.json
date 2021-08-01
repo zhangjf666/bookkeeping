@@ -25,11 +25,15 @@
 		{
 			"path": "pages/statistics/statistics",
 			"style": {}
+		},
+		{
+			"path": "pages/record/record",
+			"style": {}
 		}
 	],
 	"tabBar": {
 		"color": "#7A7E83",
-		"selectedColor": "#EB5F70",
+		"selectedColor": "#d83d34",
 		"borderStyle": "black",
 		"backgroundColor": "#ffffff",
 		"list": [{

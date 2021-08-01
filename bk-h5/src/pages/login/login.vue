@@ -2,12 +2,12 @@
 	<view class="content">
 		<u-navbar
 			class="navbar"
-			:background="{ backgroundColor: '#D83D34' }"
-			back-icon-color="#fff"
+			:background="{ backgroundColor: '#efeff4' }"
+			back-icon-color="#000"
 			back-icon-size="38"
 			back-text="登录"
             z-index="0"
-			:back-text-style="{ color: '#fff', fontSize: '34rpx', marginLeft: '10rpx' }"
+			:back-text-style="{ color: '#000', fontSize: '30rpx', marginLeft: '10rpx' }"
 		></u-navbar>
 		<view class="login-type">
 			<view v-for="(item,index) in loginTypeList" :key="index" @click="loginType = index" :class="{act: loginType === index}"
@@ -234,6 +234,7 @@
 
 <style lang="scss" scoped>
 @import "page.css";
+$mColor: #d83d34;
 .navbar {
 	/deep/ .u-border-bottom:after {
 		border-bottom-width: 0px;
@@ -250,14 +251,14 @@
 }
 
 .login-type-btn.act {
-    color: #d83d34;
-    border-bottom: solid 1px #d83d34;
+    color: $mColor;
+    border-bottom: solid 1px $mColor;
 }
 
 .send-code-btn {
     width: 100px;
     text-align: center;
-    background-color: #d83d34;
+    background-color: $mColor;
     color: #FFFFFF;
 }
 

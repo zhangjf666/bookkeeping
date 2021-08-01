@@ -11,7 +11,7 @@
       </view>
     </view>
     <view class="btn-add">
-      <button class="primary" type="primary" @tap="addRecord">记一笔</button>
+      <button class="primary" type="primary" @tap="goRecordPage">记一笔</button>
     </view>
 	<view class="recently">
 		<view class="title">近3日新增账单 {{record}} 笔</view>
@@ -34,14 +34,18 @@ export default {
 
   },
   methods: {
-    addRecord() {
-      console.log("1111");
-    },
+    // 跳转记录页面
+    goRecordPage() {
+      uni.navigateTo({
+        url: `../record/record`,
+      });
+    }
   },
 };
 </script>
 
 <style lang="scss" scoped>
+$mColor: #d83d34;
 .content {
   display: flex;
   flex-direction: column;
@@ -60,11 +64,11 @@ export default {
     margin: 20rpx;
     .income-title {
       color: gainsboro;
-      font-size: 14rpx;
+      font-size: 28rpx;
     }
     .income-sum {
       margin-left: 20rpx;
-      font-size: 14rpx;
+      font-size: 28rpx;
       color: white;
     }
   }
@@ -74,7 +78,7 @@ export default {
     margin-top: 160rpx;
     .expense-title {
       color: gainsboro;
-      font-size: 14rpx;
+      font-size: 32rpx;
       padding: 20rpx;
     }
     .expense-sum {
@@ -90,7 +94,7 @@ export default {
   padding: 20rpx;
 }
 button.primary {
-  background-color: #EB5F70;
+  background-color: $mColor;
   border-radius: 4rpx;
   width: 100%;
 }
