@@ -8,13 +8,13 @@
         <result column="user_id" property="userId" />
         <result column="name" property="name" />
         <result column="value" property="value" />
-        <result column="describe" property="describe" />
+        <result column="description" property="description" />
         <result column="enable" property="enable" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, user_id, name, value, describe, enable
+        id, user_id, name, value, description, enable
     </sql>
 
 </mapper>

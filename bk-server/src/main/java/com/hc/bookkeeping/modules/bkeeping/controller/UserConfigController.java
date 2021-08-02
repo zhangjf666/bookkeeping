@@ -5,6 +5,7 @@ import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
+import com.hc.bookkeeping.common.utils.QueryUtil;
 import com.hc.bookkeeping.modules.bkeeping.dto.UserConfigDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.UserConfigQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.service.UserConfigService;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -29,9 +31,9 @@ public class UserConfigController {
     @Log("查询用户配置")
     @ApiOperation("查询用户配置")
     @GetMapping
-    public Response getPosition(@Validated UserConfigQueryDto queryDto, Page pageable){
-        Page page = userConfigService.queryPage(queryDto, pageable);
-        return Response.ok(page);
+    public Response getPosition(@Validated UserConfigQueryDto queryDto){
+        List<UserConfigDto> list = userConfigService.queryList(QueryUtil.bulid(queryDto));
+        return Response.ok(list);
     }
 
     @Log("创建用户配置")

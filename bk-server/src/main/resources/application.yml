@@ -79,10 +79,11 @@ spring:
 mybatis-plus:
   configuration:
     log-impl: org.apache.ibatis.logging.stdout.StdOutImpl
+    default-enum-type-handler: com.baomidou.mybatisplus.extension.handlers.MybatisEnumTypeHandler
   mapper-locations: classpath*:**/mapper/xml/*.xml
   type-aliases-package: com.hc.bookkeeping.entity
   # 枚举配置
-  type-enums-package: com.hc.bookkeeping.model
+  # type-enums-package: com.hc.bookkeeping.common,model;com.hc.bookkeeping.modules.*.model
 logging:
   level:
     root: info

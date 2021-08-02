@@ -27,7 +27,7 @@ public class UserConfigQueryDto implements Serializable {
     private Long id;
 
     @ApiModelProperty(value = "用户id")
-    @Query
+    @Query(column = "user_id")
     private Long userId;
 
     @ApiModelProperty(value = "配置项目名")
@@ -36,7 +36,7 @@ public class UserConfigQueryDto implements Serializable {
 
     @ApiModelProperty(value = "描述")
     @Query(match = Query.Matching.INNER_LIKE)
-    private String describe;
+    private String description;
 
     @ApiModelProperty(value = "是否启用(0:不启用,1:启用)")
     @Query

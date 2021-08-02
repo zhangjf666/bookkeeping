@@ -6,7 +6,7 @@
     <resultMap id="BaseResultMap" type="com.hc.bookkeeping.modules.bkeeping.entity.AccountBook">
         <id column="id" property="id" />
         <result column="name" property="name" />
-        <result column="describe" property="describe" />
+        <result column="description" property="description" />
         <result column="user_id" property="userId" />
         <result column="image" property="image" />
         <result column="sort" property="sort" />

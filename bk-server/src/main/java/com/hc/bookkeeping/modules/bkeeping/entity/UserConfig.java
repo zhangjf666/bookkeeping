@@ -1,9 +1,7 @@
 package com.hc.bookkeeping.modules.bkeeping.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.Version;
-import com.baomidou.mybatisplus.annotation.TableId;
+import com.baomidou.mybatisplus.annotation.*;
+
 import java.io.Serializable;
 
 import com.hc.bookkeeping.common.model.BoolEnum;
@@ -42,7 +40,7 @@ public class UserConfig implements Serializable {
     private String value;
 
     @ApiModelProperty(value = "描述")
-    private String describe;
+    private String description;
 
     @ApiModelProperty(value = "是否启用(0:不启用,1:启用)")
     private BoolEnum enable;

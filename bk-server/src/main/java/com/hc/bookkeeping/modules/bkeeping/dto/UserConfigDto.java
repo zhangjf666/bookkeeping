@@ -37,7 +37,7 @@ public class UserConfigDto implements Serializable {
     private String value;
 
     @ApiModelProperty(value = "描述")
-    private String describe;
+    private String description;
 
     @ApiModelProperty(value = "是否启用(0:不启用,1:启用)")
     private BoolEnum enable;

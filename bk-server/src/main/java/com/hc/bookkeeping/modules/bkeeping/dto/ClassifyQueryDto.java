@@ -37,7 +37,7 @@ public class ClassifyQueryDto implements Serializable {
     private Long pid;
 
     @ApiModelProperty(value = "所属用户id")
-    @Query
+    @Query(column = "user_id")
     private Long userId;
 
     @ApiModelProperty(value = "排序")

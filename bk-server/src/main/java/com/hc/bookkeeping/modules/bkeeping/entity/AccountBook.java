@@ -36,7 +36,7 @@ public class AccountBook implements Serializable {
     private String name;
 
     @ApiModelProperty(value = "描述")
-    private String describe;
+    private String description;
 
     @ApiModelProperty(value = "用户id")
     private Long userId;

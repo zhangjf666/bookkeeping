@@ -406,7 +406,7 @@ DROP TABLE IF EXISTS `account_book`;
 CREATE TABLE `account_book` (
   `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
   `name` VARCHAR(200) NOT NULL COMMENT '名称',
-  `describe` VARCHAR(2000) NULL DEFAULT NULL COMMENT '描述',
+  `description` VARCHAR(2000) NULL DEFAULT NULL COMMENT '描述',
   `user_id` BIGINT(20) NOT NULL COMMENT '用户id',
   `image` VARCHAR(200) NULL DEFAULT NULL COMMENT '图标名称',
   `sort` INTEGER(10) NOT NULL DEFAULT 0 COMMENT '排序',
@@ -467,7 +467,21 @@ CREATE TABLE `user_config` (
   `user_id` BIGINT(20) NOT NULL COMMENT '用户id',
   `name` VARCHAR(100) NOT NULL COMMENT '配置项目名',
   `value` VARCHAR(100) NOT NULL COMMENT '配置项的值',
-  `describe` VARCHAR(1000) NULL DEFAULT NULL COMMENT '描述',
+  `description` VARCHAR(1000) NULL DEFAULT NULL COMMENT '描述',
   `enable` CHAR(1) NOT NULL DEFAULT '1' COMMENT '是否启用(0:不启用,1:启用)',
   PRIMARY KEY (`id`)
 ) COMMENT '用户配置表';
+
+-- ---
+-- Table 'icon_config'
+-- 图标配置表
+-- ---
+
+DROP TABLE IF EXISTS `icon_config`;
+
+CREATE TABLE `icon_config` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT '配置id',
+  `code` VARCHAR(100) NOT NULL COMMENT '图标代码',
+  `type` CHAR(1) NOT NULL DEFAULT '0' COMMENT '图标类型(0:支出,1:收入)',
+  PRIMARY KEY (`id`)
+) COMMENT '图标配置表';

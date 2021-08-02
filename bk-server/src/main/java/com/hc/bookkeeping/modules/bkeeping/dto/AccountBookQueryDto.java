@@ -25,7 +25,7 @@ public class AccountBookQueryDto implements Serializable {
 
     @ApiModelProperty(value = "描述")
     @Query(match = Query.Matching.INNER_LIKE)
-    private String describe;
+    private String description;
 
     @ApiModelProperty(value = "用户id")
     @Query
