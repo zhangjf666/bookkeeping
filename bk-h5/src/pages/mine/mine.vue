@@ -42,7 +42,6 @@ export default {
 			logout();
 			this.setToken('');
 			this.setUser('');
-			this.updateUserSonglist();
 			uni.setStorageSync('token', null);
 			uni.setStorageSync('user', null);
 		}

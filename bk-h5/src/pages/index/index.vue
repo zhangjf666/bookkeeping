@@ -13,17 +13,19 @@
     <view class="btn-add">
       <button class="primary" type="primary" @tap="goRecordPage">记一笔</button>
     </view>
-	<view class="recently">
-		<view class="title">近3日新增账单 {{record}} 笔</view>
-		<!-- 近3日账单 -->
-		<view class="record">
-
-		</view>
-	</view>
+    <view class="recently">
+      <view class="title">近3日新增账单 {{ record }} 笔</view>
+      <!-- 近3日账单 -->
+      <view class="record"> </view>
+    </view>
+    <u-toast ref="uToast" />
   </view>
 </template>
 
 <script>
+import { mapState, mapMutations, mapGetters } from "vuex";
+import { userConfig } from "@/api/user.js";
+
 export default {
   data() {
     return {
@@ -31,15 +33,35 @@ export default {
     };
   },
   onLoad() {
-
+    
   },
   methods: {
+    ...mapMutations(['setUserConfig']),
+    // 获取用户配置
+    getUserConfig() {
+      userConfig({userId: this.user.id}).then((data) => {
+        this.setUserConfig(data);
+      })
+    },
+    // 获取用户分类
     // 跳转记录页面
     goRecordPage() {
+      if (!this.loginFlag) {
+        this.$refs.uToast.show({
+          title: "请先登录",
+          duration: 1000,
+          position: "bottom",
+        });
+        return;
+      }
       uni.navigateTo({
         url: `../record/record`,
       });
-    }
+    },
+  },
+  computed: {
+    ...mapState(['user']),
+    ...mapGetters(["loginFlag"]),
   },
 };
 </script>
@@ -88,8 +110,8 @@ $mColor: #d83d34;
   }
 }
 .btn-add {
-	display: flex;
-	width: 100%;
+  display: flex;
+  width: 100%;
   margin-top: 20rpx;
   padding: 20rpx;
 }
@@ -99,16 +121,15 @@ button.primary {
   width: 100%;
 }
 .recently {
-	display: flex;
-	width: 100%;
-	flex-direction: column;
-	padding: 30rpx;
-	.title {
-		font-size: 26rpx;
-		font-weight: bold;
-	}
-	.record {
-
-	}
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  padding: 30rpx;
+  .title {
+    font-size: 26rpx;
+    font-weight: bold;
+  }
+  .record {
+  }
 }
 </style>

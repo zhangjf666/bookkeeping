@@ -8,7 +8,11 @@ const store = new Vuex.Store({
         // token
         token: '',
         // user
-        user: {}
+        user: {},
+        //用户配置
+        userConfig: {},
+        //用户分类
+        classify: []
     },
     getters: {
         // 返回是否已登录
@@ -24,6 +28,14 @@ const store = new Vuex.Store({
         // 设置user
         setUser(state, user){
             state.user = user;
+        },
+        // 设置用户配置
+        setUserConfig(state, config) {
+            state.userConfig[config.name] = config.value;
+        },
+        // 设置用户分类
+        setClassify(state, classify) {
+            state.classify = classify;
         }
     }
 })

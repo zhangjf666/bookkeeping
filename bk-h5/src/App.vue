@@ -1,5 +1,6 @@
 <script>
 	import { userInfo } from '@/api/auth.js';
+	import { userConfig } from '@/api/user.js';
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')
@@ -8,6 +9,9 @@
 				userInfo().then(data => {
 					this.$store.commit('setToken', token);
 					this.$store.commit('setUser', data.user);
+					userConfig({userId: data.user.id}).then((uc) => {
+						this.$store.commit('setUserConfig', uc);
+					})
 				}).catch(data =>{
 					uni.setStorageSync('token', null);
 					uni.setStorageSync('user', null);
@@ -27,5 +31,5 @@
 	/*每个页面公共css */
 	/* 注意要写在第一行，同时给style标签加入lang="scss"属性 */
     @import "uview-ui/index.scss";
-	/* @import '/static/font/iconfont.css'; */
+	@import '/static/iconfont.css';
 </style>
