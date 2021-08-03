@@ -24,7 +24,7 @@
 
 <script>
 import { mapState, mapMutations, mapGetters } from "vuex";
-import { userConfig } from "@/api/user.js";
+import { userConfig,userAccountBook,userClassify } from "@/api/user.js";
 
 export default {
   data() {
@@ -32,11 +32,18 @@ export default {
       record: 5,
     };
   },
-  onLoad() {
-    
+  async onLoad() {
+    //等待登录成功	
+    await this.$onLaunched;
+    //加载用户信息
+    if(this.loginFlag){
+      this.getUserConfig();
+      this.getUserClassify();
+      this.getUserAccountBook();
+    }
   },
   methods: {
-    ...mapMutations(['setUserConfig']),
+    ...mapMutations(['setUserConfig','setClassify','setAccountBook']),
     // 获取用户配置
     getUserConfig() {
       userConfig({userId: this.user.id}).then((data) => {
@@ -44,6 +51,17 @@ export default {
       })
     },
     // 获取用户分类
+    getUserClassify() {
+      userClassify({userId: this.user.id}).then((data) => {
+        this.setClassify(data);
+      })
+    },
+    // 获取用户账本
+    getUserAccountBook() {
+      userAccountBook({userId: this.user.id}).then((data) => {
+        this.setAccountBook(data);
+      })
+    },
     // 跳转记录页面
     goRecordPage() {
       if (!this.loginFlag) {

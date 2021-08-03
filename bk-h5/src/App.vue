@@ -9,9 +9,7 @@
 				userInfo().then(data => {
 					this.$store.commit('setToken', token);
 					this.$store.commit('setUser', data.user);
-					userConfig({userId: data.user.id}).then((uc) => {
-						this.$store.commit('setUserConfig', uc);
-					})
+					this.$isResolve();
 				}).catch(data =>{
 					uni.setStorageSync('token', null);
 					uni.setStorageSync('user', null);

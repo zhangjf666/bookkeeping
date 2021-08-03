@@ -12,7 +12,9 @@ const store = new Vuex.Store({
         //用户配置
         userConfig: {},
         //用户分类
-        classify: []
+        classify: [],
+        //用户账本
+        accountBook: []
     },
     getters: {
         // 返回是否已登录
@@ -36,6 +38,10 @@ const store = new Vuex.Store({
         // 设置用户分类
         setClassify(state, classify) {
             state.classify = classify;
+        },
+        // 设置用户账本
+        setAccountBook(state, accountBook) {
+            state.accountBook = accountBook;
         }
     }
 })
