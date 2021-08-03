@@ -445,11 +445,12 @@ CREATE TABLE `income_expense` (
   `user_id` BIGINT(20) NOT NULL COMMENT '用户id',
   `account_book_id` BIGINT(20) NOT NULL COMMENT '账本id',
   `type` CHAR(1) NOT NULL DEFAULT '0' COMMENT '类型(0:支出,1:收入)',
+  `amount` decimal(15,2) NOT NULL DEFAULT '0.00' COMMENT '金额',
   `date` DATE NOT NULL COMMENT '产生时间',
   `remark` VARCHAR(1000) NULL DEFAULT NULL COMMENT '备注',
   `main_classify` BIGINT(20) NULL DEFAULT NULL COMMENT '主分类id',
   `sub_classify` BIGINT(20) NULL DEFAULT NULL COMMENT '子分类id',
-  `is_credit_card` CHAR(1) NOT NULL DEFAULT '0' COMMENT '是否信用卡消费(0:否,1;是)',
+  `is_credit_card` CHAR(1) NULL DEFAULT NULL COMMENT '是否信用卡消费(0:否,1;是)',
   `create_time`   datetime NOT NULL comment '创建时间',
   `update_time`   datetime NOT NULL comment '更新时间',
   PRIMARY KEY (`id`)

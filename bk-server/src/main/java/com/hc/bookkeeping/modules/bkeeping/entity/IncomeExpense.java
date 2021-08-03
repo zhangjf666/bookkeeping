@@ -1,15 +1,15 @@
 package com.hc.bookkeeping.modules.bkeeping.entity;
 
-import com.baomidou.mybatisplus.annotation.TableName;
-import com.baomidou.mybatisplus.annotation.IdType;
+import com.baomidou.mybatisplus.annotation.*;
+
+import java.math.BigDecimal;
 import java.time.LocalDate;
-import com.baomidou.mybatisplus.annotation.Version;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableField;
 import java.io.Serializable;
+import java.time.LocalDateTime;
 
 import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
+import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiModel;
 import io.swagger.annotations.ApiModelProperty;
 import lombok.Data;
@@ -41,6 +41,9 @@ public class IncomeExpense implements Serializable {
     @ApiModelProperty(value = "账本id")
     private Long accountBookId;
 
+    @ApiModelProperty(value = "金额")
+    private BigDecimal amount;
+
     @ApiModelProperty(value = "类型(0:支出,1:收入)")
     private BillType type;
 
@@ -60,5 +63,11 @@ public class IncomeExpense implements Serializable {
     @TableField("is_credit_card")
     private BoolEnum isCreditCard;
 
+    @ApiModelProperty(value = "创建时间")
+    @TableField(value = "create_time", fill = FieldFill.INSERT)
+    private LocalDateTime createTime;
 
+    @ApiModelProperty(value = "更新时间")
+    @TableField(value = "update_time", fill = FieldFill.INSERT_UPDATE)
+    private LocalDateTime updateTime;
 }

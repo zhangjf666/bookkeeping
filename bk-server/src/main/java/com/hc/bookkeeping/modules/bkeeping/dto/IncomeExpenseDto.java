@@ -1,9 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.dto;
 
-import com.baomidou.mybatisplus.annotation.IdType;
-import com.baomidou.mybatisplus.annotation.TableField;
-import com.baomidou.mybatisplus.annotation.TableId;
-import com.baomidou.mybatisplus.annotation.TableName;
+import com.baomidou.mybatisplus.annotation.*;
 import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
 import io.swagger.annotations.ApiModel;
@@ -12,7 +9,9 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 
 /**
  * <p>
@@ -36,6 +35,9 @@ public class IncomeExpenseDto implements Serializable {
     @ApiModelProperty(value = "账本id")
     private Long accountBookId;
 
+    @ApiModelProperty(value = "金额")
+    private BigDecimal amount;
+
     @ApiModelProperty(value = "类型(0:支出,1:收入)")
     private BillType type;
 
@@ -52,6 +54,11 @@ public class IncomeExpenseDto implements Serializable {
     private Long subClassify;
 
     @ApiModelProperty(value = "是否信用卡消费(0:否,1;是)")
-    @TableField("is_credit_card")
     private BoolEnum isCreditCard;
+
+    @ApiModelProperty(value = "创建时间")
+    private LocalDateTime createTime;
+
+    @ApiModelProperty(value = "更新时间")
+    private LocalDateTime updateTime;
 }

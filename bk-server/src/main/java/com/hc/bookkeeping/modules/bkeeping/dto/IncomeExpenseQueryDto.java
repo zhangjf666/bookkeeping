@@ -11,6 +11,7 @@ import lombok.Data;
 import lombok.EqualsAndHashCode;
 
 import java.io.Serializable;
+import java.math.BigDecimal;
 import java.time.LocalDate;
 import java.util.List;
 
@@ -38,6 +39,10 @@ public class IncomeExpenseQueryDto implements Serializable {
     @ApiModelProperty(value = "账本id")
     @Query
     private Long accountBookId;
+
+    @ApiModelProperty(value = "金额")
+    @Query(match = Query.Matching.BETWEEN)
+    private List<BigDecimal> amount;
 
     @ApiModelProperty(value = "类型(0:支出,1:收入)")
     @Query

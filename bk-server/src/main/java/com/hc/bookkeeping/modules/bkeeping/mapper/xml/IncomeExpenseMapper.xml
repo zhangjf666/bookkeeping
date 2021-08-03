@@ -7,17 +7,20 @@
         <id column="id" property="id" />
         <result column="user_id" property="userId" />
         <result column="account_book_id" property="accountBookId" />
+        <result column="amount" property="amount" />
         <result column="type" property="type" />
         <result column="date" property="date" />
         <result column="remark" property="remark" />
         <result column="main_classify" property="mainClassify" />
         <result column="sub_classify" property="subClassify" />
         <result column="is_credit_card" property="isCreditCard" />
+        <result column="create_time" property="createTime" />
+        <result column="update_time" property="updateTime" />
     </resultMap>
 
     <!-- 通用查询结果列 -->
     <sql id="Base_Column_List">
-        id, user_id, account_book_id, type, date, remark, main_classify, sub_classify, is_credit_card
+        id, user_id, account_book_id, amount, type, date, remark, main_classify, sub_classify, is_credit_card, create_time, update_time
     </sql>
 
 </mapper>
