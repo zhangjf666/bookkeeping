@@ -33,7 +33,7 @@ const store = new Vuex.Store({
         },
         // 设置用户配置
         setUserConfig(state, config) {
-            state.userConfig[config.name] = config.value;
+            state.userConfig = config;
         },
         // 设置用户分类
         setClassify(state, classify) {

@@ -47,7 +47,11 @@ export default {
     // 获取用户配置
     getUserConfig() {
       userConfig({userId: this.user.id}).then((data) => {
-        this.setUserConfig(data);
+        var config = {};
+        data.forEach(item => {
+          config[item.name] = item.value;
+        })
+        this.setUserConfig(config);
       })
     },
     // 获取用户分类

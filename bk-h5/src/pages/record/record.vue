@@ -18,7 +18,9 @@
     </view>
     <view class="amount">
         <view class="amount-text">账单金额</view>
-        <u-input class="amount-number" @focus="getFocus" :clearable="false" :focus="true" type="number" v-model="formatAmount" input-align="right"></u-input>
+        <view class="amount-number">
+          <u-input :custom-style="inputStyle" @focus="getFocus" :clearable="false" :focus="true" type="text" v-model="formatAmount" input-align="right"></u-input>
+        </view>
     </view>
     <view class="classify">
         <swiper ref="expenseSwiper" id="expense" :style="'height:100%'" v-if="type==0" indicator-dots :current="expenseSwiperCurrent">
@@ -46,14 +48,14 @@
         <view class="options-date">
             <u-icon name="calendar" :size="40"></u-icon>
             <text @click="showCalendar()">{{calendar}}</text>
-            <u-checkbox v-model="creditChecked" shape="circle" class="credit-check">信用卡产生</u-checkbox>
+            <u-checkbox v-if="type == 0" v-model="creditChecked" shape="circle" class="credit-check">信用卡产生</u-checkbox>
         </view>
         <view class="options-remark">
             <u-input v-model="remark" placeholder="请输入备注信息" />
         </view>
     </view>
     <view class="buttom">
-        <u-button class="again" @click="recordAgain" type="error">在记一笔</u-button>
+        <u-button class="again" @click="recordAgain" type="error">再记一笔</u-button>
         <u-button class="save" @click="recordSave" type="error">保 存</u-button>
     </view>
     <u-calendar v-model="isShowCalendar" @change="changeDate"></u-calendar>
@@ -62,20 +64,22 @@
 </template>
 
 <script>
-import UIcon from '../../uview-ui/components/u-icon/u-icon.vue';
-import classify from './classify.vue';
 import { mapGetters, mapMutations, mapState } from "vuex";
+import { createIncomeExpense } from "@/api/incomeExpense.js";
+import moment from 'moment'
 
 export default {
   components: {
-      classify,UIcon
+      
   },
   data() {
     return {
+      //选择的账本
+      accountBookId: '',
       //收入支出类型0:支出,1:收入
       type: 0,
       //金额
-      amount: 0,
+      amount: '0.00',
       //主分类
       mainClassify: "",
       //子分类
@@ -118,9 +122,11 @@ export default {
       this.mainClassifyList = this.classify.filter(item => { return item.pid == -1});
       this.updateExpenseClassifyList();
       this.updateIncomeClassifyList();
+      this.updateUserConfig();
+      this.date = moment(new Date()).format('YYYY-MM-DD');
   },
   computed: {
-      ...mapState(['accountBook','classify','userConfig']),
+      ...mapState(['accountBook','classify','userConfig', 'user']),
       formatAmount() {
         return '￥' + this.amount
       },
@@ -137,9 +143,25 @@ export default {
           set: function(e) {
               this.isCreditCard = e ? '1' : '0';
           }
+      },
+      inputStyle() {
+        var style = {}
+        style['font-size'] = '70rpx';
+        style['color'] = this.type == 0 ? '#d83d34' : '#00a151'
+        return style;
       }
   },
   methods: {
+    updateUserConfig() {
+      //初始选中默认账本
+      this.accountBook.forEach(item => {
+        if(item.isDefault == '1'){
+          this.accountBookId = item.id;
+        }
+      });
+      //设置信用卡
+      this.isCreditCard = this.userConfig['is_credit_card'];
+    },
     showCalendar() {
         this.isShowCalendar = true;
     },
@@ -197,19 +219,64 @@ export default {
         }
     },
     valChange(val) {
-      console.log(val)
-      this.amount += val;
+      //判断是否是初始状态
+      var isDefault = this.amount == '0.00' ? true : false;
+      if(isDefault) {
+        if(val != '.') {
+          this.amount = val
+        } else {
+          this.amount = '0.'
+        }
+      } else {
+        this.amount += "";
+        if(val == '.' && this.amount.indexOf('.') != -1) {
+          return;
+        } else {
+          var index = this.amount.indexOf('.')
+          if(index != -1 && this.amount.length - index > 2){
+            return;
+          }
+          this.amount += val;
+        }
+      }
     },
     backspace() {
       // 删除value的最后一个字符
-			if(this.amount.length) {
-        this.amount = this.amount.substr(0, this.amount.length - 1);
+			if(this.amount.length == 1 || this.amount == "0.") {
+        this.amount = '0.00';
       } else {
-        this.amount = 0;
+        this.amount = this.amount.substr(0, this.amount.length - 1);
       }
     },
     getFocus() {
       this.isShowKeyboard = true;
+    },
+    //保存记录
+    recordSave() {
+      var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+      data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
+      if(this.type == 0) {
+        data['isCreditCard'] = this.isCreditCard;
+      }
+      createIncomeExpense(data).then((res) => {
+        //跳转到首页
+        uni.switchTab({
+          url: `/pages/index/index`,
+        });
+      });
+    },
+    //再记一笔
+    recordAgain() {
+      var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+      data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
+      if(this.type == 0) {
+        data['isCreditCard'] = this.isCreditCard;
+      }
+      createIncomeExpense(data).then((res) => {
+        //清空数据
+        this.amount = "0.00";
+        this.remark = "";
+      });
     }
   },
   watch: {
@@ -243,11 +310,11 @@ $mColor: #d83d34;
     .amount-text {
         font-size: 32rpx;
         font-weight: bold;
+        width: 30%;
     }
     .amount-number {
-        height: 40rpx;
-        font-size: 80rpx;
         font-weight: bold;
+        margin-left: auto;
     }
 }
 .classify {
@@ -274,6 +341,7 @@ $mColor: #d83d34;
         display: flex;
         align-items: center;
         .credit-check {
+            height: 40rpx;
             margin-left: auto;
         }
     }
