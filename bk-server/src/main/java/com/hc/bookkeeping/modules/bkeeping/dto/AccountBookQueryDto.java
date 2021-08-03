@@ -28,7 +28,7 @@ public class AccountBookQueryDto implements Serializable {
     private String description;
 
     @ApiModelProperty(value = "用户id")
-    @Query
+    @Query(column = "user_id")
     private Long userId;
 
     @ApiModelProperty(value = "排序")

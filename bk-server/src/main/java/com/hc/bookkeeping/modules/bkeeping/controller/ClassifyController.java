@@ -5,6 +5,7 @@ import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
+import com.hc.bookkeeping.common.utils.QueryUtil;
 import com.hc.bookkeeping.modules.bkeeping.dto.ClassifyDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.ClassifyQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.service.ClassifyService;
@@ -15,6 +16,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -29,9 +31,9 @@ public class ClassifyController {
     @Log("查询分类")
     @ApiOperation("查询分类")
     @GetMapping
-    public Response getPosition(@Validated ClassifyQueryDto queryDto, Page pageable){
-        Page page = classifyService.queryPage(queryDto, pageable);
-        return Response.ok(page);
+    public Response getPosition(@Validated ClassifyQueryDto queryDto){
+        List<ClassifyDto> list = classifyService.queryList(QueryUtil.bulid(queryDto));
+        return Response.ok(list);
     }
 
     @Log("创建分类")
