@@ -30,6 +30,5 @@
         <if test="type != null and type != ''">
             and `type` = #{type}
         </if>
-        order by `date`, create_time desc
     </select>
 </mapper>

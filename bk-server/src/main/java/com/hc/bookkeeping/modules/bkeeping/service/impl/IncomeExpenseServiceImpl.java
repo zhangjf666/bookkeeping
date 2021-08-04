@@ -55,7 +55,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         BigDecimal expense = baseMapper.querySumAmount(beginDate, endDate, BillType.Expense.getValue());
         //收支明细
         Date detail = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), -days));
-        List<IncomeExpenseDto> list = queryList(Wrappers.<IncomeExpense>lambdaQuery().ge(IncomeExpense::getDate, detail));
+        List<IncomeExpenseDto> list = queryList(Wrappers.<IncomeExpense>lambdaQuery().ge(IncomeExpense::getDate, detail).orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));
         for (IncomeExpenseDto dto:list) {
             if(dto.getMainClassify() != null) {
                 Classify mclassify = classifyMapper.selectById(dto.getMainClassify());
