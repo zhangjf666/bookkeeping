@@ -61,4 +61,16 @@ public class IncomeExpenseDto implements Serializable {
 
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
+
+    @ApiModelProperty(value = "主分类名称")
+    private String mainClassifyName;
+
+    @ApiModelProperty(value = "子分类名称")
+    private String subClassifyName;
+
+    @ApiModelProperty(value = "主分类图标")
+    private String mainClassifyImage;
+
+    @ApiModelProperty(value = "子分类图标")
+    private String subClassifyImage;
 }

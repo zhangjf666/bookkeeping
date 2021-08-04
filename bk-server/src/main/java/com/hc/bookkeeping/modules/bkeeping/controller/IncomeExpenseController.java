@@ -7,6 +7,7 @@ import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.modules.bkeeping.dto.IncomeExpenseDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.IncomeExpenseQueryDto;
+import com.hc.bookkeeping.modules.bkeeping.dto.SummaryDto;
 import com.hc.bookkeeping.modules.bkeeping.service.IncomeExpenseService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -56,5 +57,13 @@ public class IncomeExpenseController {
     public Response delete(@RequestBody Set<Long> ids){
         incomeExpenseService.delete(ids);
         return Response.ok();
+    }
+
+    @Log("查询首页摘要信息")
+    @ApiOperation("查询首页摘要信息")
+    @GetMapping("/summary")
+    public Response<SummaryDto> getSummary(@RequestParam(name = "userId") Long userId,
+                                           @RequestParam(name = "days", required = false, defaultValue = "3") int days) {
+        return Response.ok(incomeExpenseService.querySummary(userId, days));
     }
 }
