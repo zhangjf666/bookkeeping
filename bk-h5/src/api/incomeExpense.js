@@ -10,3 +10,12 @@ export function createIncomeExpense(data) {
         header: {'content-type': 'application/json'}
     })
 }
+//获取首页统计信息
+export function querySummary(data) {
+    return request({
+        url: prefix + '/summary',
+        method: 'GET',
+        data
+        // header: {'content-type': 'application/json'}
+    })
+}

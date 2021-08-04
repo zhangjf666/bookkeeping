@@ -79,7 +79,7 @@ export default {
       //收入支出类型0:支出,1:收入
       type: 0,
       //金额
-      amount: '0.00',
+      amount: "0.00",
       //主分类
       mainClassify: "",
       //子分类
@@ -220,12 +220,12 @@ export default {
     },
     valChange(val) {
       //判断是否是初始状态
-      var isDefault = this.amount == '0.00' ? true : false;
+      var isDefault = this.amount == "0.00" ? true : false;
       if(isDefault) {
         if(val != '.') {
           this.amount = val
         } else {
-          this.amount = '0.'
+          this.amount = "0."
         }
       } else {
         this.amount += "";
@@ -242,6 +242,7 @@ export default {
     },
     backspace() {
       // 删除value的最后一个字符
+      this.amount += "";
 			if(this.amount.length == 1 || this.amount == "0.") {
         this.amount = '0.00';
       } else {

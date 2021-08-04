@@ -3,20 +3,26 @@
     <view class="summary">
       <view class="expense">
         <view class="expense-title">本月支出 (元)</view>
-        <view class="expense-sum">￥1400005.2546</view>
+        <view class="expense-sum">
+          <text>￥</text>
+          <u-count-to ref="countExpense" duration="1300" font-size="80" color="#fff" :end-val="expenseTotal" autoplay decimals="2" separator=","></u-count-to>
+        </view>
       </view>
       <view class="income">
         <view class="income-title">本月收入</view>
-        <view class="income-sum">￥15000.2546</view>
+        <view class="income-sum">
+          <text>￥</text>
+          <u-count-to ref="countIncome" duration="1300" font-size="28" color="#fff" :end-val="incomeTotal" autoplay decimals="2" separator=","></u-count-to>
+        </view>
       </view>
     </view>
     <view class="btn-add">
       <button class="primary" type="primary" @tap="goRecordPage">记一笔</button>
     </view>
     <view class="recently">
-      <view class="title">近3日新增账单 {{ record }} 笔</view>
+      <view class="title">近3日新增账单 {{ recordSize }} 笔</view>
       <!-- 近3日账单 -->
-      <view class="record"> </view>
+      <record-list :list="incomeExpenseList" :sortType="0"></record-list>
     </view>
     <u-toast ref="uToast" />
   </view>
@@ -25,11 +31,18 @@
 <script>
 import { mapState, mapMutations, mapGetters } from "vuex";
 import { userConfig,userAccountBook,userClassify } from "@/api/user.js";
+import { querySummary } from "@/api/incomeExpense.js";
+import recordList from "@/my-components/recordList.vue";
 
 export default {
+  components: {
+    recordList
+  },
   data() {
     return {
-      record: 5,
+      expenseTotal: 0,
+      incomeTotal: 0,
+      incomeExpenseList: []
     };
   },
   async onLoad() {
@@ -40,6 +53,7 @@ export default {
       this.getUserConfig();
       this.getUserClassify();
       this.getUserAccountBook();
+      this.getSummary();
     }
   },
   methods: {
@@ -80,10 +94,27 @@ export default {
         url: `../record/record`,
       });
     },
+    //加载首页统计信息
+    getSummary() {
+      querySummary({userId: this.user.id}).then(data => {
+        this.expenseTotal = data.expenseAmount;
+        this.incomeTotal = data.incomeAmount;
+        this.incomeExpenseList = data.incomeExpenseList;
+      })
+    }
   },
   computed: {
     ...mapState(['user']),
     ...mapGetters(["loginFlag"]),
+    recordSize() {
+      return this.incomeExpenseList.length;
+    },
+    incomeShow() {
+      return '￥' + this.incomeTotal;
+    },
+    expenseShow() {
+      return '￥' + this.expenseTotal;
+    }
   },
 };
 </script>
@@ -150,8 +181,7 @@ button.primary {
   .title {
     font-size: 26rpx;
     font-weight: bold;
-  }
-  .record {
+    margin-bottom: 10rpx;
   }
 }
 </style>
