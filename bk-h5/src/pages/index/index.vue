@@ -20,7 +20,7 @@
       <button class="primary" type="primary" @tap="goRecordPage">记一笔</button>
     </view>
     <view class="recently">
-      <view class="title">近3日新增账单 {{ recordSize }} 笔</view>
+      <view class="title">近三日新增账单 {{ recordSize }} 笔</view>
       <!-- 近3日账单 -->
       <record-list :list="incomeExpenseList" :sortType="0"></record-list>
     </view>

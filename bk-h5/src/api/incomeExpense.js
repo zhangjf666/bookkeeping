@@ -10,6 +10,24 @@ export function createIncomeExpense(data) {
         header: {'content-type': 'application/json'}
     })
 }
+// 更新收入支出
+export function updateIncomeExpense(data) {
+    return request({
+        url: prefix,
+        method: 'PUT',
+        data,
+        header: {'content-type': 'application/json'}
+    })
+}
+// 删除收入支出
+export function deleteIncomeExpense(data) {
+    return request({
+        url: prefix,
+        method: 'DELETE',
+        data,
+        header: {'content-type': 'application/json'}
+    })
+}
 //获取首页统计信息
 export function querySummary(data) {
     return request({

@@ -77,12 +77,9 @@ export default {
                 }
             })
             // 返回新数组前按时间排序
-            console.log(newArr)
             newArr = newArr.sort((a,b) => {
-                console.log(this.$moment(a.date).isAfter(b.date))
                 return this.$moment(a.date) > this.$moment(b.date);
             })
-            console.log(newArr)
             return newArr;
         },
         //返回金额前面的RMB图标
@@ -108,13 +105,16 @@ export default {
         //日期格式化
         dateFormat() {
             return (date) => {
-                return this.$moment(date).format('YYYYMMDD')
+                return this.$moment(date).format('YYYY年MM月DD日 dddd')
             }
         }
     },
     methods: {
         itemClick(item) {
-            console.log('111')
+            console.log(item)
+            uni.navigateTo({
+                url: `/pages/record/record?item=` + encodeURIComponent(JSON.stringify(item))
+            });
         },
         itemColor(item) {
             return item.type === '0' ? 'color: #d83d34;' : 'color: #00a151;'
@@ -130,12 +130,12 @@ export default {
     flex-direction: column;
     .time-text {
         margin-top: 10rpx 0rpx 10rpx 0rpx;
-        font-size: 26rpx;
+        font-size: 20rpx;
         color: #7A7E83;
     };
     .item {
         width: 100%;
-        height: 140rpx;
+        height: 120rpx;
         display: flex;
         flex-direction: row;
         align-items: center;

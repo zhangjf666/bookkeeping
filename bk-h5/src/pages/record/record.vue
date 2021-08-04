@@ -1,61 +1,63 @@
 <template>
   <view class="content">
-    <u-navbar
-      class="navbar"
-      :background="{ backgroundColor: '#fff' }"
-      back-icon-color="#000"
-      back-icon-size="38"
-      back-text="收支记录"
-      z-index="0"
-      :back-text-style="{
-        color: '#000',
-        fontSize: '30rpx',
-        marginLeft: '10rpx',
-      }"
-    ></u-navbar>
-    <view class="direction">
-        <u-subsection :list="list" :current="type" @change="subsectionChange" active-color="#252569" mode="subsection" font-size="28" height="56"></u-subsection>
-    </view>
-    <view class="amount">
-        <view class="amount-text">账单金额</view>
-        <view class="amount-number">
-          <u-input :custom-style="inputStyle" @focus="getFocus" :clearable="false" :focus="true" type="text" v-model="formatAmount" input-align="right"></u-input>
-        </view>
-    </view>
-    <view class="classify">
-        <swiper ref="expenseSwiper" id="expense" :style="'height:100%'" v-if="type==0" indicator-dots :current="expenseSwiperCurrent">
-            <swiper-item class="classify-swiper-item" v-for="(item, index) in showClassifyList['expense']" :key="index">
-                <u-grid :col="5" :border="false">
-                    <u-grid-item v-for="(k) in item" :key="k.id" :index="k.id" @click="classifyClick">
-                        <text class="item-image" :class="'iconfont icon-' + k.image" :style="isSelect(k)"></text>
-                        <view class="item-text">{{k.name}}</view>
-                    </u-grid-item>
-                </u-grid>
-            </swiper-item>
-        </swiper>
-        <swiper ref="incomeSwiper" id="income" :style="'height:100%'" v-if="type==1" indicator-dots :current="incomeSwiperCurrent">
-            <swiper-item class="classify-swiper-item" v-for="(item, index) in showClassifyList['income']" :key="index">
-                <u-grid :col="5" :border="false">
-                    <u-grid-item v-for="(k) in item" :key="k.id" :index="k.id" @click="classifyClick">
-                        <text class="item-image" :class="'iconfont icon-' + k.image" :style="isSelect(k)"></text>
-                        <view class="item-text">{{k.name}}</view>
-                    </u-grid-item>
-                </u-grid>
-            </swiper-item>
-        </swiper>
-    </view>
-    <view class="options">
-        <view class="options-date">
-            <u-icon name="calendar" :size="40"></u-icon>
-            <text @click="showCalendar()">{{calendar}}</text>
-            <u-checkbox v-if="type == 0" v-model="creditChecked" shape="circle" class="credit-check">信用卡产生</u-checkbox>
-        </view>
-        <view class="options-remark">
-            <u-input v-model="remark" placeholder="请输入备注信息" />
-        </view>
+    <view class="mainContent">
+      <u-navbar
+        class="navbar"
+        :background="{ backgroundColor: '#fff' }"
+        back-icon-color="#000"
+        back-icon-size="38"
+        back-text=""
+        z-index="0"
+        :back-text-style="{
+          color: '#000',
+          fontSize: '30rpx',
+          marginLeft: '10rpx',
+        }"
+      ></u-navbar>
+      <view class="direction">
+          <u-subsection :list="list" :current="type" @change="subsectionChange" active-color="#252569" mode="subsection" font-size="28" height="56"></u-subsection>
+      </view>
+      <view class="amount">
+          <view class="amount-text">账单金额</view>
+          <view class="amount-number">
+            <u-input :custom-style="inputStyle" @focus="getFocus" :clearable="false" :focus="true" type="text" v-model="formatAmount" input-align="right"></u-input>
+          </view>
+      </view>
+      <view class="classify">
+          <swiper ref="expenseSwiper" id="expense" :style="'height:100%'" v-if="type==0" indicator-dots :current="expenseSwiperCurrent">
+              <swiper-item class="classify-swiper-item" v-for="(item, index) in showClassifyList['expense']" :key="index">
+                  <u-grid :col="5" :border="false">
+                      <u-grid-item v-for="(k) in item" :key="k.id" :index="k.id" @click="classifyClick">
+                          <text class="item-image" :class="'iconfont icon-' + k.image" :style="isSelect(k)"></text>
+                          <view class="item-text">{{k.name}}</view>
+                      </u-grid-item>
+                  </u-grid>
+              </swiper-item>
+          </swiper>
+          <swiper ref="incomeSwiper" id="income" :style="'height:100%'" v-if="type==1" indicator-dots :current="incomeSwiperCurrent">
+              <swiper-item class="classify-swiper-item" v-for="(item, index) in showClassifyList['income']" :key="index">
+                  <u-grid :col="5" :border="false">
+                      <u-grid-item v-for="(k) in item" :key="k.id" :index="k.id" @click="classifyClick">
+                          <text class="item-image" :class="'iconfont icon-' + k.image" :style="isSelect(k)"></text>
+                          <view class="item-text">{{k.name}}</view>
+                      </u-grid-item>
+                  </u-grid>
+              </swiper-item>
+          </swiper>
+      </view>
+      <view class="options">
+          <view class="options-date">
+              <u-icon name="calendar" :size="40"></u-icon>
+              <text @click="showCalendar()">{{calendar}}</text>
+              <u-checkbox v-if="type == 0" v-model="creditChecked" shape="circle" class="credit-check">信用卡产生</u-checkbox>
+          </view>
+          <view class="options-remark">
+              <u-input v-model="remark" placeholder="请输入备注信息" />
+          </view>
+      </view>
     </view>
     <view class="buttom">
-        <u-button class="again" @click="recordAgain" type="error">再记一笔</u-button>
+        <u-button class="again" @click="recordAgain" type="error">{{buttonText}}</u-button>
         <u-button class="save" @click="recordSave" type="error">保 存</u-button>
     </view>
     <u-calendar v-model="isShowCalendar" @change="changeDate"></u-calendar>
@@ -65,7 +67,7 @@
 
 <script>
 import { mapGetters, mapMutations, mapState } from "vuex";
-import { createIncomeExpense } from "@/api/incomeExpense.js";
+import { createIncomeExpense, deleteIncomeExpense, updateIncomeExpense } from "@/api/incomeExpense.js";
 import moment from 'moment'
 
 export default {
@@ -74,6 +76,8 @@ export default {
   },
   data() {
     return {
+      //记录id
+      id: '',
       //选择的账本
       accountBookId: '',
       //收入支出类型0:支出,1:收入
@@ -85,7 +89,7 @@ export default {
       //子分类
       subClassify: "",
       //信用卡
-      isCreditCard: "0",
+      isCreditCard: "",
       //发生日期
       date: "",
       //发生日期是否是当天
@@ -118,12 +122,27 @@ export default {
       incomeSwiperCurrent:0
     };
   },
-  onLoad() {
+  onLoad(option) {
       this.mainClassifyList = this.classify.filter(item => { return item.pid == -1});
       this.updateExpenseClassifyList();
       this.updateIncomeClassifyList();
       this.updateUserConfig();
       this.date = moment(new Date()).format('YYYY-MM-DD');
+
+      if(option.item){
+        const item = JSON.parse(decodeURIComponent(option.item));
+        this.id = item.id;
+        this.accountBookId = item.accountBookId;
+        this.type = item.type == '0' ? 0 : 1;
+        this.amount = item.amount + "";
+        if(this.type == 0){
+          this.expenseMainClassify = item.mainClassify;
+        } else {
+          this.incomeMainClassify = item.mainClassify
+        }
+        this.remark = item.remark;
+        this.isCreditCard = item.isCreditCard;
+      }
   },
   computed: {
       ...mapState(['accountBook','classify','userConfig', 'user']),
@@ -149,6 +168,10 @@ export default {
         style['font-size'] = '70rpx';
         style['color'] = this.type == 0 ? '#d83d34' : '#00a151'
         return style;
+      },
+      //左边按钮显示的文字
+      buttonText() {
+        return this.id != null && this.id != '' ? "删 除": "再记一笔"
       }
   },
   methods: {
@@ -254,30 +277,50 @@ export default {
     },
     //保存记录
     recordSave() {
-      var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
-      data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
-      if(this.type == 0) {
-        data['isCreditCard'] = this.isCreditCard;
-      }
-      createIncomeExpense(data).then((res) => {
-        //跳转到首页
-        uni.switchTab({
-          url: `/pages/index/index`,
+      if(this.id == null || this.id == ''){
+        var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+        data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
+        if(this.type == 0) {
+          data['isCreditCard'] = this.isCreditCard;
+        }
+        createIncomeExpense(data).then((res) => {
+          //跳转到首页
+          uni.switchTab({
+            url: `/pages/index/index`,
+          });
         });
-      });
-    },
-    //再记一笔
-    recordAgain() {
-      var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
-      data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
-      if(this.type == 0) {
-        data['isCreditCard'] = this.isCreditCard;
+      } else {
+        var data = {id:this.id, userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+        data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
+        if(this.type == 0) {
+          data['isCreditCard'] = this.isCreditCard;
+        }
+        updateIncomeExpense(data).then((res) => {
+          //跳转回之前页面
+          uni.navigateBack();
+        });
       }
-      createIncomeExpense(data).then((res) => {
-        //清空数据
-        this.amount = "0.00";
-        this.remark = "";
-      });
+      
+    },
+    //再记一笔或者是删除
+    recordAgain() {
+      if(this.id == null || this.id == ''){
+        var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+        data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
+        if(this.type == 0) {
+          data['isCreditCard'] = this.isCreditCard;
+        }
+        createIncomeExpense(data).then((res) => {
+          //清空数据
+          this.amount = "0.00";
+          this.remark = "";
+        });
+      } else {
+        deleteIncomeExpense([this.id]).then((res) => {
+          //跳转回之前页面
+          uni.navigateBack();
+        })
+      }
     }
   },
   watch: {
@@ -293,11 +336,24 @@ $mColor: #d83d34;
 .content {
   display: flex;
   flex-direction: column;
-  align-items: center;
+  height: 100vh;
+}
+.mainContent {
+  display: flex;
+  flex-direction: column;
   justify-content: center;
-  height: 100%;
+  align-content: flex-start;
+  align-items: flex-start;
+  flex-flow: row wrap;
+  height: 90%;
+}
+.navbar {
+  display: flex;
+  flex-direction: column;
 }
 .direction {
+    display: flex;
+    flex-direction: column;
     margin: 20rpx;
     width: 40%;
 }
@@ -337,6 +393,7 @@ $mColor: #d83d34;
     padding: 30rpx;
     display: flex;
     flex-direction: column;
+    flex-grow: 1;
     .options-date {
         width: 100%;
         display: flex;
@@ -356,9 +413,6 @@ $mColor: #d83d34;
 }
 .buttom {
     display: flex;
-    position: fixed;
-    left: 0;
-    bottom: 0;
     padding: 30rpx;
     width: 100%;
     align-self: flex-end;
