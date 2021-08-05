@@ -19,9 +19,8 @@
       </view>
       <view class="amount">
           <view class="amount-text">账单金额</view>
-          <view class="amount-number">
-            <u-input :custom-style="inputStyle" @focus="getFocus" :clearable="false" :focus="true" type="text" v-model="formatAmount" input-align="right"></u-input>
-          </view>
+          <view class="amount-number" :style="inputStyle" @click="getFocus">{{formatAmount}}</view>
+          <view class="amount-cursor" :style="inputBackground"></view>
       </view>
       <view class="classify">
           <swiper ref="expenseSwiper" id="expense" :style="'height:100%'" v-if="type==0" indicator-dots :current="expenseSwiperCurrent">
@@ -143,6 +142,7 @@ export default {
         this.remark = item.remark;
         this.isCreditCard = item.isCreditCard;
       }
+      this.getFocus();
   },
   computed: {
       ...mapState(['accountBook','classify','userConfig', 'user']),
@@ -164,10 +164,10 @@ export default {
           }
       },
       inputStyle() {
-        var style = {}
-        style['font-size'] = '70rpx';
-        style['color'] = this.type == 0 ? '#d83d34' : '#00a151'
-        return style;
+        return this.type == 0 ? 'color: #d83d34;' : 'color: #00a151;';
+      },
+      inputBackground() {
+        return this.isShowKeyboard ? this.type == 0 ? 'background-color: #d83d34;' : 'background-color: #00a151;' : 'opacity: 0;';
       },
       //左边按钮显示的文字
       buttonText() {
@@ -370,8 +370,25 @@ $mColor: #d83d34;
         width: 30%;
     }
     .amount-number {
-        font-weight: bold;
+        font-size: 70rpx;
         margin-left: auto;
+    }
+    //光标动画
+    .amount-cursor {
+        width: 2px;
+        height: 70rpx;
+        display: flex;
+        align-items: center;
+        font-size: 70rpx;
+        animation:cursorBlink 1.2s infinite steps(1, start);
+        @keyframes cursorBlink {
+          0%, 100% {
+            opacity: 0;
+          }
+          50% {
+            opacity: 1;
+          }
+        }
     }
 }
 .classify {

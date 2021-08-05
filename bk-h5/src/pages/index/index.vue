@@ -131,7 +131,7 @@ $mColor: #d83d34;
   display: flex;
   flex-direction: column;
   width: 100%;
-  height: 480rpx;
+  height: 440rpx;
   background-color: #252569;
   padding: 30rpx;
   .income {
@@ -150,7 +150,7 @@ $mColor: #d83d34;
   .expense {
     display: flex;
     flex-direction: column;
-    margin-top: 160rpx;
+    margin-top: 120rpx;
     .expense-title {
       color: gainsboro;
       font-size: 32rpx;
