@@ -7,12 +7,12 @@
         <view class="option">
             <bill-selector></bill-selector>
         </view>
-        <!-- <div style="width: 100%; height: 100%" ref="chart"></div> -->
+        <div style="width: 100%; height: 20%" ref="chart"></div>
     </view>
 </template>
 
 <script>
-import billSelector from "@/my-components/datePicker.vue";
+import billSelector from "@/my-components/billSelector.vue";
 import * as echarts from 'echarts/core';
 import {
   BarChart,
