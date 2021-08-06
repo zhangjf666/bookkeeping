@@ -121,6 +121,7 @@ export default {
 
 <style lang="scss" scoped>
 $mColor: #d83d34;
+$sColor: #00a151;
 .content {
   display: flex;
   flex-direction: column;

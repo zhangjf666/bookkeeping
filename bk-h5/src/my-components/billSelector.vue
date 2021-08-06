@@ -8,7 +8,7 @@
                 <text class="iconfont icon-canyin"></text>
             </view>
         </view>
-        <u-popup v-model="popUpShow" mode="bottom" width="100%" height="45%">
+        <u-popup v-model="popUpShow" mode="bottom" width="100%" height="45%" @close="selectOver">
             <view>
                 <view class="selectMode">
                     <u-subsection :list="subsectionList" :current="mode" @change="subsectionChange" active-color="#252569" mode="subsection" font-size="28" height="56" width="60%"></u-subsection>
@@ -26,9 +26,6 @@
                             <view >{{endPickerText}}</view>
                         </view>
                         <date-picker id="end" :dateValue.sync="endPickerValue" v-if="showEndPicker" :type="mode"></date-picker>
-                        <view class="btn" v-if="mode == 2">
-                            <button class="primary" type="primary" @tap="billFindCustom">确 定</button>
-                        </view>
                     </view>
                 </view>
             </view>
@@ -47,6 +44,8 @@ export default {
             mode: 0,
             //筛选收支类型
             classifyList:[],
+            //选中的收支类型
+            selectClassifyList: [],
             subsectionList: ['月账单','年账单','自定义'],
             popUpShow: false,
             showBeginPicker: true,
@@ -59,9 +58,9 @@ export default {
         }
     },
     mounted() {
-        this.normalPickerValue = [this.$moment(new Date()).year(),this.$moment(new Date()).month(),this.$moment(new Date()).day()];
-        this.beginPickerValue = [this.$moment(new Date()).year(),this.$moment(new Date()).month(),this.$moment(new Date()).day()];
-        this.endPickerValue = [this.$moment(new Date()).year(),this.$moment(new Date()).month(),this.$moment(new Date()).day()];
+        this.normalPickerValue = [this.$moment(new Date()).year(),this.$moment(new Date()).month(),this.$moment(new Date()).date()];
+        this.beginPickerValue = [this.$moment(new Date()).year(),this.$moment(new Date()).month(),this.$moment(new Date()).date()];
+        this.endPickerValue = [this.$moment(new Date()).year(),this.$moment(new Date()).month(),this.$moment(new Date()).date()];
     },
     methods: {
         subsectionChange(e) {
@@ -78,8 +77,17 @@ export default {
             this.showEndPicker = true;
             this.showBeginPicker = false;
         },
-        billFindCustom() {
-
+        selectOver() {
+            var option = {};
+            option['mode'] = this.mode;
+            option['classifyList'] = this.selectClassifyList;
+            if(this.mode == 0 || this.mode == 1){
+                option['beginDate'] = this.$moment(this.normalPickerValue);
+            } else if(this.mode == 2){
+                option['beginDate'] = this.$moment(this.beginPickerValue);
+                option['endDate'] = this.$moment(this.endPickerValue);
+            }
+            this.$emit('change', option);
         }
     },
     computed: {

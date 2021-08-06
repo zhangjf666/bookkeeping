@@ -37,3 +37,12 @@ export function querySummary(data) {
         // header: {'content-type': 'application/json'}
     })
 }
+//查询账单报表信息
+export function querySumPeriod(data) {
+    return request({
+        url: prefix + '/sumPeriod',
+        method: 'GET',
+        data,
+        header: {'content-type': 'application/json'}
+    })
+}

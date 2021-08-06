@@ -8,7 +8,7 @@
 		        <view class="item" v-for="(item,index) in months" :key="index">{{item + 1}}月</view>
 		    </picker-view-column>
 		    <picker-view-column v-if="type == 2">
-		        <view class="item" v-for="(item,index) in days" :key="index">{{item + 1}}日</view>
+		        <view class="item" v-for="(item,index) in days" :key="index">{{item}}日</view>
 		    </picker-view-column>
 		</picker-view>
 	</view>
@@ -34,7 +34,7 @@
 		    for (let i = 0; i < 12; i++) {
 		        months.push(i)
 		    }
-		    for (let i = 0; i < 31; i++) {
+		    for (let i = 1; i <= 31; i++) {
 		        days.push(i)
 		    }
 			return {
@@ -58,7 +58,7 @@
 			var date = new Date()
 			this.currentYear = this.$moment(date).year()
 			this.currentMonth = this.$moment(date).month()
-			this.currentDay = this.$moment(date).day()
+			this.currentDay = this.$moment(date).date()
 
 			if(this.dateValue != null){
 				var init = [];
@@ -76,7 +76,7 @@
 			    this.year = this.years[val[0]]
 			    this.month = this.months[val[1]]
 			    this.day = this.days[val[2]]
-				
+
 				var y = parseInt(this.year)
 				var m = parseInt(this.month)
 				var d = parseInt(this.day)
@@ -84,14 +84,14 @@
 				if(m==0||m==2||m==4||m==6||m==7||m==9||m==11){
 					if(this.days.length!=31){
 						this.days = []
-						for (let i = 0; i < 31; i++) {
+						for (let i = 1; i <= 31; i++) {
 						    this.days.push(i)
 						}
 					}
 				}else if(m==3||m==5||m==8||m==10){
 					if(this.days.length!=30){
 						this.days = []
-						for (let i = 0; i < 30; i++) {
+						for (let i = 1; i <= 30; i++) {
 						    this.days.push(i)
 						}
 					}
@@ -99,14 +99,14 @@
 					if((y%4==0&&y%100!=0)||(y%400==0)){//闰年
 						if(this.days.length!=29){
 							this.days = []
-							for (let i = 0; i < 29; i++) {
+							for (let i = 1; i <= 29; i++) {
 							    this.days.push(i)
 							}
 						}
 					}else{//平年
 						if(this.days.length!=28){
 							this.days = []
-							for (let i = 0; i < 28; i++) {
+							for (let i = 1; i <= 28; i++) {
 							    this.days.push(i)
 							}
 						}
@@ -123,7 +123,7 @@
 					if(m==this.currentMonth){
 						if(this.days.length!=this.currentDay){
 							this.days = []
-							for (let i = 0; i <= this.currentDay; i++) {
+							for (let i = 1; i <= this.currentDay; i++) {
 							    this.days.push(i)
 							}
 						}
