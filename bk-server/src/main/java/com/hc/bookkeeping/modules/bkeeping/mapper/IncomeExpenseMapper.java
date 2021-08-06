@@ -23,8 +23,32 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
      * 查询某一时间段内总收入支出
      * @param beginDate
      * @param endDate
-     * @param type
      * @return
      */
-    BigDecimal querySumAmount(Date beginDate, Date endDate, String type);
+    List<Dict> querySumAmount(Long userId, Date beginDate, Date endDate);
+
+    /**
+     * 按月统计总收入支出
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    List<Dict> querySumAmountMonthly(Long userId, Date beginDate, Date endDate, List<Long> classify);
+
+    /**
+     * 按日统计总收入支出
+     * @param beginDate
+     * @param endDate
+     * @return
+     */
+    List<Dict> querySumAmountDayly(Long userId, Date beginDate, Date endDate,List<Long> classify);
+
+    /**
+     * 按分类统计总收入支出
+     * @param beginDate
+     * @param endDate
+     * @param classify
+     * @return
+     */
+    List<Dict> queryReportAmount(Long userId, Date beginDate, Date endDate, List<Long> classify);
 }

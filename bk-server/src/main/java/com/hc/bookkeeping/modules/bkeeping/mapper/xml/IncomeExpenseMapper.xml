@@ -23,12 +23,53 @@
         id, user_id, account_book_id, amount, type, date, remark, main_classify, sub_classify, is_credit_card, create_time, update_time
     </sql>
 
-    <select id="querySumAmount" resultType="java.math.BigDecimal">
-        SELECT sum(amount) from income_expense ie
-        where
-        `date` >= #{beginDate} and `date` &lt;= #{endDate}
-        <if test="type != null and type != ''">
-            and `type` = #{type}
+    <select id="querySumAmount" resultType="cn.hutool.core.lang.Dict">
+        SELECT ie.type, sum(ie.amount) amount from income_expense ie
+        where ie.user_id = #{userId}
+        and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        group by ie.type
+    </select>
+
+    <select id="querySumAmountMonthly" resultType="cn.hutool.core.lang.Dict">
+        select date_format(ie.`date` , '%Y-%m') period, ie.`type` ,SUM(ie.amount) amount
+        from income_expense ie
+        where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        <if test="classify != null and classify.size() != 0">
+            and ie.main_classify in
+            <foreach collection="classify" item="id" index="index"
+                     open="(" close=")" separator=",">
+                #{id}
+            </foreach>
         </if>
+        group by period, ie.`type` order by period;
+    </select>
+
+
+    <select id="querySumAmountDayly" resultType="cn.hutool.core.lang.Dict">
+        select date_format(ie.`date` , '%Y-%m-%d') period, ie.`type` ,SUM(ie.amount) amount
+        from income_expense ie
+        where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        <if test="classify != null and classify.size() != 0">
+            and ie.main_classify in
+            <foreach collection="classify" item="id" index="index"
+                     open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        group by period, ie.`type` order by period;
+    </select>
+
+    <select id="queryReportAmount" resultType="cn.hutool.core.lang.Dict">
+        select ie.`type`, ie.main_classify classify,SUM(ie.amount) amount
+        from income_expense ie
+        where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        <if test="classify != null and classify.size() != 0">
+            and ie.main_classify in
+            <foreach collection="classify" item="id" index="index"
+                     open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
+        group by ie.`type`, ie.main_classify;
     </select>
 </mapper>
