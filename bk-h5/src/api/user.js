@@ -28,3 +28,21 @@ export function userAccountBook(data) {
         header: {'content-type': 'application/json'}
     })
 }
+
+//查询用户最近搜索记录
+export function nearlySearch(data) {
+    return request({
+        url: '/userSearch/nearlySearch',
+        method: 'GET',
+        data
+    })
+}
+
+//删除用户搜索记录
+export function deleteUserAllSearch(data) {
+    return request({
+        url: '/userSearch/deleteUserAllSearch',
+        method: 'POST',
+        data
+    })
+}

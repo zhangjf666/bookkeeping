@@ -1,14 +1,15 @@
 <template>
     <view class="content">
         <scroll-view scroll-y class="scroll">
-            <view class="time-list" v-if="sortType==0">
+            <view class="time-list" v-if="sortType==0 || sortType == 2">
                 <view class="time-range" v-for="(k, index) in timeSortList" :key="index">
-                    <view class="time-text">{{dateFormat(k.date)}}</view>
+                    <view class="time-text" v-if="sortType==0">{{dateFormat(k.date)}}</view>
                     <view class="item" v-for="(item) in k.subList" :key="item.id" @click="itemClick(item)">
                         <text class="item-image" :class="'iconfont icon-' + classifyImageFormat(item)" :style="itemColor(item)"></text>
                         <view class="item-text">
                             <view class="item-classify">{{classifyTextFormat(item)}}</view>
-                            <view class="item-remark">{{item.remark}}</view>
+                            <view class="item-remark" v-if="sortType==0">{{item.remark}}</view>
+                            <view class="item-remark" v-else>{{remarkTextFormat(item)}}</view>
                         </view>
                         <view class="item-amount" :style="itemColor(item)">{{amountFormat(item.amount)}}</view>
                     </view>
@@ -19,7 +20,7 @@
                     <text class="item-image" :class="'iconfont icon-' + classifyImageFormat(item)" :style="itemColor(item)"></text>
                     <view class="item-text">
                         <view class="item-classify">{{classifyTextFormat(item)}}</view>
-                        <view class="item-remark">{{item.remark}}</view>
+                        <view class="item-remark">{{remarkTextFormat(item)}}</view>
                     </view>
                     <view class="item-amount" :style="itemColor(item)">{{amountFormat(item.amount)}}</view>
                 </view>
@@ -29,6 +30,7 @@
 </template>
 
 <script>
+import { formatNumber } from "../utils/utils.js"
 export default {
     name: 'recordList',
     props:{
@@ -85,7 +87,7 @@ export default {
         //返回金额前面的RMB图标
         amountFormat() {
             return (amount) => {
-                return '￥' + amount.toFixed(2);
+                return '￥' + formatNumber(amount);
             }
         },
         //返回分类图标名称
@@ -106,6 +108,11 @@ export default {
         dateFormat() {
             return (date) => {
                 return this.$moment(date).format('YYYY年MM月DD日 dddd')
+            }
+        },
+        remarkTextFormat() {
+            return (item) => {
+                return this.$moment(item.date).format('YYYY年MM月DD日') + ' ' + item.remark;
             }
         }
     },
@@ -130,7 +137,7 @@ export default {
     flex-direction: column;
     .time-text {
         margin-top: 10rpx 0rpx 10rpx 0rpx;
-        font-size: 20rpx;
+        font-size: 22rpx;
         color: #7A7E83;
     };
     .item {
@@ -150,11 +157,11 @@ export default {
             display: flex;
             flex-direction: column; 
             .item-classify {
-                font-size: 32rpx;
+                font-size: 30rpx;
             };
             .item-remark {
-                font-size: 28rpx;
-                color: #5d6063;
+                font-size: 22rpx;
+                color: #7A7E83;
             }
         };
         .item-amount {

@@ -1,6 +1,16 @@
 import request from '@/utils/request.js'
 
 let prefix = '/incomeExpense'
+//查询收入支出
+export function getIncomeExpense(data) {
+    return request({
+        url: prefix,
+        method: 'GET',
+        data,
+        header: {'content-type': 'application/json'}
+    })
+}
+
 //创建收入支出
 export function createIncomeExpense(data) {
     return request({

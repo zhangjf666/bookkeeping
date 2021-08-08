@@ -3,12 +3,12 @@
         <view class="select">
             <view class="selectButton" @click="openOption">选择</view>
             <view class="selectContent" @click="openOption">{{selectText}}</view>
-            <view class="selectFilter">
-                <text >筛选</text>
-                <text class="iconfont icon-canyin"></text>
+            <view class="selectFilter" :style="filterColor" @click="filterClick">
+                <view>筛选</view>
+                <text class="iconfont icon-shaixuan"></text>
             </view>
         </view>
-        <u-popup v-model="popUpShow" mode="bottom" width="100%" height="45%" @close="selectOver">
+        <u-popup v-model="popUpShow" mode="bottom" width="100%" height="50%" @close="selectOver">
             <view>
                 <view class="selectMode">
                     <u-subsection :list="subsectionList" :current="mode" @change="subsectionChange" active-color="#252569" mode="subsection" font-size="28" height="56" width="60%"></u-subsection>
@@ -30,10 +30,41 @@
                 </view>
             </view>
         </u-popup>
+        <u-popup v-model="filterShow" mode="right" width="85%">
+            <scroll-view scroll-y class="filter">
+                <view class="filterMainTitle">筛选收支类型</view>
+                <view class="filterContent">
+                    <view class="filterButton" :class="filterAllSelected(0)" @click="allExpense">
+                        <text>全部支出</text>
+                    </view>
+                    <view class="filterButton" :class="filterAllSelected(1)" @click="allIncome">
+                        <text>全部收入</text>
+                    </view>
+                </view>
+                <view class="filterMainTitle">筛选分类</view>
+                <view class="filterSubTitle" style="color: #d83d34;">支出</view>
+                <view class="filterContent">
+                    <view class="filterButton" :class="filterSelected(item)" v-for="(item) in expenseList" :key="item.id" @click="filterButtonClick(item)">
+                        <text>{{item.name}}</text>
+                    </view>
+                </view>
+                <view class="filterSubTitle" style="color: #00a151;">收入</view>
+                <view class="filterContent">
+                    <view class="filterButton" :class="filterSelected(item)" v-for="(item) in incomeList" :key="item.id" @click="filterButtonClick(item)">
+                        <text>{{item.name}}</text>
+                    </view>
+                </view>
+            </scroll-view>
+            <view class="filterButtom">
+                <view @click="filterReset">重置</view>
+                <view @click="filterConfirm">确定</view>
+            </view>
+        </u-popup>
     </view>
 </template>
 
 <script>
+import { mapState } from 'vuex';
 import datePicker from './datePicker.vue';
 export default {
     components: { datePicker },
@@ -42,19 +73,20 @@ export default {
     data() {
         return {
             mode: 0,
-            //筛选收支类型
-            classifyList:[],
             //选中的收支类型
             selectClassifyList: [],
             subsectionList: ['月账单','年账单','自定义'],
             popUpShow: false,
+            filterShow: false,
             showBeginPicker: true,
             showEndPicker: false,
             //月和年选择器的值
             normalPickerValue: [],
             //自定义选择器的值
             beginPickerValue: [],
-            endPickerValue: []
+            endPickerValue: [],
+            allExpenseSelected: false,
+            allIncomeSelected: false
         }
     },
     mounted() {
@@ -82,15 +114,75 @@ export default {
             option['mode'] = this.mode;
             option['classifyList'] = this.selectClassifyList;
             if(this.mode == 0 || this.mode == 1){
-                option['beginDate'] = this.$moment(this.normalPickerValue);
+                option['beginDate'] = this.$moment(this.normalPickerValue).format('YYYY-MM-DD');
+                option['endDate'] = option['beginDate'];
             } else if(this.mode == 2){
-                option['beginDate'] = this.$moment(this.beginPickerValue);
-                option['endDate'] = this.$moment(this.endPickerValue);
+                option['beginDate'] = this.$moment(this.beginPickerValue).format('YYYY-MM-DD');
+                option['endDate'] = this.$moment(this.endPickerValue).format('YYYY-MM-DD');
             }
             this.$emit('change', option);
+        },
+        filterClick() {
+            this.filterShow = true;
+        },
+        filterReset() {
+            this.selectClassifyList = [];
+        },
+        filterConfirm() {
+            this.filterShow = false;
+            this.selectOver();
+        },
+        allExpense() {
+            var list = this.classify.filter((item) => { return item.type == '0' && item.pid == -1; })
+            if(this.allExpenseSelected) {
+                //移除所有选中支出
+                for(var i = 0; i< list.length; i++){
+                    var index = this.selectClassifyList.findIndex(x => x.id == list[i].id)
+                    if(index != -1){
+                        this.selectClassifyList.splice(index, 1);
+                    }
+                }
+            } else {
+                //添加所有选中支出
+                for(var i = 0; i< list.length; i++){
+                    var index = this.selectClassifyList.findIndex(x => x.id == list[i].id)
+                    if(index == -1){
+                        this.selectClassifyList.push(list[i]);
+                    }
+                }
+            }
+        },
+        allIncome() {
+            var list = this.classify.filter((item) => { return item.type == '1' && item.pid == -1; })
+            if(this.allIncomeSelected) {
+                //移除所有选中收入
+                for(var i = 0; i< list.length; i++){
+                    var index = this.selectClassifyList.findIndex(x => x.id == list[i].id)
+                    if(index != -1){
+                        this.selectClassifyList.splice(index, 1);
+                    }
+                }
+            } else {
+                //添加所有选中收入
+                for(var i = 0; i< list.length; i++){
+                    var index = this.selectClassifyList.findIndex(x => x.id == list[i].id)
+                    if(index == -1){
+                        this.selectClassifyList.push(list[i]);
+                    }
+                }
+            }
+        },
+        filterButtonClick(item) {
+            var index = this.selectClassifyList.findIndex(x => x.id == item.id)
+            if(index == -1){
+                this.selectClassifyList.push(item);
+            } else {
+                this.selectClassifyList.splice(index, 1);
+            }
         }
     },
     computed: {
+        ...mapState(['classify']),
         beginPickerText() {
             return this.$moment(this.beginPickerValue).format('YYYY年MM月DD日 dddd')
         },
@@ -106,6 +198,44 @@ export default {
                 return this.$moment(this.beginPickerValue).format('YYYY年MM月DD日') + '-' + this.$moment(this.endPickerValue).format('YYYY年MM月DD日');
             }
             return '';
+        },
+        expenseList() {
+            var list = this.classify.filter((item) => {
+                return item.type == '0' && item.pid == -1;
+            })
+            return list;
+        },
+        incomeList() {
+            var list = this.classify.filter((item) => {
+                return item.type == '1' && item.pid == -1;
+            })
+            return list;
+        },
+        filterColor() {
+            return this.selectClassifyList.length > 0 ? 'color: #d83d34;' : ''
+        },
+        filterSelected() {
+            return (item) => {
+                return this.selectClassifyList.findIndex(x => x.id == item.id) != -1 ? 'filterButtonSelected' : '';
+            }
+        },
+        filterAllSelected() {
+            return (type) => {
+                var all = true;
+                var list = type == 0 ? this.expenseList : this.incomeList;
+                for(var i = 0; i<list.length; i++) {
+                    if(this.selectClassifyList.findIndex(x => x.id == list[i].id) == -1){
+                        all = false;
+                        break;
+                    }
+                }
+                if(type == 0){
+                    this.allExpenseSelected = all;
+                } else {
+                    this.allIncomeSelected = all;
+                }
+                return all ? 'filterButtonSelected' : '';
+            }
         }
     }
 }
@@ -128,6 +258,7 @@ $mColor: #d83d34;
     .selectButton {
         color: white;
         width: 80rpx;
+        font-size: 28rpx;
     }
     .selectMode {
         padding: 30rpx;
@@ -149,10 +280,30 @@ $mColor: #d83d34;
     }
     .selectContent {
         color: white;
+        font-size: 28rpx;
     }
     .selectFilter {
+        display: flex;
+        margin-left: auto;
+        flex-direction: row;
+        justify-content: center;
+        align-items: flex-end;
         color: white;
         margin-left: auto;
+        border-left-color: white;
+        border-left-style: solid;
+        border-left-width: 1px;
+        font-size: 28rpx;
+        :first-child {
+            display: flex;
+            padding-left: 10rpx;
+        }
+        :last-child {
+            width: 20rpx;
+            display: flex;
+            font-size: 28rpx;
+            margin-left: auto;
+        }
     }
     .custom {
         display: flex;
@@ -192,6 +343,85 @@ $mColor: #d83d34;
                 font-size: 24rpx;
                 color:#696969;
             }
+        }
+    }
+    .filter {
+        padding-left: 30rpx;
+        display: flex;
+        flex-direction: column;
+        width: 100%;
+        height: 95%;
+        .filterMainTitle {
+            margin: 30rpx 0rpx 10rpx 0rpx;
+            height: 60rpx;
+            display: flex;
+            flex-direction: column;
+            border-bottom-color: #e0e0e0;
+            border-bottom-style: solid;
+            border-bottom-width: 1px;
+            font-size: 30rpx;
+        }
+        .filterContent {
+            display: flex;
+            flex-direction: row;
+            flex-wrap: wrap;
+        }
+        .filterButton {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            margin: 20rpx 20rpx 0 0;
+            font-size: 20rpx;
+            background-color: #f3f3f3;
+            border-radius: 4rpx;
+            border-color: rgba(255, 255, 255, 0);
+            border-style: solid;
+            border-width: 1px;
+            :last-child {
+                padding: 10rpx;
+            }
+        }
+        .filterButtonSelected {
+            border-color: #d83d34;
+            border-style: solid;
+            border-width: 1px;
+        }
+        .filterSubTitle {
+            margin-top: 30rpx;
+            display: flex;
+            flex-direction: row;
+            font-size: 26rpx;
+        }
+    }
+    .filterButtom {
+        height: 5%;
+        margin-top: auto;
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-around;
+        align-items: center;
+        font-size: 36rpx;
+        :first-child {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 50%;
+            height: 100%;
+            background-color: #f3f3f3;
+            color: #bdbdbd
+        }
+        :last-child {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            width: 50%;
+            height: 100%;
+            background-color: #d83d34;
+            color: white;
         }
     }
 }

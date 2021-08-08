@@ -29,6 +29,10 @@
 		{
 			"path": "pages/record/record",
 			"style": {}
+		},
+		{
+			"path": "pages/search/search",
+			"style": {}
 		}
 	],
 	"tabBar": {

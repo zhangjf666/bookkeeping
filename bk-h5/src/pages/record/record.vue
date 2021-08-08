@@ -48,7 +48,7 @@
           <view class="options-date">
               <u-icon name="calendar" :size="40"></u-icon>
               <text @click="showCalendar()">{{calendar}}</text>
-              <u-checkbox v-if="type == 0" v-model="creditChecked" shape="circle" class="credit-check">信用卡产生</u-checkbox>
+              <u-checkbox v-if="type == 0" v-model="creditChecked" active-color="#d83d34" shape="circle" class="credit-check">信用卡产生</u-checkbox>
           </view>
           <view class="options-remark">
               <u-input v-model="remark" placeholder="请输入备注信息" />
@@ -402,7 +402,7 @@ $mColor: #d83d34;
     }
     .item-text {
       margin-top: 10rpx;
-      font-size: 16rpx;
+      font-size: 22rpx;
     }
 }
 .options {
