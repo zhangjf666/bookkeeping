@@ -27,6 +27,13 @@
         SELECT ie.type, sum(ie.amount) amount from income_expense ie
         where ie.user_id = #{userId}
         and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        <if test="classify != null and classify.size() != 0">
+            and ie.main_classify in
+            <foreach collection="classify" item="id" index="index"
+                     open="(" close=")" separator=",">
+                #{id}
+            </foreach>
+        </if>
         group by ie.type
     </select>
 

@@ -1,7 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
-import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
@@ -14,6 +13,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import java.util.List;
 import java.util.Set;
 
 @Slf4j
@@ -28,9 +28,9 @@ public class IncomeExpenseController {
     @Log("查询收入支出")
     @ApiOperation("查询收入支出")
     @GetMapping
-    public Response getPosition(@Validated IncomeExpenseQueryDto queryDto, Page pageable){
-        Page page = incomeExpenseService.queryPage(queryDto, pageable);
-        return Response.ok(page);
+    public Response get(@Validated IncomeExpenseQueryDto queryDto){
+        List<IncomeExpenseDto> list = incomeExpenseService.queryList(queryDto);
+        return Response.ok(list);
     }
 
     @Log("创建收入支出")

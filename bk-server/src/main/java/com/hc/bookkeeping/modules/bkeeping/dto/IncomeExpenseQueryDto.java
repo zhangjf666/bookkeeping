@@ -1,6 +1,5 @@
 package com.hc.bookkeeping.modules.bkeeping.dto;
 
-import com.baomidou.mybatisplus.annotation.TableField;
 import com.hc.bookkeeping.common.annotation.Query;
 import com.hc.bookkeeping.common.annotation.Sort;
 import com.hc.bookkeeping.common.model.BoolEnum;
@@ -13,6 +12,7 @@ import lombok.EqualsAndHashCode;
 import java.io.Serializable;
 import java.math.BigDecimal;
 import java.time.LocalDate;
+import java.time.LocalDateTime;
 import java.util.List;
 
 /**
@@ -33,7 +33,7 @@ public class IncomeExpenseQueryDto implements Serializable {
     private Long id;
 
     @ApiModelProperty(value = "用户id")
-    @Query
+    @Query(column = "user_id")
     private Long userId;
 
     @ApiModelProperty(value = "账本id")
@@ -50,7 +50,7 @@ public class IncomeExpenseQueryDto implements Serializable {
 
     @ApiModelProperty(value = "产生时间")
     @Query(match = Query.Matching.BETWEEN)
-    @Sort(sort = Sort.SortType.DESC)
+    @Sort(sort = Sort.SortType.DESC, sortOrder = 0)
     private List<LocalDate> date;
 
     @ApiModelProperty(value = "备注")
@@ -68,4 +68,8 @@ public class IncomeExpenseQueryDto implements Serializable {
     @ApiModelProperty(value = "是否信用卡消费(0:否,1;是)")
     @Query
     private BoolEnum isCreditCard;
+
+    @ApiModelProperty(value = "创建时间")
+    @Sort(column = "create_time", sort = Sort.SortType.DESC, sortOrder = 1)
+    private List<LocalDateTime> createTime;
 }

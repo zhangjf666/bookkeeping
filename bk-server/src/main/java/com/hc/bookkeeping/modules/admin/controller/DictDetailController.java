@@ -2,6 +2,7 @@ package com.hc.bookkeeping.modules.admin.controller;
 
 import cn.hutool.core.bean.BeanUtil;
 import cn.hutool.core.collection.CollUtil;
+import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.constants.Constants;
@@ -79,7 +80,7 @@ public class DictDetailController {
     @PreAuthorize("@ph.check('system:dict:list')")
     public Response getDictDetailByName(@RequestParam String dictName){
         String[] names = dictName.split("[,，]");
-        Map<String, List<DictDetailDto>> dicts = CollUtil.newHashMap();
+        Map<String, List<DictDetailDto>> dicts = MapUtil.newHashMap();
         for (String name: names) {
             Dict dict = dictService.getOne(new QueryWrapper<Dict>().eq("name", name));
             if(dict == null){

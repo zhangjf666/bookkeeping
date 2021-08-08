@@ -1,6 +1,6 @@
 package com.hc.bookkeeping.modules.admin.service.impl;
 
-import cn.hutool.core.date.BetweenFormater;
+import cn.hutool.core.date.BetweenFormatter;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.io.FileUtil;
 import cn.hutool.core.net.NetUtil;
@@ -72,7 +72,7 @@ public class MonitorServiceImpl implements MonitorService {
         long time = ManagementFactory.getRuntimeMXBean().getStartTime();
         Date date = new Date(time);
         // 计算项目运行时间
-        String formatBetween = DateUtil.formatBetween(date, new Date(), BetweenFormater.Level.SECOND);
+        String formatBetween = DateUtil.formatBetween(date, new Date(), BetweenFormatter.Level.SECOND);
         // 系统信息
         dto.setRunTime(formatBetween);
         dto.setIp(NetUtil.getLocalhostStr());

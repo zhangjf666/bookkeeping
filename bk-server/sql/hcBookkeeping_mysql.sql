@@ -486,3 +486,18 @@ CREATE TABLE `icon_config` (
   `type` CHAR(1) NOT NULL DEFAULT '0' COMMENT '图标类型(0:支出,1:收入)',
   PRIMARY KEY (`id`)
 ) COMMENT '图标配置表';
+
+-- ---
+-- Table 'user_search'
+-- 用户搜索记录表
+-- ---
+
+DROP TABLE IF EXISTS `user_search`;
+
+CREATE TABLE `user_search` (
+  `id` BIGINT(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+  `user_id` BIGINT(20) NOT NULL COMMENT '用户id',
+  `content` VARCHAR(100) NOT NULL COMMENT '搜索内容',
+  `create_time`   datetime NOT NULL comment '创建时间',
+  PRIMARY KEY (`id`)
+) COMMENT '用户搜索记录表';

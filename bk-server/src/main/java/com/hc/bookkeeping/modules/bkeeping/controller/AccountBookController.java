@@ -1,15 +1,12 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
-import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.common.utils.QueryUtil;
-import com.hc.bookkeeping.modules.admin.dto.DictQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.AccountBookDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.AccountBookQueryDto;
-import com.hc.bookkeeping.modules.bkeeping.entity.AccountBook;
 import com.hc.bookkeeping.modules.bkeeping.service.AccountBookService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -33,7 +30,7 @@ public class AccountBookController {
     @Log("查询账本")
     @ApiOperation("查询账本")
     @GetMapping
-    public Response getPosition(@Validated AccountBookQueryDto queryDto){
+    public Response get(@Validated AccountBookQueryDto queryDto){
         List<AccountBookDto> list = accountBookService.queryList(QueryUtil.bulid(queryDto));
         return Response.ok(list);
     }

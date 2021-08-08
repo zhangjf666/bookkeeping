@@ -1,7 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
-import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
@@ -31,7 +30,7 @@ public class ClassifyController {
     @Log("查询分类")
     @ApiOperation("查询分类")
     @GetMapping
-    public Response getPosition(@Validated ClassifyQueryDto queryDto){
+    public Response get(@Validated ClassifyQueryDto queryDto){
         List<ClassifyDto> list = classifyService.queryList(QueryUtil.bulid(queryDto));
         return Response.ok(list);
     }

@@ -2,7 +2,8 @@ package com.hc.bookkeeping.modules.bkeeping.dto;
 
 import lombok.Data;
 
-import java.util.Date;
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 /**
@@ -29,15 +30,15 @@ public class BillQueryDto {
     /**
      * 开始时间
      */
-    private Date beginDate;
+    private LocalDate beginDate;
 
     /**
      * 结束时间
      */
-    private Date endDate;
+    private LocalDate endDate;
 
     /**
      * 查询的分类
      */
-    private List<Long> classifyList;
+    private List<Long> classifyList = new ArrayList<>();
 }

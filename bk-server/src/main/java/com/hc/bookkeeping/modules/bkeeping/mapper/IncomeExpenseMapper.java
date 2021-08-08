@@ -1,11 +1,9 @@
 package com.hc.bookkeeping.modules.bkeeping.mapper;
 
 import cn.hutool.core.lang.Dict;
-import com.hc.bookkeeping.modules.bkeeping.dto.IncomeExpenseDto;
-import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
 import com.baomidou.mybatisplus.core.mapper.BaseMapper;
+import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
 
-import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
 
@@ -25,7 +23,7 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
      * @param endDate
      * @return
      */
-    List<Dict> querySumAmount(Long userId, Date beginDate, Date endDate);
+    List<Dict> querySumAmount(Long userId, Date beginDate, Date endDate, List<Long> classify);
 
     /**
      * 按月统计总收入支出

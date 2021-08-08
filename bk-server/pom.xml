@@ -22,7 +22,7 @@
         <lombok.version>1.18.4</lombok.version>
         <druid.version>1.2.3</druid.version>
         <redisson.version>3.13.6</redisson.version>
-        <hutool.version>5.3.7</hutool.version>
+        <hutool.version>5.7.7</hutool.version>
         <jjwt.version>0.11.1</jjwt.version>
     </properties>
 
@@ -123,7 +123,7 @@
         <dependency>
             <groupId>cn.hutool</groupId>
             <artifactId>hutool-all</artifactId>
-            <version>5.3.7</version>
+            <version>${hutool.version}</version>
         </dependency>
         <!--mapStruct依赖-->
         <dependency>

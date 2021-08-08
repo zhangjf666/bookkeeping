@@ -1,13 +1,10 @@
 package com.hc.bookkeeping.modules.bkeeping.service;
 
-import cn.hutool.core.lang.Dict;
 import com.hc.bookkeeping.common.base.BaseService;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
 import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
-import com.baomidou.mybatisplus.extension.service.IService;
 
-import java.util.Date;
 import java.util.List;
 
 /**
@@ -27,6 +24,13 @@ public interface IncomeExpenseService extends BaseService<IncomeExpenseDto, Inco
      * @return
      */
     Page queryPage(IncomeExpenseQueryDto queryDto, Page page);
+
+    /**
+     * 查询收支记录
+     * @param queryDto
+     * @return
+     */
+    List<IncomeExpenseDto> queryList(IncomeExpenseQueryDto queryDto);
 
     /**
      * 查询首页摘要信息
