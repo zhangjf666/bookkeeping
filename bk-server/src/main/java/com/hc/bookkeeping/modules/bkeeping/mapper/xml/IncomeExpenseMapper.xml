@@ -67,7 +67,7 @@
     </select>
 
     <select id="queryReportAmount" resultType="cn.hutool.core.lang.Dict">
-        select ie.`type`, ie.main_classify classify,SUM(ie.amount) amount
+        select ie.`type`, ie.main_classify classify,SUM(ie.amount) amount,COUNT(*) num
         from income_expense ie
         where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
         <if test="classify != null and classify.size() != 0">

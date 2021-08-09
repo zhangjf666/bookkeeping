@@ -5,6 +5,7 @@ import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
 import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
+import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
@@ -167,10 +168,22 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                     ies = Dict.create();
                 }
                 if(BillType.Income.getValue().equals(data.getStr("type"))) {
-                    ies.set("income", data.getBigDecimal("amount"));
+                    BigDecimal amount = data.getBigDecimal("amount");
+                    ies.set("percent", NumberUtil.round(amount.divide(income, 4,BigDecimal.ROUND_HALF_UP).doubleValue() * 100, 2));
+                    ies.set("income", amount);
                 } else {
+                    BigDecimal amount = data.getBigDecimal("amount");
+                    ies.set("percent", NumberUtil.round(amount.divide(expense, 4,BigDecimal.ROUND_HALF_UP).doubleValue() * 100,2));
                     ies.set("expense", data.getBigDecimal("amount"));
                 }
+                //获取图标跟名称
+                ies.set("num", data.getInt("num"));
+                Classify mclassify = classifyMapper.selectById(data.getLong("classify"));
+                if(mclassify != null) {
+                    ies.set("classifyName", mclassify.getName());
+                    ies.set("classifyImage", mclassify.getImage());
+                }
+                ies.set("classify", data.getStr("classify"));
                 incomeExpenseSum.set(data.getStr("classify"), ies);
             }
         }
