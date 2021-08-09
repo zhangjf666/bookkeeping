@@ -34,30 +34,30 @@
             <scroll-view scroll-y class="filter">
                 <view class="filterMainTitle">筛选收支类型</view>
                 <view class="filterContent">
-                    <view class="filterButton" :class="filterAllSelected(0)" @click="allExpense">
+                    <view class="filterButton" :class="filterAllSelected(0)" hover-class="click-bg" hover-stay-time="200" @click="allExpense">
                         <text>全部支出</text>
                     </view>
-                    <view class="filterButton" :class="filterAllSelected(1)" @click="allIncome">
+                    <view class="filterButton" :class="filterAllSelected(1)" hover-class="click-bg" hover-stay-time="200" @click="allIncome">
                         <text>全部收入</text>
                     </view>
                 </view>
                 <view class="filterMainTitle">筛选分类</view>
                 <view class="filterSubTitle" style="color: #d83d34;">支出</view>
                 <view class="filterContent">
-                    <view class="filterButton" :class="filterSelected(item)" v-for="(item) in expenseList" :key="item.id" @click="filterButtonClick(item)">
+                    <view class="filterButton" :class="filterSelected(item)" v-for="(item) in expenseList" :key="item.id" @click="filterButtonClick(item)" hover-class="click-bg" hover-stay-time="200">
                         <text>{{item.name}}</text>
                     </view>
                 </view>
                 <view class="filterSubTitle" style="color: #00a151;">收入</view>
                 <view class="filterContent">
-                    <view class="filterButton" :class="filterSelected(item)" v-for="(item) in incomeList" :key="item.id" @click="filterButtonClick(item)">
+                    <view class="filterButton" :class="filterSelected(item)" v-for="(item) in incomeList" :key="item.id" @click="filterButtonClick(item)" hover-class="click-bg" hover-stay-time="200">
                         <text>{{item.name}}</text>
                     </view>
                 </view>
             </scroll-view>
             <view class="filterButtom">
-                <view @click="filterReset">重置</view>
-                <view @click="filterConfirm">确定</view>
+                <view @click="filterReset" :style="resetColor" hover-class="click-bg" hover-stay-time="200">重置</view>
+                <view @click="filterConfirm" hover-class="click-bg" hover-stay-time="200">确定</view>
             </view>
         </u-popup>
     </view>
@@ -236,7 +236,10 @@ export default {
                 }
                 return all ? 'filterButtonSelected' : '';
             }
-        }
+        },
+        resetColor() {
+            return this.selectClassifyList.length > 0 ? 'color: #000;' : ''
+        },
     }
 }
 </script>
@@ -429,5 +432,8 @@ button.primary {
   background-color: $mColor;
   border-radius: 4rpx;
   width: 100%;
+}
+.click-bg {
+	background-color:rgb(114, 27, 27);
 }
 </style>

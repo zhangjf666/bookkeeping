@@ -27,6 +27,10 @@
 			"style": {}
 		},
 		{
+			"path": "pages/statistics/statisticsDetail",
+			"style": {}
+		},
+		{
 			"path": "pages/record/record",
 			"style": {}
 		},

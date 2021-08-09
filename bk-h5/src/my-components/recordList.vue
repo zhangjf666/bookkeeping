@@ -4,7 +4,7 @@
             <view class="time-list" v-if="sortType==0 || sortType == 2">
                 <view class="time-range" v-for="(k, index) in timeSortList" :key="index">
                     <view class="time-text" v-if="sortType==0">{{dateFormat(k.date)}}</view>
-                    <view class="item" v-for="(item) in k.subList" :key="item.id" @click="itemClick(item)">
+                    <view class="item" v-for="(item) in k.subList" :key="item.id" hover-class="click-bg" hover-stay-time="200" @click="itemClick(item)">
                         <text class="item-image" :class="'iconfont icon-' + classifyImageFormat(item)" :style="itemColor(item)"></text>
                         <view class="item-text">
                             <view class="item-classify">{{classifyTextFormat(item)}}</view>
@@ -16,7 +16,7 @@
                 </view>
             </view>
             <view class="amount-list" v-if="sortType==1">
-                <view class="item" v-for="(item) in amountSortList" :key="item.id" @click="itemClick(item)">
+                <view class="item" v-for="(item) in amountSortList" :key="item.id" hover-class="click-bg" hover-stay-time="200" @click="itemClick(item)">
                     <text class="item-image" :class="'iconfont icon-' + classifyImageFormat(item)" :style="itemColor(item)"></text>
                     <view class="item-text">
                         <view class="item-classify">{{classifyTextFormat(item)}}</view>
@@ -118,7 +118,6 @@ export default {
     },
     methods: {
         itemClick(item) {
-            console.log(item)
             uni.navigateTo({
                 url: `/pages/record/record?item=` + encodeURIComponent(JSON.stringify(item))
             });
@@ -169,5 +168,8 @@ export default {
             font-size: 40rpx;
         }
     }
+}
+.click-bg {
+	background-color:rgb(240, 240, 240);
 }
 </style>

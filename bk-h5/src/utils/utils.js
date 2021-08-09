@@ -8,7 +8,7 @@ export function getDeviceUUID() {
 }
 
 export function formatNumber(num, decimal, separator) {
-	decimal = decimal || 2
+	decimal = decimal == undefined ? 2 : decimal;
 	separator = separator || ','
 	// 将num转为Number类型，因为其值可能为字符串数值，调用toFixed会报错
 	num = Number(num);
