@@ -175,6 +175,7 @@ export default {
       }
   },
   methods: {
+    ...mapMutations(['updateSummary']),
     updateUserConfig() {
       //初始选中默认账本
       this.accountBook.forEach(item => {
@@ -284,6 +285,7 @@ export default {
           data['isCreditCard'] = this.isCreditCard;
         }
         createIncomeExpense(data).then((res) => {
+          this.updateSummary();
           //跳转到首页
           uni.switchTab({
             url: `/pages/index/index`,
@@ -296,6 +298,7 @@ export default {
           data['isCreditCard'] = this.isCreditCard;
         }
         updateIncomeExpense(data).then((res) => {
+          this.updateSummary();
           //跳转回之前页面
           uni.navigateBack();
         });
@@ -311,12 +314,14 @@ export default {
           data['isCreditCard'] = this.isCreditCard;
         }
         createIncomeExpense(data).then((res) => {
+          this.updateSummary();
           //清空数据
           this.amount = "0.00";
           this.remark = "";
         });
       } else {
         deleteIncomeExpense([this.id]).then((res) => {
+          this.updateSummary();
           //跳转回之前页面
           uni.navigateBack();
         })

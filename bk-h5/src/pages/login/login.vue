@@ -94,7 +94,7 @@
 			
 		},
 		methods: {
-			...mapMutations(['setToken','setUser']),
+			...mapMutations(['setToken','setUser','updateSummary']),
 			initPosition() {
 				/**
 				 * 使用 absolute 定位，并且设置 bottom 值进行定位。软键盘弹出时，底部会因为窗口变化而被顶上来。
@@ -153,6 +153,7 @@
 					this.setUser(data.user);
 					uni.setStorageSync('token', data.token);
 					uni.setStorageSync('user', data.user);
+					this.updateSummary();
 					uni.reLaunch({
 						url: '../index/index',
 					})

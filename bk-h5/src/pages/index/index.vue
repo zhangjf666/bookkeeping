@@ -5,14 +5,14 @@
         <view class="expense-title">本月支出 (元)</view>
         <view class="expense-sum">
           <text>￥</text>
-          <u-count-to ref="countExpense" duration="1300" font-size="80" color="#fff" :end-val="expenseTotal" autoplay decimals="2" separator=","></u-count-to>
+          <u-count-to ref="countExpense" duration="1300" font-size="80" color="#fff" :end-val="summary.expenseAmount" autoplay decimals="2" separator=","></u-count-to>
         </view>
       </view>
       <view class="income">
         <view class="income-title">本月收入</view>
         <view class="income-sum">
           <text>￥</text>
-          <u-count-to ref="countIncome" duration="1300" font-size="28" color="#fff" :end-val="incomeTotal" autoplay decimals="2" separator=","></u-count-to>
+          <u-count-to ref="countIncome" duration="1300" font-size="28" color="#fff" :end-val="summary.incomeAmount" autoplay decimals="2" separator=","></u-count-to>
         </view>
       </view>
     </view>
@@ -20,9 +20,9 @@
       <button class="primary" type="primary" @tap="goRecordPage">记一笔</button>
     </view>
     <view class="recently">
-      <view class="title">近三日新增账单 {{ recordSize }} 笔</view>
+      <view class="title">近三日新增账单 {{ summary.incomeExpenseList.length }} 笔</view>
       <!-- 近3日账单 -->
-      <record-list :list="incomeExpenseList" :sortType="0"></record-list>
+      <record-list v-if="summary.incomeExpenseList" :list="summary.incomeExpenseList" :sortType="0"></record-list>
     </view>
     <u-toast ref="uToast" />
   </view>
@@ -31,7 +31,6 @@
 <script>
 import { mapState, mapMutations, mapGetters } from "vuex";
 import { userConfig,userAccountBook,userClassify } from "@/api/user.js";
-import { querySummary } from "@/api/incomeExpense.js";
 import recordList from "@/my-components/recordList.vue";
 
 export default {
@@ -53,11 +52,22 @@ export default {
       this.getUserConfig();
       this.getUserClassify();
       this.getUserAccountBook();
-      this.getSummary();
+      this.updateSummary();
+    }
+  },
+  onShow() {
+    if(Object.keys(this.userConfig).length == 0) {
+      this.getUserConfig();
+    }
+    if(this.classify.length == 0) {
+      this.getUserClassify();
+    }
+    if(this.accountBook.length == 0) {
+      this.getUserAccountBook();
     }
   },
   methods: {
-    ...mapMutations(['setUserConfig','setClassify','setAccountBook']),
+    ...mapMutations(['setUserConfig','setClassify','setAccountBook','updateSummary']),
     // 获取用户配置
     getUserConfig() {
       userConfig({userId: this.user.id}).then((data) => {
@@ -93,18 +103,10 @@ export default {
       uni.navigateTo({
         url: `../record/record`,
       });
-    },
-    //加载首页统计信息
-    getSummary() {
-      querySummary({userId: this.user.id}).then(data => {
-        this.expenseTotal = data.expenseAmount;
-        this.incomeTotal = data.incomeAmount;
-        this.incomeExpenseList = data.incomeExpenseList;
-      })
     }
   },
   computed: {
-    ...mapState(['user']),
+    ...mapState(['user', 'summary','userConfig','classify','accountBook']),
     ...mapGetters(["loginFlag"]),
     recordSize() {
       return this.incomeExpenseList.length;
@@ -116,6 +118,11 @@ export default {
       return '￥' + this.expenseTotal;
     }
   },
+  watch: {
+    summary() {
+      
+    }
+  }
 };
 </script>
 

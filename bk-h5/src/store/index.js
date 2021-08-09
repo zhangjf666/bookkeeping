@@ -3,6 +3,8 @@ import Vuex from 'vuex'
 
 Vue.use(Vuex);
 
+import { querySummary } from "@/api/incomeExpense.js";
+
 const store = new Vuex.Store({
     state: {
         // token
@@ -14,7 +16,9 @@ const store = new Vuex.Store({
         //用户分类
         classify: [],
         //用户账本
-        accountBook: []
+        accountBook: [],
+        //用户收支信息摘要
+        summary: {expenseAmount: 0, incomeAmount: 0, incomeExpenseList: []}
     },
     getters: {
         // 返回是否已登录
@@ -42,6 +46,11 @@ const store = new Vuex.Store({
         // 设置用户账本
         setAccountBook(state, accountBook) {
             state.accountBook = accountBook;
+        },
+        updateSummary(state) {
+            querySummary({userId: state.user.id}).then(data => {
+                state.summary = data;
+              })
         }
     }
 })

@@ -1,6 +1,7 @@
 
 let base_url='http://127.0.0.1:8080';//请求地址
 // let base_url='http://192.168.2.88:8080';//请求地址
+// let base_url='http://173.82.115.140:8088';//请求地址
 
 function service(options = {}) {
     options.url = `${base_url}${options.url}`;

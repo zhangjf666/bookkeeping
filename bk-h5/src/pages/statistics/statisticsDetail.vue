@@ -1,7 +1,7 @@
 <template>
     <view class='content'>
         <!-- 头部导航栏 -->
-        <u-navbar z-index="0" back-icon-color="#000" back-icon-size="38" :background="{background: '#fff'}">
+        <u-navbar z-index="9999" back-icon-color="#000" back-icon-size="38" :background="{background: '#fff'}">
 			<view class="slot-wrap">
 				<view>{{title}}</view>
 			</view>
