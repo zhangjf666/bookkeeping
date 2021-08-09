@@ -9,7 +9,6 @@ import com.hc.bookkeeping.modules.bkeeping.entity.UserConfig;
 import com.hc.bookkeeping.modules.bkeeping.mapper.UserConfigMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapstruct.UserConfigMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.service.UserConfigService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

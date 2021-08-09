@@ -13,14 +13,13 @@ import com.hc.bookkeeping.common.base.BaseServiceImpl;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
-import com.hc.bookkeeping.modules.bkeeping.entity.Classify;
 import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
 import com.hc.bookkeeping.modules.bkeeping.entity.UserSearch;
-import com.hc.bookkeeping.modules.bkeeping.mapper.ClassifyMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapper.IncomeExpenseMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapper.UserSearchMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapstruct.IncomeExpenseMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
+import com.hc.bookkeeping.modules.bkeeping.service.ClassifyService;
 import com.hc.bookkeeping.modules.bkeeping.service.IncomeExpenseService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -44,7 +43,7 @@ import static com.hc.bookkeeping.modules.bkeeping.constants.constants.*;
 @Service
 public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapstruct, IncomeExpenseDto, IncomeExpenseMapper, IncomeExpense> implements IncomeExpenseService {
     @Autowired
-    private ClassifyMapper classifyMapper;
+    private ClassifyService classifyService;
     @Autowired
     private UserSearchMapper userSearchMapper;
 
@@ -95,7 +94,10 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         };
         //收支明细
         Date detail = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), -days));
-        List<IncomeExpenseDto> list = queryList(Wrappers.<IncomeExpense>lambdaQuery().ge(IncomeExpense::getDate, detail).orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));
+        List<IncomeExpenseDto> list = queryList(Wrappers.<IncomeExpense>lambdaQuery()
+                .eq(IncomeExpense::getUserId, userId)
+                .ge(IncomeExpense::getCreateTime, detail)
+                .orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));
         fillClassify(list);
 
         summaryDto.setExpenseAmount(expense);
@@ -178,7 +180,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 }
                 //获取图标跟名称
                 ies.set("num", data.getInt("num"));
-                Classify mclassify = classifyMapper.selectById(data.getLong("classify"));
+                ClassifyDto mclassify = classifyService.queryUserClassifyById(billQueryDto.getUserId(), data.getLong("classify"));
                 if(mclassify != null) {
                     ies.set("classifyName", mclassify.getName());
                     ies.set("classifyImage", mclassify.getImage());
@@ -191,6 +193,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
 
         //查询收支明细
         List<IncomeExpenseDto> list = queryList(Wrappers.<IncomeExpense>lambdaQuery().ge(IncomeExpense::getDate, beginDate)
+                .eq(IncomeExpense::getUserId, billQueryDto.getUserId())
                 .le(IncomeExpense::getDate, endDate)
                 .in(!billQueryDto.getClassifyList().isEmpty(), IncomeExpense::getMainClassify, billQueryDto.getClassifyList())
                 .orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));
@@ -202,14 +205,14 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
     private void fillClassify(List<IncomeExpenseDto> list){
         for (IncomeExpenseDto dto:list) {
             if(dto.getMainClassify() != null) {
-                Classify mclassify = classifyMapper.selectById(dto.getMainClassify());
+                ClassifyDto mclassify = classifyService.queryUserClassifyById(dto.getUserId(), dto.getMainClassify());
                 if(mclassify != null) {
                     dto.setMainClassifyName(mclassify.getName());
                     dto.setMainClassifyImage(mclassify.getImage());
                 }
             }
             if(dto.getSubClassify() != null) {
-                Classify sclassify = classifyMapper.selectById(dto.getSubClassify());
+                ClassifyDto sclassify = classifyService.queryUserClassifyById(dto.getUserId(),dto.getSubClassify());
                 if(sclassify != null) {
                     dto.setSubClassifyName(sclassify.getName());
                     dto.setSubClassifyImage(sclassify.getImage());

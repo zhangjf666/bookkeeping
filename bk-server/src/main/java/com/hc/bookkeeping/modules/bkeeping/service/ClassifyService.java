@@ -5,7 +5,6 @@ import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.modules.bkeeping.dto.ClassifyDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.ClassifyQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.entity.Classify;
-import com.baomidou.mybatisplus.extension.service.IService;
 
 /**
  * <p>
@@ -24,4 +23,12 @@ public interface ClassifyService extends BaseService<ClassifyDto, Classify> {
      * @return
      */
     Page queryPage(ClassifyQueryDto queryDto, Page page);
+
+    /**
+     * 查询用户分类信息
+     * @param userId
+     * @param classifyId
+     * @return
+     */
+    ClassifyDto queryUserClassifyById(Long userId, Long classifyId);
 }
