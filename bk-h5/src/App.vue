@@ -1,6 +1,5 @@
 <script>
 	import { userInfo } from '@/api/auth.js';
-	import { userConfig } from '@/api/user.js';
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')

@@ -16,7 +16,7 @@
                 </u-radio>
             </u-radio-group>
             <view class="chartView">
-                <div id="chart" style="width: 100%; height: 100%" ref="chart"></div>
+                <div id="statisticsChart" style="width: 100%; height: 100%" ref="statisticsChart"></div>
             </view>
         </view>
         <view class="detail">
@@ -87,14 +87,12 @@ export default {
             radioValue: 'expense',
             incomeExpenseList: [],
             incomeExpenseSum: [],
-            //图表横坐标
-            xAxisList: [],
-            yAxisIncomeList: [],
-            yAxisExpenseList: [],
             //账单排序,0:按时间,1:按金额
             billSort: 0,
             //控制年账单中明细是否打开
-            rowDetailOpen: []
+            rowDetailOpen: [],
+            chartIncomeData: [],
+            chartExpenseData: []
         }
     },
     onLoad() {
@@ -106,41 +104,18 @@ export default {
     },
     mounted() {
         //初始化echarts
-        this.chart = echarts.init(document.getElementById("chart"));
+        this.statisticsChart = echarts.init(document.getElementById("statisticsChart"));
         //配置数据
         let option = {
-            tooltip: {
-                trigger: 'axis',
-                triggerOn:'mouseover',
-                axisPointer: { // 坐标轴指示器配置项。
-                    type: 'line', // 'line' 直线指示器  'shadow' 阴影指示器  'none' 无指示器  'cross' 十字准星指示器。
-                    axis: 'auto', // 指示器的坐标轴。 
-                    snap: true, // 坐标轴指示器是否自动吸附到点上
-                },
-                confine: true,
-            },
-            xAxis: { type: 'category',axisTick: {show:false}, data: [] }, //X轴
-            yAxis: { type: 'value', axisLine: {show:false},axisTick: {show:false},splitLine:{show:false},axisLabel : {
-                formatter: function(){
-                        return "";
-                    }
-                }
-            }, //Y轴
             series: [] //配置项
         };
-        this.chart.setOption(option);
+        this.statisticsChart.setOption(option);
         //添加点击事件
-        this.chart.on('click', (params) => {
-            console.log(params)
+        this.statisticsChart.on('click', (param) => {
+            var data = param.data;
+            data['classifyName'] = data.name;
+            this.detailClick(data);
         })
-        // this.chart.getZr().on('click', function(params) {
-        //         let pointInPixel = [params.offsetX, params.offsetY]
-        //         console.log(pointInPixel)
-        //         if (this.chart.containPixel('grid', pointInPixel)) {
-        //             let xIndex = this.chart.convertFromPixel({ seriesIndex: 0 }, [params.offsetX, params.offsetY])[0]
-        //             console.log(xIndex)
-        //         }
-        //     })
     },
     methods: {
         //获取统计数据
@@ -151,24 +126,21 @@ export default {
                 this.incomeExpenseList = res.incomeExpenseList;
                 this.incomeExpenseSum = res.incomeExpenseSum;
                 //更新图表
-                this.xAxisList = [];
-                this.yAxisIncomeList = [];
-                this.yAxisExpenseList = [];
-
-                var sum = res.incomeExpenseSum;
-                var keys = Object.keys(sum);
-                if(this.mode == 0 || this.mode == 1) {
-                    for(var i = 0; i<keys.length; i++){
-                        this.xAxisList.push(keys[i]);
-                    }
-                } else {
-                    this.xAxisList = keys;
-                }
-                var values= Object.values(sum);
+                var values= Object.values(this.incomeExpenseSum);
+                var incomelist = [];
+                var expenselist = [];
                 for(var i = 0; i<values.length; i++){
-                    this.yAxisIncomeList.push(values[i].income);
-                    this.yAxisExpenseList.push(values[i].expense);
+                    if(values[i].percent >= 1){
+                        var value = {name: values[i].classifyName, value: formatNumber(values[i].percent, 0), classify: values[i].classify};
+                        if(values[i].income) {
+                            incomelist.push(value);
+                        } else {
+                            expenselist.push(value);
+                        }
+                    }
                 }
+                this.chartIncomeData = incomelist;
+                this.chartExpenseData = expenselist;
                 // 填入数据
                 this.updateChart(0);
             })
@@ -184,28 +156,22 @@ export default {
         },
         updateChart(type){
             this.radioValue = type == 0 ? 'expense' : 'income';
-            var chartType = this.mode == 1 ? 'line':'bar';
-            var seriesExpense = {
+            var series = {
                         // 根据名字对应到相应的系列
                         name: 'expense',
-                        data: this.yAxisExpenseList,
-                        type: chartType,
-                        color: ['#d83d34'],
-                        barWidth: 2
+                        data: type == 0 ? this.chartExpenseData : this.chartIncomeData,
+                        selectedMode: 'single',
+                        type: 'pie',
+                        radius: ['40%', '70%'],
+                        clockwise: false,
+                        label: {
+                            normal: {
+                                position: 'outside', // 设置标签向外
+                                formatter: '{b} {c}%' // 设置标签格式
+                            }
+                        },
                     }
-            var seriesIncome = {
-                        // 根据名字对应到相应的系列
-                        name: 'income',
-                        data: this.yAxisIncomeList,
-                        type: chartType,
-                        color: ['#00a151'],
-                        barWidth: 2
-                    }
-            var series = type == 0 ? [seriesExpense] : [seriesIncome];
-            this.chart.setOption({
-                    xAxis: {
-                        data: this.xAxisList
-                    },
+            this.statisticsChart.setOption({
                     series: series
                 });
         },
@@ -310,7 +276,7 @@ export default {
 .chartContent {
     margin-top: -100rpx;
     width: 95%;
-    height: 320rpx;
+    height: 520rpx;
     align-items: center;
     justify-content: space-between;
     flex-direction: column;
@@ -328,7 +294,7 @@ export default {
     }
     .chartView { 
         width: 100%;
-        height: 180rpx;
+        height: 440rpx;
     }
 }
 .detail {

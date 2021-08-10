@@ -17,7 +17,7 @@
                 </u-radio>
             </u-radio-group>
             <view class="chartView">
-                <div id="chart" style="width: 100%; height: 100%" ref="chart"></div>
+                <div id="billChart" style="width: 100%; height: 100%" ref="billChart"></div>
             </view>
         </view>
         <view class="detail">
@@ -69,7 +69,8 @@ import {
   TooltipComponent,
   GridComponent,
   LegendComponent,
-  DatasetComponent
+  DatasetComponent,
+  DataZoomComponent
 } from 'echarts/components';
 import {
   CanvasRenderer
@@ -85,7 +86,8 @@ echarts.use(
     LineChart,
     LegendComponent,
     DatasetComponent,
-    CanvasRenderer
+    CanvasRenderer,
+    DataZoomComponent
   ]
 );
 
@@ -96,7 +98,7 @@ export default {
     data() {
         return {
             //初始化图表
-            chart: null,
+            billChart: null,
             mode: 0,
             expenseTotal: 0,
             incomeTotal: 0,
@@ -121,18 +123,29 @@ export default {
     },
     mounted() {
         //初始化echarts
-        this.chart = echarts.init(document.getElementById("chart"));
+        this.billChart = echarts.init(document.getElementById("billChart"));
         //配置数据
         let option = {
             tooltip: {
                 trigger: 'axis',
-                triggerOn:'mouseover',
-                axisPointer: { // 坐标轴指示器配置项。
-                    type: 'line', // 'line' 直线指示器  'shadow' 阴影指示器  'none' 无指示器  'cross' 十字准星指示器。
-                    axis: 'auto', // 指示器的坐标轴。 
-                    snap: true, // 坐标轴指示器是否自动吸附到点上
-                },
+                triggerOn:'none',
                 confine: true,
+                formatter: this.tooltipFormatter
+            },
+            dataZoom: [
+                {
+                    id: 'dataZoomX',
+                    type: 'inside',
+                    xAxisIndex: [0],
+                    filterMode: 'none',
+                    zoomLock: true,
+                    startValue: 0,
+                    minValueSpan: 31,
+                    maxValueSpan: 31
+                }
+            ],
+            grid: {
+                height: 74
             },
             xAxis: { type: 'category',axisTick: {show:false}, data: [] }, //X轴
             yAxis: { type: 'value', axisLine: {show:false},axisTick: {show:false},splitLine:{show:false},axisLabel : {
@@ -143,19 +156,29 @@ export default {
             }, //Y轴
             series: [] //配置项
         };
-        this.chart.setOption(option);
+        this.billChart.setOption(option);
         //添加点击事件
-        this.chart.on('click', (params) => {
-            console.log(params)
-        })
-        // this.chart.getZr().on('click', function(params) {
-        //         let pointInPixel = [params.offsetX, params.offsetY]
-        //         console.log(pointInPixel)
-        //         if (this.chart.containPixel('grid', pointInPixel)) {
-        //             let xIndex = this.chart.convertFromPixel({ seriesIndex: 0 }, [params.offsetX, params.offsetY])[0]
-        //             console.log(xIndex)
-        //         }
-        //     })
+        this.billChart.getZr().on('click', (params) => {
+                let pointInPixel = [params.offsetX, params.offsetY]
+                console.log(pointInPixel)
+                if (this.billChart.containPixel('grid', pointInPixel)) {
+                    let xIndex = this.billChart.convertFromPixel({ seriesIndex: 0 }, [params.offsetX, params.offsetY])[0]
+                    if(xIndex >= 0) {
+                        var data = this.radioValue == 'income' ? this.yAxisIncomeList[xIndex] : this.yAxisExpenseList[xIndex];
+                        //显示提示
+                        this.billChart.dispatchAction({
+                            type: 'showTip',
+                            // 系列的 index，在 tooltip 的 trigger 为 axis 的时候可选。
+                            seriesIndex: 0,
+                            // 数据项的 index，如果不指定也可以通过 name 属性根据名称指定数据项
+                            dataIndex: xIndex,
+                            // 本次显示 tooltip 的位置。只在本次 action 中生效。
+                            // 缺省则使用 option 中定义的 tooltip 位置。
+                            position: [pointInPixel.offsetX, 10],
+                        })
+                    }
+                }
+            })
     },
     methods: {
         //获取统计数据
@@ -170,12 +193,14 @@ export default {
                 this.yAxisExpenseList = [];
                 var sum = res.incomeExpenseSum;
                 var keys = Object.keys(sum);
-                if(this.mode == 0 || this.mode == 1) {
-                    for(var i = 0; i<keys.length; i++){
+                for(var i = 0; i<keys.length; i++){
+                    if(this.mode == 0) {
                         this.xAxisList.push(keys[i].substring(5));
-                    }
-                } else {
-                    this.xAxisList = keys;
+                    } else if(this.mode == 1){
+                         this.xAxisList.push(keys[i].substring(5) + '月');
+                    } else {
+                        this.xAxisList.push(keys[i]);
+                    } 
                 }
                 var values= Object.values(sum);
                 for(var i = 0; i<values.length; i++){
@@ -205,7 +230,7 @@ export default {
             var chartType = this.mode == 1 ? 'line':'bar';
             var seriesExpense = {
                         // 根据名字对应到相应的系列
-                        name: 'expense',
+                        name: '支出',
                         data: this.yAxisExpenseList,
                         type: chartType,
                         color: ['#d83d34'],
@@ -213,14 +238,14 @@ export default {
                     }
             var seriesIncome = {
                         // 根据名字对应到相应的系列
-                        name: 'income',
+                        name: '收入',
                         data: this.yAxisIncomeList,
                         type: chartType,
                         color: ['#00a151'],
                         barWidth: 2
                     }
             var series = type == 0 ? [seriesExpense] : [seriesIncome];
-            this.chart.setOption({
+            this.billChart.setOption({
                     xAxis: {
                         data: this.xAxisList
                     },
@@ -237,6 +262,10 @@ export default {
             } else {
                 this.rowDetailOpen.splice(index, 1);
             }
+        },
+        //自定义图表提示
+        tooltipFormatter(param) {
+            return param[0].name + ' ￥' + formatNumber(param[0].data); 
         }
     },
     computed: {
@@ -360,7 +389,7 @@ export default {
 .chartContent {
     margin-top: -100rpx;
     width: 95%;
-    height: 320rpx;
+    height: 400rpx;
     align-items: center;
     justify-content: space-between;
     flex-direction: column;
@@ -378,7 +407,7 @@ export default {
     }
     .chartView { 
         width: 100%;
-        height: 180rpx;
+        height: 320rpx;
     }
 }
 .detail {

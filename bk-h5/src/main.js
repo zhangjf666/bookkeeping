@@ -20,6 +20,9 @@ Vue.prototype.$onLaunched = new Promise(resolve => {
   Vue.prototype.$isResolve = resolve
 })
 
+//echarts排除不能点击的问题
+window.wx = {}
+
 App.mpType = 'app'
 
 const app = new Vue({
