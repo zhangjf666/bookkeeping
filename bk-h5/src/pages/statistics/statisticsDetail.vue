@@ -39,7 +39,6 @@ export default {
           const data = JSON.parse(decodeURIComponent(option.data));
           this.classifyName = data.classifyName;
           this.recordList = data.recordList;
-          console.log(this.recordList)
       }
   },
   methods: {

@@ -145,7 +145,8 @@ export default {
                 }
             ],
             grid: {
-                height: 74
+                y: "0%",
+                height: "80%"
             },
             xAxis: { type: 'category',axisTick: {show:false}, data: [] }, //X轴
             yAxis: { type: 'value', axisLine: {show:false},axisTick: {show:false},splitLine:{show:false},axisLabel : {
@@ -160,7 +161,6 @@ export default {
         //添加点击事件
         this.billChart.getZr().on('click', (params) => {
                 let pointInPixel = [params.offsetX, params.offsetY]
-                console.log(pointInPixel)
                 if (this.billChart.containPixel('grid', pointInPixel)) {
                     let xIndex = this.billChart.convertFromPixel({ seriesIndex: 0 }, [params.offsetX, params.offsetY])[0]
                     if(xIndex >= 0) {
@@ -174,7 +174,7 @@ export default {
                             dataIndex: xIndex,
                             // 本次显示 tooltip 的位置。只在本次 action 中生效。
                             // 缺省则使用 option 中定义的 tooltip 位置。
-                            position: [pointInPixel.offsetX, 10],
+                            //position: [],
                         })
                     }
                 }
@@ -203,9 +203,36 @@ export default {
                     } 
                 }
                 var values= Object.values(sum);
+                var imax = 0;
+                var emax = 0;
+                if(values.length > 0){
+                    var ilist = values.map((item)=> { return item.income});
+                    var elist = values.map((item)=> { return item.expense});
+                    imax = Math.max.apply(null, ilist);
+                    emax = Math.max.apply(null, elist);
+                }
                 for(var i = 0; i<values.length; i++){
-                    this.yAxisIncomeList.push(values[i].income);
-                    this.yAxisExpenseList.push(values[i].expense);
+                    //避免极值的影响
+                    var ivalue = values[i].income;
+                    var showiValue = ivalue;
+                    if(ivalue == 0) {
+                        showeValue = (imax * 0.01).toFixed(1)
+                    } else if(ivalue * 20 < imax){
+                        showiValue = (imax * 0.04).toFixed(1)
+                    }else if(ivalue * 10 < imax){
+                        showiValue = (imax * 0.09).toFixed(1);
+                    }
+                    this.yAxisIncomeList.push({value: showiValue, fact:values[i].income});
+                    var evalue = values[i].expense;
+                    var showeValue = evalue;
+                    if(evalue == 0) {
+                        showeValue = (emax * 0.01).toFixed(1)
+                    } else if(evalue * 20 < emax){
+                        showeValue = (emax * 0.04).toFixed(1)
+                    }else if(evalue * 10 < emax){
+                        showeValue = (emax * 0.08).toFixed(1);
+                    }
+                    this.yAxisExpenseList.push({value: showeValue, fact:values[i].expense});
                 }
                 // 填入数据
                 this.updateChart(0);
@@ -217,6 +244,9 @@ export default {
             });
         },
         dateChange(option) {
+            this.billChart.dispatchAction({
+                type: 'hideTip'
+            });
             this.mode = option.mode;
             var param = {userId: this.user.id, queryMode: '0'};
             param['mode'] = option.mode;
@@ -265,7 +295,7 @@ export default {
         },
         //自定义图表提示
         tooltipFormatter(param) {
-            return param[0].name + ' ￥' + formatNumber(param[0].data); 
+            return param[0].name + ' ￥' + formatNumber(param[0].data.fact); 
         }
     },
     computed: {
@@ -338,6 +368,9 @@ export default {
     },
     watch: {
         radioValue(e) {
+            this.billChart.dispatchAction({
+                type: 'hideTip'
+            });
             //切换显示
             e == 'expense' ? this.updateChart(0) : this.updateChart(1);
         }
@@ -389,7 +422,7 @@ export default {
 .chartContent {
     margin-top: -100rpx;
     width: 95%;
-    height: 400rpx;
+    height: 360rpx;
     align-items: center;
     justify-content: space-between;
     flex-direction: column;
@@ -407,7 +440,7 @@ export default {
     }
     .chartView { 
         width: 100%;
-        height: 320rpx;
+        height: 280rpx;
     }
 }
 .detail {

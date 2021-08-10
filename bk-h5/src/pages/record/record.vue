@@ -59,7 +59,7 @@
         <u-button class="again" @click="recordAgain" type="error">{{buttonText}}</u-button>
         <u-button class="save" @click="recordSave" type="error">保 存</u-button>
     </view>
-    <u-calendar v-model="isShowCalendar" @change="changeDate"></u-calendar>
+    <u-calendar v-model="isShowCalendar" @change="changeDate" :selectedDate="date"></u-calendar>
     <u-keyboard ref="uKeyboard" mode="number" :tooltip="false" v-model="isShowKeyboard" @change="valChange" @backspace="backspace"></u-keyboard>
   </view>
 </template>
@@ -134,6 +134,8 @@ export default {
         this.accountBookId = item.accountBookId;
         this.type = item.type == '0' ? 0 : 1;
         this.amount = item.amount + "";
+        this.date = item.date;
+        this.isToday = new Date().toLocaleDateString() == new Date(this.date).toLocaleDateString();
         if(this.type == 0){
           this.expenseMainClassify = item.mainClassify;
         } else {

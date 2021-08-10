@@ -224,6 +224,11 @@
 			toolTip: {
 				type: String,
 				default: '选择日期'
+			},
+			// 初始化选中日期
+			selectedDate: {
+				type: String,
+				default: ''
 			}
 		},
 		data() {
@@ -288,11 +293,15 @@
 			},
 			init() {
 				let now = new Date();
-				this.year = now.getFullYear();
-				this.month = now.getMonth() + 1;
-				this.day = now.getDate();
+				let iDate = new Date();
+				if(this.selectedDate != null && this.selectedDate != ''){
+					iDate = new Date(this.selectedDate);
+				}
+				this.year = iDate.getFullYear();
+				this.month = iDate.getMonth() + 1;
+				this.day = iDate.getDate();
 				this.today = `${now.getFullYear()}-${now.getMonth() + 1}-${now.getDate()}`;
-				this.activeDate = this.today;
+				this.activeDate = `${iDate.getFullYear()}-${iDate.getMonth() + 1}-${iDate.getDate()}`;
 				this.min = this.initDate(this.minDate);
 				this.max = this.initDate(this.maxDate || this.today);
 				this.startDate = "";

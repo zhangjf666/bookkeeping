@@ -111,11 +111,7 @@ export default {
         };
         this.statisticsChart.setOption(option);
         //添加点击事件
-        this.statisticsChart.on('click', (param) => {
-            var data = param.data;
-            data['classifyName'] = data.name;
-            this.detailClick(data);
-        })
+        this.chartClick();
     },
     methods: {
         //获取统计数据
@@ -165,10 +161,8 @@ export default {
                         radius: ['40%', '70%'],
                         clockwise: false,
                         label: {
-                            normal: {
-                                position: 'outside', // 设置标签向外
-                                formatter: '{b} {c}%' // 设置标签格式
-                            }
+                            position: 'outside', // 设置标签向外
+                            formatter: '{b} {c}%' // 设置标签格式
                         },
                     }
             this.statisticsChart.setOption({
@@ -179,13 +173,24 @@ export default {
             return item.expense ? 'color: #d83d34;' : 'color: #00a151;'
         },
         detailClick(item) {
-            console.log(item)
             //提取数据
             var recordList = this.incomeExpenseList.filter(x => x.mainClassify == item.classify);
             var data = { classifyName: item.classifyName, recordList: recordList };
             uni.navigateTo({
-                url: `./statisticsDetail?data=` + encodeURIComponent(JSON.stringify(data))
+                url: `./statisticsDetail?data=` + encodeURIComponent(JSON.stringify(data)),
+                animationType: 'slide-in-right', 
+                animationDuration: 300
             });
+        },
+        chartClick() {
+            this.statisticsChart.on('click', (param) => {
+                var data = param.data;
+                data['classifyName'] = data.name;
+                //点击在移动端会连续多次触发,需要添加一个停顿
+                setTimeout(() => {
+                    this.detailClick(data);
+                }, 200);
+            })
         }
     },
     computed: {
