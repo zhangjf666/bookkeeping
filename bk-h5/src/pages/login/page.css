@@ -41,13 +41,6 @@ page {
 /* #endif */
 
 /* 原生组件模式下需要注意组件外部样式 */
-m-input {
-    width: 100%;
-    /* min-height: 100%; */
-    display: flex;
-    flex: 1;
-}
-
 .content {
     display: flex;
     flex: 1;
@@ -57,6 +50,8 @@ m-input {
 }
 
 .input-group {
+    display: flex;
+    flex-direction: column;
     background-color: #ffffff;
     margin-top: 20px;
     position: relative;

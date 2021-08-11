@@ -57,11 +57,6 @@ export default {
 </script>
 
 <style lang="scss" scoped>
-page {
-    width: 100%;
-    height: 100%;
-    display: block;
-}
 .mine{
 	width: 100%;
 	height: 100%;
@@ -109,7 +104,7 @@ page {
 .btn-logout {
 	width: 100%;
 	margin-top: 25px;
-    padding: 10px;
+    padding: 30rpx;
 	button.primary {
 		background-color: #d83d34;
 	}

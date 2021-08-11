@@ -1,6 +1,15 @@
 
-let base_url='http://127.0.0.1:8080';//请求地址
-// let base_url='http://192.168.2.88:8080';//请求地址
+let base_url="";//请求地址
+if (process.env.NODE_ENV === "development") {
+    // 开发环境
+    base_url = "http://127.0.0.1:8080";
+} else if (process.env.NODE_ENV === "test") {
+    // 测试环境
+    base_url = "http://192.168.2.88:8080";
+} else if (process.env.NODE_ENV === "production") {
+    // 正式环境
+    base_url = "https://www.zhiizh.com/bookkeeping/api";
+}
 
 function service(options = {}) {
     options.url = `${base_url}${options.url}`;

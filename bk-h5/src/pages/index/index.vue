@@ -73,7 +73,7 @@ export default {
       userConfig({userId: this.user.id}).then((data) => {
         var config = {};
         data.forEach(item => {
-          config[item.name] = item.value;
+          config[item.name] = item;
         })
         this.setUserConfig(config);
       })

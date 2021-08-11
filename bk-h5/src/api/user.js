@@ -10,6 +10,15 @@ export function userConfig(data) {
         header: {'content-type': 'application/json'}
     })
 }
+//编辑配置查询
+export function updateUserConfig(data) {
+    return request({
+        url: '/userConfig',
+        method: 'PUT',
+        data,
+        header: {'content-type': 'application/json'}
+    })
+}
 //用户分类查询
 export function userClassify(data) {
     return request({

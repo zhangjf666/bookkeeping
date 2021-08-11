@@ -11,31 +11,32 @@
 		></u-navbar>
 		<view class="login-type">
 			<view v-for="(item,index) in loginTypeList" :key="index" @click="loginType = index" :class="{act: loginType === index}"
-			 class="login-type-btn">{{item}}</view>
+			 	class="login-type-btn">{{item}}
+			</view>
 		</view>
 		<view class="input-group" v-if="loginType === 0">
 			<view class="input-row border">
 				<text class="title">手机：</text>
-				<m-input class="m-input" type="text" clearable focus v-model="mobile" placeholder="请输入手机号码"></m-input>
+				<u-input type="text" focus v-model="mobile" placeholder="请输入手机号码"></u-input>
 			</view>
 			<view class="input-row">
 				<text class="title">验证码：</text>
-				<m-input type="text" v-model="code" placeholder="请输入验证码"></m-input>
+				<u-input type="text" v-model="code" placeholder="请输入验证码"></u-input>
 				<view class="send-code-btn" @click="sendSmsCode">{{codeDuration ? codeDuration + 's' : '发送验证码' }}</view>
 			</view>
 		</view>
 		<view class="input-group" v-else>
 			<view class="input-row border">
 				<text class="title">账号：</text>
-				<m-input class="m-input" type="text" clearable focus v-model="username" placeholder="请输入账号"></m-input>
+				<u-input type="text" focus v-model="username" placeholder="请输入账号"></u-input>
 			</view>
 			<view class="input-row border">
 				<text class="title">密码：</text>
-				<m-input type="password" displayable v-model="password" placeholder="请输入密码"></m-input>
+				<u-input type="password"  v-model="password" placeholder="请输入密码"></u-input>
 			</view>
 			<view v-if="needCaptcha" class="input-row">
 				<text class="title">验证码：</text>
-				<m-input type="text" v-model="captchaText" placeholder="请输入验证码"></m-input>
+				<u-input type="text" v-model="captchaText" placeholder="请输入验证码"></u-input>
 				<view class="send-code-btn captcha-view" @click="captcha('refreshCaptcha')">
 					<i v-if="captchaing" class="uni-icon_toast uni-loading"></i>
 					<img v-if="!captchaing" :src="captchaBase64" width="100%" height="100%"></img>
@@ -53,7 +54,6 @@
 
 <script>
 	import { mapState, mapMutations } from 'vuex';
-	import mInput from '@/my-components/m-input/m-input.vue';
 	import { getDeviceUUID } from '@/utils/utils.js';
 	import { login } from '@/api/auth.js';
 
@@ -65,7 +65,7 @@
 
 	export default {
 		components: {
-			mInput
+			
 		},
 		data() {
 			return {
@@ -234,14 +234,22 @@
 </script>
 
 <style lang="scss" scoped>
-@import "page.css";
 $mColor: #d83d34;
+.content {
+	display: flex;
+    flex: 1;
+    flex-direction: column;
+    background-color: #efeff4;
+	width: 100%;
+	height: 100vh;
+}
 .navbar {
 	/deep/ .u-border-bottom:after {
 		border-bottom-width: 0px;
 	}
 }
 .login-type {
+	margin-top: 20rpx;
     display: flex;
     justify-content: center;
 }
@@ -256,11 +264,58 @@ $mColor: #d83d34;
     border-bottom: solid 1px $mColor;
 }
 
+.input-group {
+	margin: 30rpx;
+	padding: 0rpx 20rpx 0rpx 20rpx;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 6px;
+}
+
+.input-group::before {
+    position: absolute;
+    right: 0;
+    top: 0;
+    left: 0;
+    height: 1px;
+    content: '';
+    -webkit-transform: scaleY(.5);
+    transform: scaleY(.5);
+    background-color: #c8c7cc;
+}
+
+.input-group::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    content: '';
+    -webkit-transform: scaleY(.5);
+    transform: scaleY(.5);
+    background-color: #c8c7cc;
+}
+.input-row {
+    display: flex;
+    flex-direction: row;
+    /* font-size: 18px; */
+    height: 40px;
+	align-items: center;
+	border-bottom: #c8c7cc solid 1px;
+	.title {
+		width: 140rpx;
+	}
+}
+
 .send-code-btn {
+	display: flex;
+	align-items: center;
+	justify-content: center;
     width: 100px;
-    text-align: center;
     background-color: $mColor;
     color: #FFFFFF;
+	height: 70rpx;
 }
 
 .action-row {
@@ -281,5 +336,14 @@ $mColor: #d83d34;
     display: flex;
     position: relative;
     background-color: #f3f3f3;
+}
+
+.btn-row {
+    margin-top: 20rpx;
+    padding: 30rpx;
+}
+
+button.primary {
+    background-color: #d83d34;
 }
 </style>

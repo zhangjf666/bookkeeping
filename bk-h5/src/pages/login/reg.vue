@@ -12,15 +12,15 @@
 		<view class="input-group">
 			<view class="input-row border">
 				<text class="title">账号：</text>
-				<m-input type="text" focus clearable v-model="username" placeholder="请输入账号"></m-input>
+				<u-input type="text" focus v-model="username" placeholder="请输入账号"></u-input>
 			</view>
 			<view class="input-row border">
 				<text class="title">密码：</text>
-				<m-input type="password" displayable v-model="password" placeholder="请输入密码"></m-input>
+				<u-input type="password" v-model="password" placeholder="请输入密码"></u-input>
 			</view>
 			<view class="input-row">
 				<text class="title">确认密码：</text>
-				<m-input type="password" displayable v-model="confirmPassword" placeholder="请确认密码"></m-input>
+				<u-input type="password" v-model="confirmPassword" placeholder="请确认密码"></u-input>
 			</view>
 		</view>
 		<view class="btn-row">
@@ -30,13 +30,12 @@
 </template>
 
 <script>
-	import mInput from '@/my-components/m-input/m-input.vue';
     import { registerUser, login } from '@/api/auth.js';
 	import { mapMutations } from 'vuex';
 
 	export default {
 		components: {
-			mInput
+
 		},
 		data() {
 			return {
@@ -119,10 +118,68 @@
 </script>
 
 <style lang="scss" scoped>
-@import "page.css";
+.content {
+	display: flex;
+    flex: 1;
+    flex-direction: column;
+    background-color: #efeff4;
+	width: 100%;
+	height: 100vh;
+}
 .navbar {
 	/deep/ .u-border-bottom:after {
 		border-bottom-width: 0px;
 	}
+}
+.input-group {
+	margin: 30rpx;
+	padding: 0rpx 20rpx 0rpx 20rpx;
+    display: flex;
+    flex-direction: column;
+    background-color: #ffffff;
+    border-radius: 6px;
+}
+
+.input-group::before {
+    position: absolute;
+    right: 0;
+    top: 0;
+    left: 0;
+    height: 1px;
+    content: '';
+    -webkit-transform: scaleY(.5);
+    transform: scaleY(.5);
+    background-color: #c8c7cc;
+}
+
+.input-group::after {
+    position: absolute;
+    right: 0;
+    bottom: 0;
+    left: 0;
+    height: 1px;
+    content: '';
+    -webkit-transform: scaleY(.5);
+    transform: scaleY(.5);
+    background-color: #c8c7cc;
+}
+.input-row {
+    display: flex;
+    flex-direction: row;
+    /* font-size: 18px; */
+    height: 40px;
+	align-items: center;
+	border-bottom: #c8c7cc solid 1px;
+	.title {
+		width: 140rpx;
+	}
+}
+.btn-row {
+    margin-top: 20rpx;
+    padding: 30rpx;
+}
+
+button.primary {
+    background-color: #d83d34;
 }
 </style>

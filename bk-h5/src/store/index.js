@@ -4,6 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex);
 
 import { querySummary } from "@/api/incomeExpense.js";
+import { updateUserConfig } from "@/api/user.js";
 
 const store = new Vuex.Store({
     state: {
@@ -38,6 +39,11 @@ const store = new Vuex.Store({
         // 设置用户配置
         setUserConfig(state, config) {
             state.userConfig = config;
+        },
+        // 设置用户配置项
+        setUserConfigItem(state, config) {
+            state.userConfig[config.name].value = config.value;
+            updateUserConfig(state.userConfig[config.name]);
         },
         // 设置用户分类
         setClassify(state, classify) {

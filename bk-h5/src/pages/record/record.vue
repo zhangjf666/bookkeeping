@@ -125,7 +125,7 @@ export default {
       this.mainClassifyList = this.classify.filter(item => { return item.pid == -1});
       this.updateExpenseClassifyList();
       this.updateIncomeClassifyList();
-      this.updateUserConfig();
+      this.initUserConfig();
       this.date = moment(new Date()).format('YYYY-MM-DD');
 
       if(option.item){
@@ -163,6 +163,7 @@ export default {
           },
           set: function(e) {
               this.isCreditCard = e ? '1' : '0';
+              this.setUserConfigItem({name: 'is_credit_card', value: this.isCreditCard});
           }
       },
       inputStyle() {
@@ -177,8 +178,8 @@ export default {
       }
   },
   methods: {
-    ...mapMutations(['updateSummary']),
-    updateUserConfig() {
+    ...mapMutations(['updateSummary','setUserConfigItem']),
+    initUserConfig() {
       //初始选中默认账本
       this.accountBook.forEach(item => {
         if(item.isDefault == '1'){
@@ -186,7 +187,7 @@ export default {
         }
       });
       //设置信用卡
-      this.isCreditCard = this.userConfig['is_credit_card'];
+      this.isCreditCard = this.userConfig['is_credit_card'].value;
     },
     showCalendar() {
         this.isShowCalendar = true;
