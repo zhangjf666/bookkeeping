@@ -1,19 +1,19 @@
 <template>
   <view class="content">
+	<u-navbar
+	  class="navbar"
+	  :background="{ backgroundColor: '#252569' }"
+	  back-icon-color="#fff"
+	  back-icon-size="38"
+	  back-text="收支记录"
+	  z-index="0"
+	  :back-text-style="{
+	    color: '#fff',
+	    fontSize: '34rpx',
+	    marginLeft: '10rpx',
+	  }"
+	></u-navbar>
     <view class="mainContent">
-      <u-navbar
-        class="navbar"
-        :background="{ backgroundColor: '#fff' }"
-        back-icon-color="#000"
-        back-icon-size="38"
-        back-text=""
-        z-index="0"
-        :back-text-style="{
-          color: '#000',
-          fontSize: '30rpx',
-          marginLeft: '10rpx',
-        }"
-      ></u-navbar>
       <view class="direction">
           <u-subsection :list="list" :current="type" @change="subsectionChange" active-color="#252569" mode="subsection" font-size="28" height="56"></u-subsection>
       </view>
@@ -346,6 +346,10 @@ $mColor: #d83d34;
   flex-direction: column;
   height: 100vh;
 }
+.navbar {
+    display: flex;
+    flex-direction: column;
+  }
 .mainContent {
   display: flex;
   flex-direction: column;
@@ -354,16 +358,12 @@ $mColor: #d83d34;
   align-items: flex-start;
   flex-flow: row wrap;
   height: 90%;
-}
-.navbar {
-  display: flex;
-  flex-direction: column;
-}
-.direction {
-    display: flex;
-    flex-direction: column;
-    margin: 20rpx;
-    width: 40%;
+  .direction {
+      display: flex;
+      flex-direction: column;
+      margin: 20rpx;
+      width: 40%;
+  }
 }
 .amount {
     padding: 30rpx;

@@ -27,7 +27,7 @@
 		    const months = []
 		    const month = this.$moment(date).month()
 		    const days = []
-		    const day = this.$moment(date).day()
+		    const day = this.$moment(date).date()
 		    for (let i = 2010; i <= date.getFullYear(); i++) {
 		        years.push(i)
 		    }
@@ -45,7 +45,7 @@
 		        month,
 		        days,
 		        day,
-		        value: [9999, month - 1, day - 1],
+		        value: [],
 		        visible: true,
 		        // indicatorStyle: `height: ${Math.round(uni.getSystemInfoSync().screenWidth/(750/100))}px;`,
 				indicatorStyle: `height: 60rpx;`,
@@ -66,6 +66,11 @@
 				init[1] = this.months.indexOf(this.dateValue[1]);
 				init[2] = this.days.indexOf(this.dateValue[2]);
 				this.value = init;
+				this.checkRange(this.dateValue[0], this.dateValue[1], this.dateValue[2]);
+			} else {
+				console.log('222')
+				this.value = [this.currentYear, this.currentMonth, this.currentDay];
+				this.checkRange(this.currentYear, this.currentMonth, this.currentDay);
 			}
 		},
 		computed: {
@@ -77,9 +82,15 @@
 			    this.month = this.months[val[1]]
 			    this.day = this.days[val[2]]
 
-				var y = parseInt(this.year)
-				var m = parseInt(this.month)
-				var d = parseInt(this.day)
+				this.checkRange(this.year, this.month, this.day);
+				var date = [this.year,this.month,this.day];
+				this.$emit('update:dateValue',date);
+			},
+			//限制输入范围
+			checkRange(year, month, day) {
+				var y = parseInt(year)
+				var m = parseInt(month)
+				var d = parseInt(day)
 				
 				if(m==0||m==2||m==4||m==6||m==7||m==9||m==11){
 					if(this.days.length!=31){
@@ -134,9 +145,7 @@
 					    this.months.push(i)
 					}
 				}
-				var date = [this.year,this.month,this.day];
-				this.$emit('update:dateValue',date);
-			},
+			}
 		}
 	}
 </script>

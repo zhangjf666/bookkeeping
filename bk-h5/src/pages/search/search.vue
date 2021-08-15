@@ -1,9 +1,9 @@
 <template>
     <view class='content'>
         <!-- 头部导航栏 -->
-        <u-navbar z-index="9999" back-icon-color="#000" back-icon-size="38" :background="{background: '#fff'}">
+        <u-navbar z-index="9999" back-icon-color="#fff" back-icon-size="38" :background="{background: '#252569'}">
 			<view class="slot-wrap">
-				<u-search @search="getSearch" :show-action="false" color="rgba(0,0,0,.9)" placeholder-color="rgba(12,12,12,.5)" bg-color="" search-icon="" :placeholder="placeholder" v-model="search"></u-search>
+				<u-search @search="getSearch" :show-action="false" color="rgb(255,255,255)" placeholder-color="rgba(255,255,255,.5)" bg-color="" search-icon="" :placeholder="placeholder" v-model="search"></u-search>
 			</view>
 		</u-navbar>
         <!-- 内容显示 -->
@@ -146,14 +146,14 @@ $bColor: #d83d34;
     flex-direction: column;
     width: 100%;
     height: 100%;
-    font-size: 24rpx;
+    font-size: 30rpx;
     .historyTitle {
         display: flex;
         flex-direction: row;
         align-items: center;
         justify-content: space-between;
         :last-child {
-            font-size: 20rpx;
+            font-size: 30rpx;
         }
     }
     .historyContent {
@@ -167,7 +167,7 @@ $bColor: #d83d34;
             align-items: center;
             justify-content: center;
             margin: 20rpx 20rpx 0 0;
-            font-size: 20rpx;
+            font-size: 26rpx;
             background-color: #f3f3f3;
             border-radius: 4rpx;
             :last-child {

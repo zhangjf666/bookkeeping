@@ -156,16 +156,16 @@ export default {
             display: flex;
             flex-direction: column; 
             .item-classify {
-                font-size: 30rpx;
+                font-size: 32rpx;
             };
             .item-remark {
-                font-size: 22rpx;
+                font-size: 24rpx;
                 color: #7A7E83;
             }
         };
         .item-amount {
             margin-left: auto;
-            font-size: 40rpx;
+            font-size: 32rpx;
         }
     }
 }

@@ -20,18 +20,20 @@
                             <view>开始时间</view>
                             <view>{{beginPickerText}}</view>
                         </view>
-                        <date-picker id="begin" :dateValue.sync="beginPickerValue" v-if="showBeginPicker" :type="mode"></date-picker>
+                        <date-picker id="begin" :dateValue.sync="beginPickerValue" v-show="showBeginPicker" :type="mode"></date-picker>
                         <view @click="showEnd" class="endTitle">
                             <view>结束时间</view>
                             <view >{{endPickerText}}</view>
                         </view>
-                        <date-picker id="end" :dateValue.sync="endPickerValue" v-if="showEndPicker" :type="mode"></date-picker>
+                        <date-picker id="end" :dateValue.sync="endPickerValue" v-show="showEndPicker" :type="mode"></date-picker>
                     </view>
                 </view>
             </view>
         </u-popup>
         <u-popup v-model="filterShow" mode="right" width="85%">
             <scroll-view scroll-y class="filter">
+				<!-- 顶部状态栏 -->
+				<view class="stateBar"></view>
                 <view class="filterMainTitle">筛选收支类型</view>
                 <view class="filterContent">
                     <view class="filterButton" :class="filterAllSelected(0)" hover-class="click-bg" hover-stay-time="200" @click="allExpense">
@@ -252,6 +254,11 @@ $mColor: #d83d34;
     display: flex;
     flex-direction: column;
     background-color: #252569;
+	.stateBar {
+		height: var(--status-bar-height);  
+		width: 100%;
+		background-color: #252569;
+	}
     .select {
         width: 100%;
         display: flex;
@@ -349,12 +356,12 @@ $mColor: #d83d34;
         }
     }
     .filter {
-        padding-left: 30rpx;
         display: flex;
         flex-direction: column;
         width: 100%;
         height: 95%;
         .filterMainTitle {
+			padding-left: 30rpx;
             margin: 30rpx 0rpx 10rpx 0rpx;
             height: 60rpx;
             display: flex;
@@ -362,9 +369,10 @@ $mColor: #d83d34;
             border-bottom-color: #e0e0e0;
             border-bottom-style: solid;
             border-bottom-width: 1px;
-            font-size: 30rpx;
+            font-size: 36rpx;
         }
         .filterContent {
+			padding-left: 30rpx;
             display: flex;
             flex-direction: row;
             flex-wrap: wrap;
@@ -375,7 +383,7 @@ $mColor: #d83d34;
             align-items: center;
             justify-content: center;
             margin: 20rpx 20rpx 0 0;
-            font-size: 20rpx;
+            font-size: 24rpx;
             background-color: #f3f3f3;
             border-radius: 4rpx;
             border-color: rgba(255, 255, 255, 0);
@@ -391,10 +399,11 @@ $mColor: #d83d34;
             border-width: 1px;
         }
         .filterSubTitle {
+			padding-left: 30rpx;
             margin-top: 30rpx;
             display: flex;
             flex-direction: row;
-            font-size: 26rpx;
+            font-size: 32rpx;
         }
     }
     .filterButtom {

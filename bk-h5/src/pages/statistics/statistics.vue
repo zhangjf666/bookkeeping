@@ -1,8 +1,13 @@
 <template>
     <view class="content">
-        <view class="header">
-            <view class="title">报表</view>
-        </view>
+		<!-- 头部导航栏 -->
+		<u-navbar z-index="9999" back-icon-color="#fff" :is-back="false" back-icon-size="38" :background="{background: '#252569'}" :border-bottom="false">
+			<view class="slot-wrap">
+				<view class="header">
+				    <view class="title">报表</view>
+				</view>
+			</view>
+		</u-navbar>
         <view class="option">
             <bill-selector @change="dateChange"></bill-selector>
         </view>
@@ -16,7 +21,7 @@
                 </u-radio>
             </u-radio-group>
             <view class="chartView">
-                <div id="statisticsChart" style="width: 100%; height: 100%" ref="statisticsChart"></div>
+                <echarts :option="option" class="echarts" @click="echartsClick"></echarts>
             </view>
         </view>
         <view class="detail">
@@ -42,40 +47,11 @@ import billSelector from "@/my-components/billSelector.vue";
 import { querySumPeriod } from "@/api/incomeExpense.js";
 import recordList from "@/my-components/recordList.vue";
 import { formatNumber } from "../../utils/utils.js"
-//echarts
-import * as echarts from 'echarts/core';
-import {
-  BarChart,
-  PieChart,
-  LineChart
-} from 'echarts/charts';
-import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  LegendComponent,
-  DatasetComponent
-} from 'echarts/components';
-import {
-  CanvasRenderer
-} from 'echarts/renderers';
+import Echarts from '@/my-components/echarts/echarts.vue'
 
-echarts.use(
-  [
-    TitleComponent,
-    TooltipComponent,
-    GridComponent,
-    BarChart,
-    PieChart,
-    LineChart,
-    LegendComponent,
-    DatasetComponent,
-    CanvasRenderer
-  ]
-);
 export default {
     components: {
-        billSelector, recordList
+        billSelector, recordList, Echarts
     },
     data() {
         return {
@@ -92,7 +68,11 @@ export default {
             //控制年账单中明细是否打开
             rowDetailOpen: [],
             chartIncomeData: [],
-            chartExpenseData: []
+            chartExpenseData: [],
+			//配置数据
+			option : {
+			    series: [] //配置项
+			}
         }
     },
     onLoad() {
@@ -103,15 +83,6 @@ export default {
         this.getSumPeriod(param);
     },
     mounted() {
-        //初始化echarts
-        this.statisticsChart = echarts.init(document.getElementById("statisticsChart"));
-        //配置数据
-        let option = {
-            series: [] //配置项
-        };
-        this.statisticsChart.setOption(option);
-        //添加点击事件
-        this.chartClick();
     },
     methods: {
         //获取统计数据
@@ -165,9 +136,10 @@ export default {
                             formatter: '{b} {c}%' // 设置标签格式
                         },
                     }
-            this.statisticsChart.setOption({
-                    series: series
-                });
+            // this.statisticsChart.setOption({
+            //         series: series
+            //     });
+			this.option.series = series;
         },
         itemColor(item) {
             return item.expense ? 'color: #d83d34;' : 'color: #00a151;'
@@ -182,6 +154,14 @@ export default {
                 animationDuration: 300
             });
         },
+		echartsClick(param) {
+			var data = param.data;
+			data['classifyName'] = data.name;
+			//点击在移动端会连续多次触发,需要添加一个停顿
+			setTimeout(() => {
+			    this.detailClick(data);
+			}, 200);
+		},
         chartClick() {
             this.statisticsChart.on('click', (param) => {
                 var data = param.data;
@@ -252,11 +232,13 @@ export default {
   justify-content: flex-start;
   width: 100%;
   height: 100%;
-//   padding-bottom: 1rpx;
+}
+.slot-wrap{
+    display: flex;
+	align-items: center;
+	flex: 1;
 }
 .header {
-    padding: 30rpx;
-    height: 100rpx;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -300,6 +282,10 @@ export default {
     .chartView { 
         width: 100%;
         height: 440rpx;
+		.echarts {
+			width: 100%;
+			height: 440rpx;
+		}
     }
 }
 .detail {
@@ -309,7 +295,7 @@ export default {
     display: flex;
     flex-direction: column;
     align-items: center;
-    justify-content: center;
+    justify-content: flex-start;
     .detailRow {
         width: 100%;
         height: 120rpx;
@@ -341,12 +327,11 @@ export default {
             display: flex;
             flex-direction: column;
             align-items: flex-end;
-            justify-content: space-evenly;
+            justify-content: center;
             .item-value {
                 font-size: 32rpx;
             }
             .item-num {
-                font-size: 20rpx;
                 color: #7A7E83;
             }
         }

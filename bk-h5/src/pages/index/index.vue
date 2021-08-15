@@ -1,5 +1,7 @@
 <template>
   <view class="content">
+	  <!-- 顶部状态栏 -->
+	  <view class="stateBar"></view>
     <view class="summary">
       <view class="expense">
         <view class="expense-title">本月支出 (元)</view>
@@ -134,6 +136,11 @@ $sColor: #00a151;
   flex-direction: column;
   align-items: center;
   justify-content: center;
+}
+.stateBar {
+	height: var(--status-bar-height);  
+	width: 100%;
+	background-color: #252569;
 }
 .summary {
   display: flex;

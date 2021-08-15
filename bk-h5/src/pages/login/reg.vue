@@ -2,12 +2,12 @@
 	<view class="content">
 		<u-navbar
 			class="navbar"
-			:background="{ backgroundColor: '#efeff4' }"
-			back-icon-color="#000"
+			:background="{ backgroundColor: '#252569' }"
+			back-icon-color="#fff"
 			back-icon-size="38"
 			back-text="注册"
             z-index="0"
-			:back-text-style="{ color: '#000', fontSize: '30rpx', marginLeft: '10rpx' }"
+			:back-text-style="{ color: '#fff', fontSize: '30rpx', marginLeft: '10rpx' }"
 		></u-navbar>
 		<view class="input-group">
 			<view class="input-row border">
@@ -122,7 +122,6 @@
 	display: flex;
     flex: 1;
     flex-direction: column;
-    background-color: #efeff4;
 	width: 100%;
 	height: 100vh;
 }

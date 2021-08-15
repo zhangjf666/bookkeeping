@@ -1,23 +1,28 @@
 <template>
     <view class="content">
-        <view class="header">
-            <view class="title">账单</view>
-            <text class="iconfont icon-sousuo search" @click="goSearch"></text>
-        </view>
+		<!-- 头部导航栏 -->
+		<u-navbar z-index="9999" back-icon-color="#fff" :is-back="false" back-icon-size="38" :background="{background: '#252569'}" :border-bottom="false">
+			<view class="slot-wrap">
+				<view class="header">
+				    <view class="title">账单</view>
+				    <text class="iconfont icon-sousuo search" @click="goSearch"></text>
+				</view>
+			</view>
+		</u-navbar>
         <view class="option">
             <bill-selector @change="dateChange"></bill-selector>
         </view>
         <view class="chartContent">
-            <u-radio-group class="chartRadio" v-model="radioValue" size="26">
-                <u-radio name="expense" label-size="26" active-color="#d83d34">{{expenseText}}
+            <u-radio-group class="chartRadio" v-model="radioValue" size="28">
+                <u-radio name="expense" label-size="28" active-color="#d83d34">{{expenseText}}
                     <text style="color: #d83d34;">{{expenseValue}}</text>
                 </u-radio>
-                <u-radio name="income" label-size="26" active-color="#00a151">{{incomeText}}
+                <u-radio name="income" label-size="28" active-color="#00a151">{{incomeText}}
                     <text style="color: #00a151;">{{incomeValue}}</text>
                 </u-radio>
             </u-radio-group>
             <view class="chartView">
-                <div id="billChart" style="width: 100%; height: 100%" ref="billChart"></div>
+                <echarts :option="option" class="echarts" @click="echartsClick"></echarts>
             </view>
         </view>
         <view class="detail">
@@ -57,43 +62,11 @@ import billSelector from "@/my-components/billSelector.vue";
 import { querySumPeriod } from "@/api/incomeExpense.js";
 import recordList from "@/my-components/recordList.vue";
 import { formatNumber } from "../../utils/utils.js"
-//echarts
-import * as echarts from 'echarts/core';
-import {
-  BarChart,
-  PieChart,
-  LineChart
-} from 'echarts/charts';
-import {
-  TitleComponent,
-  TooltipComponent,
-  GridComponent,
-  LegendComponent,
-  DatasetComponent,
-  DataZoomComponent
-} from 'echarts/components';
-import {
-  CanvasRenderer
-} from 'echarts/renderers';
-
-echarts.use(
-  [
-    TitleComponent,
-    TooltipComponent,
-    GridComponent,
-    BarChart,
-    PieChart,
-    LineChart,
-    LegendComponent,
-    DatasetComponent,
-    CanvasRenderer,
-    DataZoomComponent
-  ]
-);
+import Echarts from '@/my-components/echarts/echarts.vue'
 
 export default {
     components: {
-        billSelector, recordList
+        billSelector, recordList, Echarts
     },
     data() {
         return {
@@ -111,7 +84,39 @@ export default {
             //账单排序,0:按时间,1:按金额
             billSort: 0,
             //控制年账单中明细是否打开
-            rowDetailOpen: []
+            rowDetailOpen: [],
+			//配置数据
+			option : {
+				notMerge: true,
+			    tooltip: {
+					formatterStatus: true,
+					formatterType: 'money',
+			        trigger: 'axis',
+			        triggerOn:'none',
+			        confine: true,
+			        formatter: this.tooltipFormatter
+			    },
+			    dataZoom: [
+			        {
+			            id: 'dataZoomX',
+			            type: 'inside',
+			            xAxisIndex: [0],
+			            filterMode: 'none',
+			            zoomLock: true,
+			            startValue: 0,
+			            minValueSpan: 31,
+			            maxValueSpan: 31
+			        }
+			    ],
+			    grid: {
+			        y: "0%",
+			        height: "80%"
+			    },
+			    xAxis: { type: 'category',axisTick: {show:false}, data: [] }, //X轴
+			    yAxis: { type: 'value', axisLine: {show:false},axisTick: {show:false},splitLine:{show:false},axisLabel : { formatter: ""}
+			    }, //Y轴
+			    series: [] //配置项
+			}
         }
     },
     onLoad() {
@@ -122,65 +127,12 @@ export default {
         this.getSumPeriod(param);
     },
     mounted() {
-        //初始化echarts
-        this.billChart = echarts.init(document.getElementById("billChart"));
-        //配置数据
-        let option = {
-            tooltip: {
-                trigger: 'axis',
-                triggerOn:'none',
-                confine: true,
-                formatter: this.tooltipFormatter
-            },
-            dataZoom: [
-                {
-                    id: 'dataZoomX',
-                    type: 'inside',
-                    xAxisIndex: [0],
-                    filterMode: 'none',
-                    zoomLock: true,
-                    startValue: 0,
-                    minValueSpan: 31,
-                    maxValueSpan: 31
-                }
-            ],
-            grid: {
-                y: "0%",
-                height: "80%"
-            },
-            xAxis: { type: 'category',axisTick: {show:false}, data: [] }, //X轴
-            yAxis: { type: 'value', axisLine: {show:false},axisTick: {show:false},splitLine:{show:false},axisLabel : {
-                formatter: function(){
-                        return "";
-                    }
-                }
-            }, //Y轴
-            series: [] //配置项
-        };
-        this.billChart.setOption(option);
-        //添加点击事件
-        this.billChart.getZr().on('click', (params) => {
-                let pointInPixel = [params.offsetX, params.offsetY]
-                if (this.billChart.containPixel('grid', pointInPixel)) {
-                    let xIndex = this.billChart.convertFromPixel({ seriesIndex: 0 }, [params.offsetX, params.offsetY])[0]
-                    if(xIndex >= 0) {
-                        var data = this.radioValue == 'income' ? this.yAxisIncomeList[xIndex] : this.yAxisExpenseList[xIndex];
-                        //显示提示
-                        this.billChart.dispatchAction({
-                            type: 'showTip',
-                            // 系列的 index，在 tooltip 的 trigger 为 axis 的时候可选。
-                            seriesIndex: 0,
-                            // 数据项的 index，如果不指定也可以通过 name 属性根据名称指定数据项
-                            dataIndex: xIndex,
-                            // 本次显示 tooltip 的位置。只在本次 action 中生效。
-                            // 缺省则使用 option 中定义的 tooltip 位置。
-                            //position: [],
-                        })
-                    }
-                }
-            })
+        
     },
     methods: {
+		echartsClick(params) {
+			console.log('点击数据', params)
+		},
         //获取统计数据
         getSumPeriod(data) {
             querySumPeriod(data).then(res => {
@@ -243,16 +195,13 @@ export default {
                 url: `../search/search`,
             });
         },
-        dateChange(option) {
-            this.billChart.dispatchAction({
-                type: 'hideTip'
-            });
-            this.mode = option.mode;
+        dateChange(opt) {
+            this.mode = opt.mode;
             var param = {userId: this.user.id, queryMode: '0'};
-            param['mode'] = option.mode;
-            param['beginDate'] = option.beginDate;
-            param['endDate'] = option.endDate;
-            param['classifyList'] = option.classifyList.map((item) => { return item.id });
+            param['mode'] = opt.mode;
+            param['beginDate'] = opt.beginDate;
+            param['endDate'] = opt.endDate;
+            param['classifyList'] = opt.classifyList.map((item) => { return item.id });
             this.getSumPeriod(param);
         },
         updateChart(type){
@@ -275,12 +224,9 @@ export default {
                         barWidth: 2
                     }
             var series = type == 0 ? [seriesExpense] : [seriesIncome];
-            this.billChart.setOption({
-                    xAxis: {
-                        data: this.xAxisList
-                    },
-                    series: series
-                });
+			
+			this.option.xAxis.data = this.xAxisList;
+			this.option.series = series;
         },
         billSortClick() {
             this.billSort = this.billSort == 0 ? 1 : 0;
@@ -330,27 +276,27 @@ export default {
         },
         yearMonth() {
             return(item) => {
-                return item.date + '月'
+                return item.date
             }
         },
         yearIncome() {
             return(item) => {
-                return '￥ ' + formatNumber(item.income);
+                return '￥ ' + formatNumber(item.income.fact);
             }
         },
         yearExpense() {
             return(item) => {
-                return '￥ ' + formatNumber(item.expense);
+                return '￥ ' + formatNumber(item.expense.fact);
             }
         },
         yearRemain() {
             return(item) => {
-                return '￥ ' + formatNumber((item.income - item.expense));
+                return '￥ ' + formatNumber((item.income.fact - item.expense.fact));
             }
         },
         rowDetailList() {
             return (item) => {
-                var date = item.date;
+                var date = item.date.substring(0, item.date.length - 1);
                 var list = [];
                 for(var i=0; i<this.incomeExpenseList.length;i++){
                     if(this.$moment(this.incomeExpenseList[i].date).month() + 1 == date){
@@ -368,9 +314,6 @@ export default {
     },
     watch: {
         radioValue(e) {
-            this.billChart.dispatchAction({
-                type: 'hideTip'
-            });
             //切换显示
             e == 'expense' ? this.updateChart(0) : this.updateChart(1);
         }
@@ -386,11 +329,13 @@ export default {
   justify-content: flex-start;
   width: 100%;
   height: 100%;
-//   padding-bottom: 1rpx;
+}
+.slot-wrap{
+    display: flex;
+	align-items: center;
+	flex: 1;
 }
 .header {
-    padding: 30rpx;
-    height: 100rpx;
     display: flex;
     flex-direction: row;
     align-items: center;
@@ -441,6 +386,10 @@ export default {
     .chartView { 
         width: 100%;
         height: 280rpx;
+		.echarts {
+			width: 100%;
+			height: 280rpx;
+		}
     }
 }
 .detail {
@@ -487,7 +436,7 @@ export default {
             display: flex;
             flex-direction: row;
             width: 100%;
-            font-size: 26rpx;
+            font-size: 30rpx;
             height: 120rpx;
             border-bottom-style: solid;
             border-bottom-width: 1px;
@@ -496,7 +445,7 @@ export default {
                 width: 10%;
             }
             .month {
-                font-size: 30rpx;
+                font-size: 34rpx;
                 width: 20%;
                 display: flex;
                 flex-direction: column;
@@ -508,9 +457,9 @@ export default {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: space-evenly;
+                justify-content: center;
                 :last-child {
-                    font-size: 20rpx;
+                    font-size: 26rpx;
                     color: #00a151;
                 }
             }
@@ -519,9 +468,9 @@ export default {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: space-evenly;
+                justify-content: center;
                 :last-child {
-                    font-size: 20rpx;
+                    font-size: 26rpx;
                     color: #d83d34;
                 }
             }
@@ -530,9 +479,9 @@ export default {
                 display: flex;
                 flex-direction: column;
                 align-items: center;
-                justify-content: space-evenly;
+                justify-content: center;
                 :last-child {
-                    font-size: 20rpx;
+                    font-size: 26rpx;
                 }
             }
         }

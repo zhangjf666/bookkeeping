@@ -67,7 +67,11 @@
 		}]
 	},
 	"globalStyle": {
-		"navigationStyle":"custom"
+		"navigationStyle":"custom",
+		"navigationBarTextStyle": "white",	// 导航栏标题颜色及状态栏前景颜色，仅支持 black/white
+				"app-plus": {
+					"titleNView": false
+				}
 	},
 	"easycom": {
 		"^u-(.*)": "@/uview-ui/components/u-$1/u-$1.vue"

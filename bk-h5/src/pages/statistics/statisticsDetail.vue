@@ -1,7 +1,7 @@
 <template>
     <view class='content'>
         <!-- 头部导航栏 -->
-        <u-navbar z-index="9999" back-icon-color="#000" back-icon-size="38" :background="{background: '#fff'}">
+        <u-navbar z-index="9999" back-icon-color="#fff" back-icon-size="38" :background="{background: '#252569'}">
 			<view class="slot-wrap">
 				<view>{{title}}</view>
 			</view>
@@ -69,6 +69,7 @@ export default {
     display: flex;
     align-items: center;
     justify-content: center;
+	color: #fff;
     /deep/.u-content{
         border-radius: 0 !important;
         padding: 0;

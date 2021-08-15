@@ -1,5 +1,7 @@
 <template name="Mine">
 	<view class="mine">
+		<!-- 顶部状态栏 -->
+		<view class="stateBar"></view>
 		<!-- user info -->
 		<view class="mine-user">
 			<view class="user-info">
@@ -57,13 +59,17 @@ export default {
 </script>
 
 <style lang="scss" scoped>
+.stateBar {
+	height: var(--status-bar-height);  
+	width: 100%;
+	background-color: #252569;
+}
 .mine{
 	width: 100%;
 	height: 100%;
 	display: flex;
 	flex-direction: column;
 	align-items: center;
-	background-color: #efeff4;
 }
 .mine .mine-user{
 	width: 100%;
