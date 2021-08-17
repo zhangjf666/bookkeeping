@@ -2,12 +2,11 @@ package com.hc.bookkeeping.common.handler;
 
 import cn.hutool.json.JSONArray;
 import cn.hutool.json.JSONUtil;
-import com.google.gson.Gson;
-import com.swsc.microservices.common.constants.KeysConstant;
-import com.swsc.microservices.common.util.LogUtil;
-import org.apache.commons.lang3.StringUtils;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import com.hc.bookkeeping.common.utils.JsonUtil;
+import com.hc.bookkeeping.common.utils.WebUtil;
+import com.hc.bookkeeping.util.LogUtil;
+import lombok.extern.slf4j.Slf4j;
+import org.slf4j.MDC;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.Ordered;
 import org.springframework.core.env.Environment;
@@ -27,10 +26,11 @@ import java.util.*;
 
 /**用于记录出入参信息
  */
+@Slf4j
 @Component
 public class HttpLoggerFilter extends OncePerRequestFilter implements Ordered {
 
-    private static final Logger logger = LoggerFactory.getLogger(HttpLoggerFilter.class);
+    private final static String TRACE_ID = "traceId";
 
     private int order = Ordered.LOWEST_PRECEDENCE - 8;
 
@@ -43,8 +43,6 @@ public class HttpLoggerFilter extends OncePerRequestFilter implements Ordered {
     }
 
     @Autowired
-    private Gson gson;
-    @Autowired
     private LogUtil logUtil;
 
     @Override
@@ -54,43 +52,45 @@ public class HttpLoggerFilter extends OncePerRequestFilter implements Ordered {
 
     @Override
     protected void doFilterInternal(HttpServletRequest request, HttpServletResponse response, FilterChain filterChain) throws ServletException, IOException {
-        String filterFunctionId = env.getProperty("logger.filter.function", "");
-        String[] funtionIds = filterFunctionId.split(",");
-        // 设置SessionId
-        String requestId = UUID.randomUUID().toString().replace("-", "");
-        ContentCachingRequestWrapper wrapperRequest = new ContentCachingRequestWrapper(request);
-        ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
-        long startTime = System.currentTimeMillis();
-        String uri = wrapperRequest.getRequestURI();//请求路径
-        String sysId = wrapperRequest.getParameter(KeysConstant.SYS_ID);
-        if (StringUtils.isBlank(sysId)) {
-            sysId = wrapperRequest.getHeader(KeysConstant.SYS_ID);
-        }
-        // 不需要记录日志的功能号
-        if (!Arrays.asList(funtionIds).contains(uri)) {
-            if (urlCompare(uri)) {//请求过滤
-                filterChain.doFilter(wrapperRequest, wrapperResponse);
-            } else {
-                String remoteAddr = getIpAddr(wrapperRequest);//ip
-                Map<String, String[]> pramMap = wrapperRequest.getParameterMap();
-                logger.info("调用开始>>{ sysId : " + sysId + " uri : "
-                        + uri + " | " + "IP : " + remoteAddr + " |}  params : " + logUtil.logFilter(gson.toJson(pramMap)));
-                filterChain.doFilter(wrapperRequest, wrapperResponse);
-                String requestBody = getRequestBody(wrapperRequest);
-                String requestBodyStr = "";
-                try {
-                    Map paramaterMap = buildParametersMap(requestBody);
-                    requestBodyStr = logUtil.mapFilter(paramaterMap);
-                } catch (Exception e) {
-                    //do nothing
-                }
-                logger.info(" 调用结束[sysId : " + sysId + " uri : " + uri + "]>>耗时:" + (System.currentTimeMillis() - startTime) + "ms,请求body：[  " + requestBodyStr + "  ]  返回值: [  " + logUtil.logFilter(getResponseBody(wrapperResponse)) + " ]");
-            }
-        } else {
-            filterChain.doFilter(wrapperRequest, wrapperResponse);
-        }
+        // 设置traceId
+        String traceId = UUID.randomUUID().toString().replace("-", "");
+        MDC.put(TRACE_ID, traceId);
+        try {
+            String uristr = env.getProperty("logging.whitelist", "");
+            String[] uris = uristr.split(",");
 
-        wrapperResponse.copyBodyToResponse();
+            ContentCachingRequestWrapper wrapperRequest = new ContentCachingRequestWrapper(request);
+            ContentCachingResponseWrapper wrapperResponse = new ContentCachingResponseWrapper(response);
+            long startTime = System.currentTimeMillis();
+            String uri = wrapperRequest.getRequestURI();//请求路径
+            // 不需要记录日志的uri
+            if (!Arrays.asList(uris).contains(uri)) {
+                if (urlCompare(uri)) {//请求过滤
+                    filterChain.doFilter(wrapperRequest, wrapperResponse);
+                } else {
+                    String remoteAddr = WebUtil.getIp(wrapperRequest);//ip
+                    Map<String, String[]> pramMap = wrapperRequest.getParameterMap();
+                    log.info("调用开始>>[uri : "
+                            + uri + " | " + "IP : " + remoteAddr + " |]  params : " + logUtil.logFilter(JsonUtil.toJsonString(pramMap)));
+                    filterChain.doFilter(wrapperRequest, wrapperResponse);
+                    String requestBody = getRequestBody(wrapperRequest);
+                    String requestBodyStr = "";
+                    try {
+                        Map paramaterMap = buildParametersMap(requestBody);
+                        requestBodyStr = logUtil.mapFilter(paramaterMap);
+                    } catch (Exception e) {
+                        //do nothing
+                    }
+                    log.info(" 调用结束>>[uri : " + uri + "]>>耗时:" + (System.currentTimeMillis() - startTime) + "ms,请求body：[  " + requestBodyStr + "  ]  返回值: [  " + logUtil.logFilter(getResponseBody(wrapperResponse)) + " ]");
+                }
+            } else {
+                filterChain.doFilter(wrapperRequest, wrapperResponse);
+            }
+
+            wrapperResponse.copyBodyToResponse();
+        } finally {
+            MDC.remove(TRACE_ID);
+        }
     }
 
     private  Map buildParametersMap(String requestBody) {
@@ -119,8 +119,9 @@ public class HttpLoggerFilter extends OncePerRequestFilter implements Ordered {
 
     private boolean urlCompare(String uri) {
         for (String url : unFilterUrl) {
-            if (uri.startsWith(url))
+            if (uri.startsWith(url)) {
                 return true;
+            }
         }
         return false;
     }
@@ -133,8 +134,9 @@ public class HttpLoggerFilter extends OncePerRequestFilter implements Ordered {
     private String getResponseBody(ContentCachingResponseWrapper response) {
         ContentCachingResponseWrapper wrapper = WebUtils.getNativeResponse(response, ContentCachingResponseWrapper.class);
         if (wrapper != null) {
-            if (wrapper.getContentType() == null || wrapper.getContentType().contains("excel") || wrapper.getContentType().contains("word"))
+            if (wrapper.getContentType() == null || wrapper.getContentType().contains("excel") || wrapper.getContentType().contains("word")) {
                 return "";
+            }
             byte[] buf = wrapper.getContentAsByteArray();
             if (buf.length > 0) {
                 String payload;
@@ -168,21 +170,5 @@ public class HttpLoggerFilter extends OncePerRequestFilter implements Ordered {
             }
         }
         return "";
-    }
-
-
-    //获取客户端IP
-    private String getIpAddr(HttpServletRequest request) {
-        String ip = request.getHeader("x-forwarded-for");
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getHeader("WL-Proxy-Client-IP");
-        }
-        if (ip == null || ip.length() == 0 || "unknown".equalsIgnoreCase(ip)) {
-            ip = request.getRemoteAddr();
-        }
-        return ip;
     }
 }

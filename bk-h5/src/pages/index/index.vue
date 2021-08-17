@@ -58,14 +58,16 @@ export default {
     }
   },
   onShow() {
-    if(Object.keys(this.userConfig).length == 0) {
-      this.getUserConfig();
-    }
-    if(this.classify.length == 0) {
-      this.getUserClassify();
-    }
-    if(this.accountBook.length == 0) {
-      this.getUserAccountBook();
+    if(this.loginFlag){
+      if(Object.keys(this.userConfig).length == 0) {
+        this.getUserConfig();
+      }
+      if(this.classify.length == 0) {
+        this.getUserClassify();
+      }
+      if(this.accountBook.length == 0) {
+        this.getUserAccountBook();
+      }
     }
   },
   methods: {

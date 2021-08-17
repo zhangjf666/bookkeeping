@@ -88,10 +88,12 @@ logging:
   level:
     root: info
   pattern:
-    console: '%d{yyyy-MM-dd HH:mm:ss.SSS}[${spring.application.name}][%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-B3-ParentSpanId}][%-5level][%logger{36}]:%msg%n'
-    file: '%d{yyyy-MM-dd HH:mm:ss.SSS}[${spring.application.name}][%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-B3-ParentSpanId}][%-5level][%logger{36}]:%msg%n'
+    console: '%d{yyyy-MM-dd HH:mm:ss.SSS}[${spring.application.name}][%thread][%X{traceId}][%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-B3-ParentSpanId}][%-5level][%logger{36}]:%msg%n'
+    file: '%d{yyyy-MM-dd HH:mm:ss.SSS}[${spring.application.name}][%thread][%X{traceId}][%X{X-B3-TraceId},%X{X-B3-SpanId},%X{X-B3-ParentSpanId}][%-5level][%logger{36}]:%msg%n'
   file:
     name: './logs/${spring.application.name}_${server.port}.log'
+  logfilterkey: password
+  whitelist:
 server:
   port: 8080
 #spring 异步执行线程

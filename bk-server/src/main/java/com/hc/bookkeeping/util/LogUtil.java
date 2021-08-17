@@ -1,30 +1,28 @@
-package com.swsc.microservices.common.util;
+package com.hc.bookkeeping.util;
+
+import com.hc.bookkeeping.common.utils.JsonUtil;
+import org.apache.commons.lang3.StringUtils;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.core.env.Environment;
+import org.springframework.stereotype.Component;
 
 import java.util.Iterator;
 import java.util.List;
 import java.util.Map;
 
-import org.apache.commons.lang3.StringUtils;
-import org.springframework.stereotype.Component;
-
-import com.google.gson.Gson;
-import com.google.gson.GsonBuilder;
-import com.google.gson.reflect.TypeToken;
-import com.swsc.microservices.common.base.SwscBase;
-import com.swsc.microservices.common.config.MyGsonTypeAdapter;
-
 
 @Component
 @SuppressWarnings(value={"unchecked", "rawtypes"})
-public class LogUtil extends SwscBase{
-	
-	private Gson myGson = new GsonBuilder()
-            .registerTypeAdapter(new TypeToken<Map>() {
-            }.getType(), new MyGsonTypeAdapter()).create();
+public class LogUtil {
+
+	@Autowired
+	private Environment env;
 	
     public String logFilter(String json){
-    	if(StringUtils.isBlank(json)) return json;
-    	Map<String, Object> result = myGson.fromJson(json, Map.class);
+    	if(StringUtils.isBlank(json)) {
+			return json;
+		}
+    	Map<String, Object> result = JsonUtil.toMap(json);
     	return mapFilter(result);
     }
     
@@ -52,7 +50,9 @@ public class LogUtil extends SwscBase{
 				sb.append(",");
 			}
     	}
-    	if(sb.lastIndexOf(",") == sb.length() - 1) sb.deleteCharAt(sb.length() - 1);
+    	if(sb.lastIndexOf(",") == sb.length() - 1) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
     	sb.append("}");
     	return sb.toString();
     }
@@ -73,13 +73,15 @@ public class LogUtil extends SwscBase{
     			}
         	}
     	}
-    	if(sb.lastIndexOf(",") == sb.length() - 1) sb.deleteCharAt(sb.length() - 1);
+    	if(sb.lastIndexOf(",") == sb.length() - 1) {
+			sb.deleteCharAt(sb.length() - 1);
+		}
     	sb.append("]");
     	return sb.toString();
     }
     
     private Object replace(String key, Object value){
-    	String logFilterKey = env.getProperty("online.logfilterkey", "");
+    	String logFilterKey = env.getProperty("logging.logfilterkey", "");
     	if(StringUtils.isNotBlank(logFilterKey)){
 			for(String k : logFilterKey.split(",")){
 				if(k.equalsIgnoreCase(key)){
