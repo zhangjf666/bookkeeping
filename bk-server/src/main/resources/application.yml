@@ -96,6 +96,11 @@ logging:
   whitelist:
 server:
   port: 8080
+  servlet:
+    encoding:
+      charset: utf-8
+      force: true
+      enabled: true
 #spring 异步执行线程
 async:
   pool:
