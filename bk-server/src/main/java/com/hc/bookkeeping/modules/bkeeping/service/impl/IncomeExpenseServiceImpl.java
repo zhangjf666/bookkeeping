@@ -10,6 +10,7 @@ import cn.hutool.core.util.StrUtil;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hc.bookkeeping.common.base.BaseServiceImpl;
+import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
@@ -21,6 +22,7 @@ import com.hc.bookkeeping.modules.bkeeping.mapstruct.IncomeExpenseMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
 import com.hc.bookkeeping.modules.bkeeping.service.ClassifyService;
 import com.hc.bookkeeping.modules.bkeeping.service.IncomeExpenseService;
+import com.hc.bookkeeping.modules.bkeeping.service.UserRemarkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -46,6 +48,8 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
     private ClassifyService classifyService;
     @Autowired
     private UserSearchMapper userSearchMapper;
+    @Autowired
+    private UserRemarkService userRemarkService;
 
     @Override
     public List<IncomeExpenseDto> queryList(IncomeExpenseQueryDto queryDto) {
@@ -219,5 +223,17 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 }
             }
         }
+    }
+
+    @Override
+    public IncomeExpenseDto create(IncomeExpenseDto dto) {
+        if(dto.getAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
+            //remark添加到常用备注
+            UserRemarkDto ur = new UserRemarkDto();
+            ur.setUserId(dto.getUserId());
+            ur.setRemark(dto.getRemark());
+            userRemarkService.create(ur);
+        }
+        return super.create(dto);
     }
 }

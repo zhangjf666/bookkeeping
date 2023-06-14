@@ -32,7 +32,7 @@
 
 <script>
 import { mapState, mapMutations, mapGetters } from "vuex";
-import { userConfig,userAccountBook,userClassify } from "@/api/user.js";
+import { userConfig,userAccountBook,userClassify,userRemark } from "@/api/user.js";
 import recordList from "@/my-components/recordList.vue";
 
 export default {
@@ -55,6 +55,7 @@ export default {
       this.getUserClassify();
       this.getUserAccountBook();
       this.updateSummary();
+      this.getUserRemark();
     }
   },
   onShow() {
@@ -68,10 +69,11 @@ export default {
       if(this.accountBook.length == 0) {
         this.getUserAccountBook();
       }
+      this.getUserRemark();
     }
   },
   methods: {
-    ...mapMutations(['setUserConfig','setClassify','setAccountBook','updateSummary']),
+    ...mapMutations(['setUserConfig','setClassify','setAccountBook','updateSummary', 'setUserRemark']),
     // 获取用户配置
     getUserConfig() {
       userConfig({userId: this.user.id}).then((data) => {
@@ -92,6 +94,12 @@ export default {
     getUserAccountBook() {
       userAccountBook({userId: this.user.id}).then((data) => {
         this.setAccountBook(data);
+      })
+    },
+    // 获取用户常用备注
+    getUserRemark() {
+      userRemark({userId: this.user.id}).then((data) => {
+        this.setUserRemark(data);
       })
     },
     // 跳转记录页面

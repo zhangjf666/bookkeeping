@@ -18,6 +18,8 @@ const store = new Vuex.Store({
         classify: [],
         //用户账本
         accountBook: [],
+        //用户常用备注
+        userRemark: [],
         //用户收支信息摘要
         summary: {expenseAmount: 0, incomeAmount: 0, incomeExpenseList: []}
     },
@@ -48,6 +50,10 @@ const store = new Vuex.Store({
         // 设置用户分类
         setClassify(state, classify) {
             state.classify = classify;
+        },
+        // 设置用户常用备注
+        setUserRemark(state, userRemark) {
+            state.userRemark = userRemark;
         },
         // 设置用户账本
         setAccountBook(state, accountBook) {

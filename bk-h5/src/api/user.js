@@ -55,3 +55,32 @@ export function deleteUserAllSearch(data) {
         data
     })
 }
+
+//查询用户常用备注
+export function userRemark(data) {
+    return request({
+        url: '/userRemark',
+        method: 'GET',
+        data
+    })
+}
+
+//创建用户常用备注
+export function createUserRemark(data) {
+    return request({
+        url: '/userRemark',
+        method: 'POST',
+        data,
+        header: {'content-type': 'application/json'}
+    })
+}
+
+//删除用户常用备注
+export function deleteUserRemark(data) {
+    return request({
+        url: '/userRemark',
+        method: 'DELETE',
+        data,
+        header: {'content-type': 'application/json'}
+    })
+}
