@@ -227,7 +227,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
 
     @Override
     public IncomeExpenseDto create(IncomeExpenseDto dto) {
-        if(dto.getAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
+        if(dto.getIsAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
             //remark添加到常用备注
             UserRemarkDto ur = new UserRemarkDto();
             ur.setUserId(dto.getUserId());
@@ -235,5 +235,17 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             userRemarkService.create(ur);
         }
         return super.create(dto);
+    }
+
+    @Override
+    public boolean update(IncomeExpenseDto dto) {
+        if(dto.getIsAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
+            //remark添加到常用备注
+            UserRemarkDto ur = new UserRemarkDto();
+            ur.setUserId(dto.getUserId());
+            ur.setRemark(dto.getRemark());
+            userRemarkService.create(ur);
+        }
+        return super.update(dto);
     }
 }

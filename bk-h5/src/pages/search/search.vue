@@ -13,9 +13,10 @@
                 <text class="iconfont icon-shanchu" @click="deleteSearchList"></text>
             </view>
             <view class="historyContent">
-                <view class="contentButton" v-for="(item) in searchList" :key="item.id" @click="historyClick(item)">
+                <!-- <view class="contentButton" v-for="(item) in searchList" :key="item.id" @click="historyClick(item)">
                     <text>{{item.content}}</text>
-                </view>
+                </view> -->
+                <u-tag class="contentButton" v-for="(item) in searchList" :key="item.id" :text="item.content" type="info" @click="historyClick(item)"/>
             </view>
         </view>
         <view class="content-list" v-if="searchListVisible">
@@ -170,9 +171,6 @@ $bColor: #d83d34;
             font-size: 26rpx;
             background-color: #f3f3f3;
             border-radius: 4rpx;
-            :last-child {
-                padding: 10rpx;
-            }
         }
     }
 }

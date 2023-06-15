@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex);
 
 import { querySummary } from "@/api/incomeExpense.js";
-import { updateUserConfig } from "@/api/user.js";
+import { updateUserConfig, userRemark } from "@/api/user.js";
 
 const store = new Vuex.Store({
     state: {
@@ -59,6 +59,13 @@ const store = new Vuex.Store({
         setAccountBook(state, accountBook) {
             state.accountBook = accountBook;
         },
+        //更新用户常用配置
+        updateUserRemark(state) {
+            userRemark({userId: state.user.id}).then(data => {
+                state.userRemark = data;
+              })
+        },
+        //更新摘要
         updateSummary(state) {
             querySummary({userId: state.user.id}).then(data => {
                 state.summary = data;

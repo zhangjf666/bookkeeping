@@ -56,7 +56,7 @@ public class IncomeExpenseDto implements Serializable {
     private BoolEnum isCreditCard;
 
     @ApiModelProperty(value = "是否加入常用备注(0:否,1;是)")
-    private BoolEnum addRemark;
+    private BoolEnum isAddRemark;
 
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;
