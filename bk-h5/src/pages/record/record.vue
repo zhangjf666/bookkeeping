@@ -326,6 +326,9 @@ export default {
         }
         createIncomeExpense(data).then((res) => {
           this.updateSummary();
+          if(this.isAddRemark == '1'){
+            this.updateUserRemark();
+          }
           //跳转到首页
           uni.switchTab({
             url: `/pages/index/index`,
@@ -339,6 +342,9 @@ export default {
         }
         updateIncomeExpense(data).then((res) => {
           this.updateSummary();
+          if(this.isAddRemark == '1'){
+            this.updateUserRemark();
+          }
           //跳转回之前页面
           uni.navigateBack();
         });
@@ -363,7 +369,9 @@ export default {
         }
         createIncomeExpense(data).then((res) => {
           this.updateSummary();
-          this.updateUserRemark();
+          if(this.isAddRemark == '1'){
+            this.updateUserRemark();
+          }
           //清空数据
           this.amount = "0.00";
           this.remark = "";

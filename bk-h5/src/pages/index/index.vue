@@ -69,7 +69,6 @@ export default {
       if(this.accountBook.length == 0) {
         this.getUserAccountBook();
       }
-      this.getUserRemark();
     }
   },
   methods: {
