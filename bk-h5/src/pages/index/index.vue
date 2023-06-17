@@ -69,6 +69,9 @@ export default {
       if(this.accountBook.length == 0) {
         this.getUserAccountBook();
       }
+      if(this.userRemark.length == 0) {
+        this.getUserRemark();
+      }
     }
   },
   methods: {
@@ -117,7 +120,7 @@ export default {
     }
   },
   computed: {
-    ...mapState(['user', 'summary','userConfig','classify','accountBook']),
+    ...mapState(['user', 'summary','userConfig','classify','accountBook','userRemark']),
     ...mapGetters(["loginFlag"]),
     recordSize() {
       return this.incomeExpenseList.length;

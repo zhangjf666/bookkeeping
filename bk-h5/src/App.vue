@@ -3,6 +3,17 @@
 	export default {
 		onLaunch: function() {
 			console.log('App Launch')
+			// uni.configMTLS({
+			//       certificates: [{
+			//       host: 'www.zhiizh.com',  // 换成你证书设定的域名（也就是https请求的域名）
+			//       client: '/static/client.p12',
+			//       clientPassword: '39518605',
+			//       server: ['/static/server.crt']
+			//   }],
+			//   complete (res) {
+			//       console.log('res', res)
+			//   }
+			// })
 			let token = uni.getStorageSync('token')
 			if (token) {
 				userInfo().then(data => {
