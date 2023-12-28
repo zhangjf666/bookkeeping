@@ -164,6 +164,7 @@ export default {
         }
         this.remark = item.remark;
         this.isCreditCard = item.isCreditCard;
+        this.updateSwiper()
       }
       this.getFocus();
   },
@@ -234,9 +235,10 @@ export default {
     },
     subsectionChange(index) {
       this.type = index
+      this.updateSwiper()
     },
     isSelect(item) {
-      if(this.type === 0){
+      if(this.type == 0){
         return item.id == this.expenseMainClassify ? 'color: #d83d34;' : 'color: #7A7E83';
       } else {
         return item.id == this.incomeMainClassify ? 'color: #00a151;' : 'color: #7A7E83';
@@ -272,6 +274,32 @@ export default {
         if(this.incomeMainClassify == null || this.incomeMainClassify == '') {
           this.incomeMainClassify = list[0][0].id;
           this.incomeSwiperCurrent = 0;
+        }
+    },
+    //更新swiper,指向选中的分类的那一页
+    updateSwiper(){
+        if(this.type == 0){
+          if(this.expenseMainClassify == null || this.expenseMainClassify == '') {
+            this.expenseSwiperCurrent = 0
+          }
+          let expenseList = this.showClassifyList['expense']
+          for(let i = 0; i , expenseList.length; i++){
+            if(expenseList[i].some(item => item.id == this.expenseMainClassify)){
+              this.expenseSwiperCurrent = i
+              break
+            }
+          }
+        } else {
+          if(this.incomeMainClassify == null || this.incomeMainClassify == '') {
+            this.incomeSwiperCurrent = 0
+          }
+          let incomeList = this.showClassifyList['income']
+          for(let i = 0; i , incomeList.length; i++){
+            if(incomeList[i].some(item => item.id == this.incomeMainClassify)){
+              this.incomeSwiperCurrent = i
+              break
+            }
+          }
         }
     },
     valChange(val) {
@@ -388,6 +416,16 @@ export default {
     remarkClick(item) {
       if(!this.remarkDeleteMode){
         this.remark = item.remark;
+        let tlist = this.mainClassifyList.filter(c => { return c.id == item.classifyId})
+        if(tlist.length != 0){
+          this.type = tlist[0].type
+          if(this.type == 0){
+            this.expenseMainClassify = item.classifyId
+          } else {
+            this.incomeMainClassify = item.classifyId
+          }
+        }
+        this.updateSwiper()
       }
     },
     deleteRemark(item) {
