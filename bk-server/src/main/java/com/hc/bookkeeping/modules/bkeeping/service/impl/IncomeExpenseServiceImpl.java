@@ -232,6 +232,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             UserRemarkDto ur = new UserRemarkDto();
             ur.setUserId(dto.getUserId());
             ur.setRemark(dto.getRemark());
+            ur.setClassifyId(dto.getMainClassify());
             userRemarkService.create(ur);
         }
         return super.create(dto);
@@ -244,6 +245,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             UserRemarkDto ur = new UserRemarkDto();
             ur.setUserId(dto.getUserId());
             ur.setRemark(dto.getRemark());
+            ur.setClassifyId(dto.getMainClassify());
             userRemarkService.create(ur);
         }
         return super.update(dto);

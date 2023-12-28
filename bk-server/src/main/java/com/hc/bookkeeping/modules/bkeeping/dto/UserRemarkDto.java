@@ -36,4 +36,6 @@ public class UserRemarkDto implements Serializable {
     @ApiModelProperty(value = "更新时间")
     private LocalDateTime updateTime;
 
+    @ApiModelProperty(value = "所属分类id")
+    private Long classifyId;
 }

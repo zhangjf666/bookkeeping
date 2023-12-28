@@ -27,6 +27,7 @@ public class UserRemarkServiceImpl extends BaseServiceImpl<UserRemarkMapstruct, 
         UserRemark one = baseMapper.selectOne(new LambdaQueryWrapper<UserRemark>().eq(UserRemark::getUserId, e.getUserId())
         .eq(UserRemark::getRemark, e.getRemark()));
         if(one != null) {
+            one.setClassifyId(e.getClassifyId());
             baseMapper.updateById(one);
             e = one;
         } else {

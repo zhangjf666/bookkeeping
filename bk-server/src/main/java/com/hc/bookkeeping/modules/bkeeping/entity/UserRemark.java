@@ -44,5 +44,6 @@ public class UserRemark implements Serializable {
     @Version
     private LocalDateTime updateTime;
 
-
+    @ApiModelProperty(value = "所属分类id")
+    private Long classifyId;
 }
