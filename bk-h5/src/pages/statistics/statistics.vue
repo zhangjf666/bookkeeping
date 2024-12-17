@@ -25,18 +25,20 @@
             </view>
         </view>
         <view class="detail">
-            <view class="detailRow" v-for="(item) in filterSumList" :key="item.classify" hover-class="click-bg" hover-stay-time="200" @click="detailClick(item)">
-                <text class="item-image" :class="'iconfont icon-' + item.classifyImage" :style="itemColor(item)"></text>
-                <view class="item-text">
-                    <view class="item-classify">{{classifyTextFormat(item)}}</view>
-                    <u-line-progress class="item-percent" :percent="item.percent" :show-percent="false" :height="15" :active-color="item.expense ? '#d83d34' : '#00a151'"></u-line-progress>
+            <scroll-view scroll-y class="scroll">
+                <view class="detailRow" v-for="(item) in filterSumList" :key="item.classify" hover-class="click-bg" hover-stay-time="200" @click="detailClick(item)">
+                    <text class="item-image" :class="'iconfont icon-' + item.classifyImage" :style="itemColor(item)"></text>
+                    <view class="item-text">
+                        <view class="item-classify">{{classifyTextFormat(item)}}</view>
+                        <u-line-progress class="item-percent" :percent="item.percent" :show-percent="false" :height="15" :active-color="item.expense ? '#d83d34' : '#00a151'"></u-line-progress>
+                    </view>
+                    <view class="item-amount">
+                        <view class="item-value" :style="itemColor(item)">{{amountFormat(item)}}</view>
+                        <view class="item-num">{{item.num + '笔'}}</view>
+                    </view>
+                    <u-icon style="color: #7A7E83;" name="arrow-right"></u-icon>
                 </view>
-                <view class="item-amount">
-                    <view class="item-value" :style="itemColor(item)">{{amountFormat(item)}}</view>
-                    <view class="item-num">{{item.num + '笔'}}</view>
-                </view>
-                <u-icon style="color: #7A7E83;" name="arrow-right"></u-icon>
-            </view>
+            </scroll-view>
         </view>
     </view>
 </template>
@@ -87,6 +89,9 @@ export default {
     methods: {
         //获取统计数据
         getSumPeriod(data) {
+            uni.showLoading({
+				title: '加载中'
+			});
             querySumPeriod(data).then(res => {
                 this.incomeTotal = res.incomeTotal;
                 this.expenseTotal = res.expenseTotal;
@@ -110,6 +115,8 @@ export default {
                 this.chartExpenseData = expenselist;
                 // 填入数据
                 this.updateChart(0);
+            }).finally(() => {
+                uni.hideLoading();
             })
         },
         dateChange(option) {
@@ -296,6 +303,12 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    .scroll {
+        display: flex;
+        width: 100%;
+        height: 740rpx;
+        // padding: 0rpx 30rpx 0 30rpx;
+    }
     .detailRow {
         width: 100%;
         height: 120rpx;

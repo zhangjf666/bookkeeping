@@ -59,6 +59,10 @@ const store = new Vuex.Store({
         setAccountBook(state, accountBook) {
             state.accountBook = accountBook;
         },
+        // 设置摘要
+        setUserSummary(state, summary) {
+            state.summary = summary;
+        },
         //更新用户常用配置
         updateUserRemark(state) {
             userRemark({userId: state.user.id}).then(data => {
@@ -69,7 +73,7 @@ const store = new Vuex.Store({
         updateSummary(state) {
             querySummary({userId: state.user.id}).then(data => {
                 state.summary = data;
-              })
+            })
         }
     }
 })

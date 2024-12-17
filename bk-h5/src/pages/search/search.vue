@@ -23,7 +23,9 @@
             <view class="option">
                 <u-subsection :list="optionList" :current="optionType" @change="subsectionChange" active-color="#252569" mode="subsection" font-size="26" height="56"></u-subsection>
             </view>
-            <record-list :list="filterList" :sortType="2"></record-list>
+            <scroll-view scroll-y class="scroll">
+                <record-list :list="filterList" :sortType="2"></record-list>
+            </scroll-view>
         </view>
     </view>
 </template>
@@ -72,9 +74,14 @@ export default {
 		},
         // 搜索触发事件
 		getSearch(){
+            uni.showLoading({
+				title: '加载中'
+			});
             getIncomeExpense({ userId: this.user.id, remark: this.search }).then(res => {
                 this.searchResult = res;
                 this.getNearlySearch();
+            }).finally(() => {
+                uni.hideLoading();
             })
             this.showSearch = false;
             this.optionType = 0;
@@ -184,6 +191,13 @@ $bColor: #d83d34;
         display: flex;
         flex-direction: column;
         width: 100%;
+        margin-bottom: 20rpx;
+    }
+    .scroll {
+        display: flex;
+        width: 100%;
+        height: 1350rpx;
+        // padding: 0rpx 30rpx 0 30rpx;
     }
 }
 </style>

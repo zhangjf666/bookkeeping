@@ -30,28 +30,30 @@
                 <view class="text">账单明细</view>
                 <view v-if="mode == 0 || mode == 2" class="detailButton" @click="billSortClick">{{btnText}}</view>
             </view>
-            <record-list v-if="mode == 0 || mode == 2" :list="incomeExpenseList" :sortType="billSort"></record-list>
-            <view class="detailYear" v-if="mode == 1">
-                <view class="row" v-for="(item, index) in yearRow" :key="index">
-                    <view class="rowSum" @click="rowClick(item)">
-                        <u-icon class="arrow" :name="yearArrow(item)"></u-icon>
-                        <view class="month">{{yearMonth(item)}}</view>
-                        <view class="income">
-                            <view>收入</view>
-                            <text>{{yearIncome(item)}}</text>
+            <scroll-view scroll-y class="scroll">
+                <record-list v-if="mode == 0 || mode == 2" :list="incomeExpenseList" :sortType="billSort"></record-list>
+                <view class="detailYear" v-if="mode == 1">
+                    <view class="row" v-for="(item, index) in yearRow" :key="index">
+                        <view class="rowSum" @click="rowClick(item)">
+                            <u-icon class="arrow" :name="yearArrow(item)"></u-icon>
+                            <view class="month">{{yearMonth(item)}}</view>
+                            <view class="income">
+                                <view>收入</view>
+                                <text>{{yearIncome(item)}}</text>
+                            </view>
+                            <view class="expense">
+                                <view>支出</view>
+                                <text>{{yearExpense(item)}}</text>
+                            </view>
+                            <view class="remain">
+                                <view>结余</view>
+                                <text>{{yearRemain(item)}}</text>
+                            </view>
                         </view>
-                        <view class="expense">
-                            <view>支出</view>
-                            <text>{{yearExpense(item)}}</text>
-                        </view>
-                        <view class="remain">
-                            <view>结余</view>
-                            <text>{{yearRemain(item)}}</text>
-                        </view>
+                        <record-list style="background-color: #FAFAFA;" v-if="rowDetailShow(item)" :list="rowDetailList(item)" :sortType="0"></record-list>
                     </view>
-                    <record-list style="background-color: #FAFAFA;" v-if="rowDetailShow(item)" :list="rowDetailList(item)" :sortType="0"></record-list>
                 </view>
-            </view>
+            </scroll-view>
         </view>
     </view>
 </template>
@@ -135,6 +137,9 @@ export default {
 		},
         //获取统计数据
         getSumPeriod(data) {
+            uni.showLoading({
+				title: '加载中'
+			});
             querySumPeriod(data).then(res => {
                 this.incomeTotal = res.incomeTotal;
                 this.expenseTotal = res.expenseTotal;
@@ -188,6 +193,8 @@ export default {
                 }
                 // 填入数据
                 this.updateChart(0);
+            }).finally(() => {
+                uni.hideLoading();
             })
         },
         goSearch() {
@@ -421,6 +428,12 @@ export default {
             border-color: rgb(0, 0, 0);
             border-radius: 6rpx;
         }
+    }
+    .scroll {
+        display: flex;
+        width: 100%;
+        height: 830rpx;
+        // padding: 0rpx 30rpx 0 30rpx;
     }
     .detailYear {
         width: 100%;

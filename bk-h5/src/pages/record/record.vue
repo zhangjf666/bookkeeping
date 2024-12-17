@@ -72,8 +72,8 @@
       </view>
     </view>
     <view class="buttom">
-        <u-button class="again" @click="recordAgain" type="error">{{buttonText}}</u-button>
-        <u-button class="save" @click="recordSave" type="error">保 存</u-button>
+        <u-button class="again" @click="recordAgain" :loading="againBtnLoading" type="error">{{buttonText}}</u-button>
+        <u-button class="save" @click="recordSave" :loading="saveBtnLoading" type="error">保 存</u-button>
     </view>
     <u-calendar v-model="isShowCalendar" @change="changeDate" :selectedDate="date"></u-calendar>
     <u-keyboard ref="uKeyboard" mode="number" :tooltip="false" v-model="isShowKeyboard" @change="valChange" @backspace="backspace"></u-keyboard>
@@ -139,7 +139,11 @@ export default {
       expenseSwiperCurrent: 0,
       incomeSwiperCurrent:0,
       //备注删除模式
-      remarkDeleteMode: false
+      remarkDeleteMode: false,
+      //再记一笔按钮加载
+      againBtnLoading: false,
+      //保存按钮加载
+      saveBtnLoading: false
     };
   },
   onLoad(option) {
@@ -307,7 +311,7 @@ export default {
       var isDefault = this.amount == "0.00" ? true : false;
       if(isDefault) {
         if(val != '.') {
-          this.amount = val
+          this.amount = String(val)
         } else {
           this.amount = "0."
         }
@@ -338,6 +342,9 @@ export default {
     },
     //保存记录
     recordSave() {
+      if(this.againBtnLoading == true){
+        return;
+      }
       if(this.amount == 0){
         uni.showToast({
             icon: 'none',   
@@ -346,6 +353,7 @@ export default {
         });
         return;
       }
+      this.saveBtnLoading = true;
       if(this.id == null || this.id == ''){
         var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date, isAddRemark:this.isAddRemark};
         data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
@@ -361,6 +369,8 @@ export default {
           uni.switchTab({
             url: `/pages/index/index`,
           });
+        }).finally(() => {
+          this.saveBtnLoading = false;
         });
       } else {
         var data = {id:this.id, userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date, isAddRemark:this.isAddRemark};
@@ -375,12 +385,17 @@ export default {
           }
           //跳转回之前页面
           uni.navigateBack();
+        }).finally(() => {
+          this.saveBtnLoading = false;
         });
       }
       
     },
     //再记一笔或者是删除
     recordAgain() {
+      if(this.saveBtnLoading == true){
+        return;
+      }
       if(this.amount == 0){
         uni.showToast({
             icon: 'none',   
@@ -389,6 +404,7 @@ export default {
         });
         return;
       }
+      this.againBtnLoading = true;
       if(this.id == null || this.id == ''){
         var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date, isAddRemark:this.isAddRemark};
         data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
@@ -404,12 +420,16 @@ export default {
           this.amount = "0.00";
           this.remark = "";
           this.isAddRemark = "0";
-        });
+        }).finally(() => {
+          this.againBtnLoading = false;
+        })
       } else {
         deleteIncomeExpense([this.id]).then((res) => {
           this.updateSummary();
           //跳转回之前页面
           uni.navigateBack();
+        }).finally(() => {
+          this.againBtnLoading = false;
         })
       }
     },
