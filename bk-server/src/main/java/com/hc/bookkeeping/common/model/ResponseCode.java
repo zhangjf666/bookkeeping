@@ -13,7 +13,8 @@ public enum ResponseCode implements IResponseCode {
     NOT_FOUND(404, "Not Found"),
     METHOD_NOT_ALLOWED(405, "Method Not Allowed"),
     INTERNAL_SERVER_ERROR(500, "Internal Server Error"),
-    DATA_NOT_EXSIT(900, "data not exsit");
+    DATA_NOT_EXSIT(900, "data not exsit"),
+    PARAM_ERROR(901, "param error");
 
 
     private int code;
