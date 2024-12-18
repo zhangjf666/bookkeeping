@@ -31,4 +31,14 @@ public class BillResultDto {
      * 收支详细列表
      */
     private List<IncomeExpenseDto> incomeExpenseList;
+
+    /**
+     * 当前支出限额
+     */
+    private BigDecimal expenseLimit;
+
+    /**
+     * 当前支出剩余
+     */
+    private BigDecimal expenseSurplus;
 }

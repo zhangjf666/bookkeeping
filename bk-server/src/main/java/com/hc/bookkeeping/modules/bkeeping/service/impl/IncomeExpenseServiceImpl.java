@@ -15,6 +15,7 @@ import com.hc.bookkeeping.common.exception.BusinessException;
 import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
+import com.hc.bookkeeping.modules.admin.entity.User;
 import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
 import com.hc.bookkeeping.modules.bkeeping.constants.OperateType;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
@@ -180,6 +181,35 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         billResultDto.setIncomeTotal(income);
         billResultDto.setExpenseTotal(expense);
 
+        //查询支出限额及剩余
+        BigDecimal expenseLimit = BigDecimal.ZERO;
+        BigDecimal expenseSurplus = BigDecimal.ZERO;
+        UserConfig userConfig = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                .eq(UserConfig::getName, SHOW_EXPENSE_LIMIT));
+        if(!ExpenseLimitShowType.NOT_SHOW.code.equals(userConfig.getValue())){
+            if(SUM_PERIOD_MONTH.equals(billQueryDto.getMode())){
+                UserConfig uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                        .eq(UserConfig::getName, EXPENSE_LIMIT_PREFIX+DateUtil.format(beginDate, DatePattern.SIMPLE_MONTH_PATTERN)), false);
+                if(uc == null){
+                    uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                            .eq(UserConfig::getName, DEFAULT_MONTHLY_EXPENSE_LIMIT));
+                }
+                expenseLimit = new BigDecimal(uc.getValue());
+            } else if(SUM_PERIOD_YEAR.equals(billQueryDto.getMode())){
+                UserConfig uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                        .eq(UserConfig::getName, EXPENSE_LIMIT_PREFIX+DateUtil.year(beginDate)), false);
+                if(uc == null){
+                    uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                            .eq(UserConfig::getName, DEFAULT_YEARLY_EXPENSE_LIMIT));
+                }
+                expenseLimit = new BigDecimal(uc.getValue());
+            }
+            List<Dict> sumExpenseAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), beginDate, endDate, null);
+            Dict expenseSum = sumExpenseAmount.stream().filter(dict -> OperateType.EXPENSE.code.equals(dict.getStr("type"))).findAny().orElse(null);
+            expenseSurplus = expenseSum == null ? expenseLimit : expenseLimit.subtract(expenseSum.getBigDecimal("amount"));
+        }
+        billResultDto.setExpenseLimit(expenseLimit);
+        billResultDto.setExpenseSurplus(expenseSurplus);
         //查询统计信息
         //账单
         Dict incomeExpenseSum = Dict.create();
