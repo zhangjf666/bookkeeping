@@ -93,7 +93,7 @@ export default {
     .scroll {
         display: flex;
         width: 100%;
-        height: 1350rpx;
+        height: 1340rpx;
         // padding: 0rpx 30rpx 0 30rpx;
     }
 }

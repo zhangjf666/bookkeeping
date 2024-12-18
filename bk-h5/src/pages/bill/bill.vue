@@ -10,7 +10,7 @@
 			</view>
 		</u-navbar>
         <view class="option">
-            <bill-selector @change="dateChange"></bill-selector>
+            <bill-selector ref="billSelector" @change="dateChange"></bill-selector>
         </view>
         <view class="chartContent">
             <u-radio-group class="chartRadio" v-model="radioValue" size="28">
@@ -21,6 +21,10 @@
                     <text style="color: #00a151;">{{incomeValue}}</text>
                 </u-radio>
             </u-radio-group>
+            <view class="expenseLimit">
+                <text>当前支出限额: {{ expenseLimitText }}</text>
+                <text :style="surplusStyle()">剩余限额: {{ expenseSurplusText }}</text>
+            </view>
             <view class="chartView">
                 <echarts :option="option" class="echarts" @click="echartsClick"></echarts>
             </view>
@@ -77,6 +81,8 @@ export default {
             mode: 0,
             expenseTotal: 0,
             incomeTotal: 0,
+            expenseLimit: 0,
+            expenseSurplus: 0,
             radioValue: 'expense',
             incomeExpenseList: [],
             //图表横坐标
@@ -121,6 +127,10 @@ export default {
 			}
         }
     },
+    onPullDownRefresh() {
+        this.$refs.billSelector.selectOver();
+        uni.stopPullDownRefresh();
+    },
     onLoad() {
         //默认获取当月数据
         var param = {userId: this.user.id, queryMode: '0', mode: '0'};
@@ -143,6 +153,8 @@ export default {
             querySumPeriod(data).then(res => {
                 this.incomeTotal = res.incomeTotal;
                 this.expenseTotal = res.expenseTotal;
+                this.expenseLimit = res.expenseLimit;
+                this.expenseSurplus = res.expenseSurplus;
                 this.incomeExpenseList = res.incomeExpenseList;
                 //更新图表
                 this.xAxisList = [];
@@ -249,6 +261,10 @@ export default {
         //自定义图表提示
         tooltipFormatter(param) {
             return param[0].name + ' ￥' + formatNumber(param[0].data.fact); 
+        },
+        surplusStyle() {
+            let percent = this.expenseSurplus/this.expenseLimit;
+            return percent <= 0.1 ? 'color: #d83d34;' : percent <= 0.3 ? 'color: #00a151;' : 'color: #00a151;'
         }
     },
     computed: {
@@ -317,6 +333,12 @@ export default {
             return (item) => {
                 return this.rowDetailOpen.indexOf(item.date) != -1;
             }
+        },
+        expenseLimitText() {
+            return formatNumber(this.expenseLimit);
+        },
+        expenseSurplusText() {
+            return formatNumber(this.expenseSurplus);
         }
     },
     watch: {
@@ -374,7 +396,7 @@ export default {
 .chartContent {
     margin-top: -100rpx;
     width: 95%;
-    height: 360rpx;
+    height: 400rpx;
     align-items: center;
     justify-content: space-between;
     flex-direction: column;
@@ -390,12 +412,18 @@ export default {
         flex-direction: row;
         display: flex;
     }
+    .expenseLimit {
+        display: flex;
+        width: 90%;
+        justify-content: space-around;
+        color: rgb(133, 133, 133);
+    }
     .chartView { 
         width: 100%;
-        height: 280rpx;
+        height: 300rpx;
 		.echarts {
 			width: 100%;
-			height: 280rpx;
+			height: 300rpx;
 		}
     }
 }
@@ -432,7 +460,7 @@ export default {
     .scroll {
         display: flex;
         width: 100%;
-        height: 830rpx;
+        height: 750rpx;
         // padding: 0rpx 30rpx 0 30rpx;
     }
     .detailYear {

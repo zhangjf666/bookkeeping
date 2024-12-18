@@ -164,7 +164,7 @@ export default {
 		},
 		expenseTypeDefaultValue: {
 			get() {
-				return [this.userConfig['show_expense_limit'].value - 1];
+				return this.userConfig['show_expense_limit'] == null ? [0] : [this.userConfig['show_expense_limit'].value - 1];
 			},
 			cache: false
 		},
