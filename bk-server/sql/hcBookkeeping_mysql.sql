@@ -501,3 +501,20 @@ CREATE TABLE `user_search` (
   `create_time`   datetime NOT NULL comment '创建时间',
   PRIMARY KEY (`id`)
 ) COMMENT '用户搜索记录表';
+
+-- ---
+-- Table 'user_remark'
+-- 用户常用备注表
+-- ---
+
+DROP TABLE IF EXISTS `user_remark`;
+
+CREATE TABLE `user_remark` (
+                               `id` bigint NOT NULL AUTO_INCREMENT COMMENT 'id',
+                               `user_id` bigint NOT NULL COMMENT '用户id',
+                               `remark` varchar(100) NOT NULL COMMENT '备注内容',
+                               `create_time` datetime NOT NULL COMMENT '创建时间',
+                               `update_time` datetime NOT NULL COMMENT '更新时间',
+                               `classify_id` bigint NOT NULL COMMENT '所属分类id',
+                               PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=55 DEFAULT CHARSET=utf8mb4 COLLATE=utf8mb4_0900_ai_ci COMMENT='用户常用备注表';
