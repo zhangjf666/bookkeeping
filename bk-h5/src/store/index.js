@@ -4,7 +4,7 @@ import Vuex from 'vuex'
 Vue.use(Vuex);
 
 import { querySummary } from "@/api/incomeExpense.js";
-import { updateUserConfig } from "@/api/user.js";
+import { updateUserConfig, userRemark } from "@/api/user.js";
 
 const store = new Vuex.Store({
     state: {
@@ -18,6 +18,8 @@ const store = new Vuex.Store({
         classify: [],
         //用户账本
         accountBook: [],
+        //用户常用备注
+        userRemark: [],
         //用户收支信息摘要
         summary: {expenseAmount: 0, incomeAmount: 0, incomeExpenseList: []}
     },
@@ -49,14 +51,29 @@ const store = new Vuex.Store({
         setClassify(state, classify) {
             state.classify = classify;
         },
+        // 设置用户常用备注
+        setUserRemark(state, userRemark) {
+            state.userRemark = userRemark;
+        },
         // 设置用户账本
         setAccountBook(state, accountBook) {
             state.accountBook = accountBook;
         },
+        // 设置摘要
+        setUserSummary(state, summary) {
+            state.summary = summary;
+        },
+        //更新用户常用配置
+        updateUserRemark(state) {
+            userRemark({userId: state.user.id}).then(data => {
+                state.userRemark = data;
+              })
+        },
+        //更新摘要
         updateSummary(state) {
             querySummary({userId: state.user.id}).then(data => {
                 state.summary = data;
-              })
+            })
         }
     }
 })

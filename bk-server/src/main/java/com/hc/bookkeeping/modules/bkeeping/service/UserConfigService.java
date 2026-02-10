@@ -24,4 +24,12 @@ public interface UserConfigService extends BaseService<UserConfigDto, UserConfig
      * @return
      */
     Page queryPage(UserConfigQueryDto queryDto, Page page);
+
+    /**
+     * 设置用户额外的支出限额
+     * @param userId 用户id
+     * @param type 1:设置月限额(当月),2:设置年限额(当年)
+     * @param expenseLimit 限额数值
+     */
+    void setAdditionalExpenseLimit(Long userId, String type, String expenseLimit);
 }

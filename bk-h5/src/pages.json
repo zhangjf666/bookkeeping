@@ -3,7 +3,8 @@
 		{
 			"path": "pages/index/index",
 			"style": {
-				"navigationBarTitleText": "bookkeeping"
+				"navigationBarTitleText": "bookkeeping",
+				"enablePullDownRefresh": true
 			}
 		},
 		{
@@ -20,11 +21,15 @@
 		},
 		{
 			"path": "pages/bill/bill",
-			"style": {}
+			"style": {
+				"enablePullDownRefresh": true
+			}
 		},
 		{
 			"path": "pages/statistics/statistics",
-			"style": {}
+			"style": {
+				"enablePullDownRefresh": true
+			}
 		},
 		{
 			"path": "pages/statistics/statisticsDetail",

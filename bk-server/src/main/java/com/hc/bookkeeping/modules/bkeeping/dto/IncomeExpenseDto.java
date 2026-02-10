@@ -1,6 +1,5 @@
 package com.hc.bookkeeping.modules.bkeeping.dto;
 
-import com.baomidou.mybatisplus.annotation.*;
 import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
 import io.swagger.annotations.ApiModel;
@@ -55,6 +54,9 @@ public class IncomeExpenseDto implements Serializable {
 
     @ApiModelProperty(value = "是否信用卡消费(0:否,1;是)")
     private BoolEnum isCreditCard;
+
+    @ApiModelProperty(value = "是否加入常用备注(0:否,1;是)")
+    private BoolEnum isAddRemark;
 
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;

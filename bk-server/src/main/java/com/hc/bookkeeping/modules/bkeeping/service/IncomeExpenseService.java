@@ -1,6 +1,7 @@
 package com.hc.bookkeeping.modules.bkeeping.service;
 
 import com.hc.bookkeeping.common.base.BaseService;
+import com.hc.bookkeeping.common.exception.BusinessException;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
 import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
@@ -38,7 +39,7 @@ public interface IncomeExpenseService extends BaseService<IncomeExpenseDto, Inco
      * @param days 查询最近几天的数据
      * @return
      */
-    SummaryDto querySummary(Long userId, int days);
+    SummaryDto querySummary(Long userId, int days) throws BusinessException;
 
     /**
      * 按月,日统计收入支出信息

@@ -9,7 +9,7 @@
 			</view>
 		</u-navbar>
         <view class="option">
-            <bill-selector @change="dateChange"></bill-selector>
+            <bill-selector ref="billSelector" @change="dateChange"></bill-selector>
         </view>
         <view class="chartContent">
             <u-radio-group class="chartRadio" v-model="radioValue" size="26">
@@ -20,23 +20,29 @@
                     <text style="color: #00a151;">{{incomeValue}}</text>
                 </u-radio>
             </u-radio-group>
+            <view class="expenseLimit">
+                <text>当前支出限额: {{ expenseLimitText }}</text>
+                <text :style="surplusStyle()">剩余限额: {{ expenseSurplusText }}</text>
+            </view>
             <view class="chartView">
                 <echarts :option="option" class="echarts" @click="echartsClick"></echarts>
             </view>
         </view>
         <view class="detail">
-            <view class="detailRow" v-for="(item) in filterSumList" :key="item.classify" hover-class="click-bg" hover-stay-time="200" @click="detailClick(item)">
-                <text class="item-image" :class="'iconfont icon-' + item.classifyImage" :style="itemColor(item)"></text>
-                <view class="item-text">
-                    <view class="item-classify">{{classifyTextFormat(item)}}</view>
-                    <u-line-progress class="item-percent" :percent="item.percent" :show-percent="false" :height="15" :active-color="item.expense ? '#d83d34' : '#00a151'"></u-line-progress>
+            <scroll-view scroll-y class="scroll">
+                <view class="detailRow" v-for="(item) in filterSumList" :key="item.classify" hover-class="click-bg" hover-stay-time="200" @click="detailClick(item)">
+                    <text class="item-image" :class="'iconfont icon-' + item.classifyImage" :style="itemColor(item)"></text>
+                    <view class="item-text">
+                        <view class="item-classify">{{classifyTextFormat(item)}}</view>
+                        <u-line-progress class="item-percent" :percent="item.percent" :show-percent="false" :height="15" :active-color="item.expense ? '#d83d34' : '#00a151'"></u-line-progress>
+                    </view>
+                    <view class="item-amount">
+                        <view class="item-value" :style="itemColor(item)">{{amountFormat(item)}}</view>
+                        <view class="item-num">{{item.num + '笔'}}</view>
+                    </view>
+                    <u-icon style="color: #7A7E83;" name="arrow-right"></u-icon>
                 </view>
-                <view class="item-amount">
-                    <view class="item-value" :style="itemColor(item)">{{amountFormat(item)}}</view>
-                    <view class="item-num">{{item.num + '笔'}}</view>
-                </view>
-                <u-icon style="color: #7A7E83;" name="arrow-right"></u-icon>
-            </view>
+            </scroll-view>
         </view>
     </view>
 </template>
@@ -60,6 +66,8 @@ export default {
             mode: 0,
             expenseTotal: 0,
             incomeTotal: 0,
+            expenseLimit: 0,
+            expenseSurplus: 0,
             radioValue: 'expense',
             incomeExpenseList: [],
             incomeExpenseSum: [],
@@ -75,6 +83,10 @@ export default {
 			}
         }
     },
+    onPullDownRefresh() {
+        this.$refs.billSelector.selectOver();
+        uni.stopPullDownRefresh();
+    },
     onLoad() {
         //默认获取当月数据
         var param = {userId: this.user.id, queryMode: '1', mode: '0'};
@@ -87,9 +99,14 @@ export default {
     methods: {
         //获取统计数据
         getSumPeriod(data) {
+            uni.showLoading({
+				title: '加载中'
+			});
             querySumPeriod(data).then(res => {
                 this.incomeTotal = res.incomeTotal;
                 this.expenseTotal = res.expenseTotal;
+                this.expenseLimit = res.expenseLimit;
+                this.expenseSurplus = res.expenseSurplus;
                 this.incomeExpenseList = res.incomeExpenseList;
                 this.incomeExpenseSum = res.incomeExpenseSum;
                 //更新图表
@@ -110,6 +127,8 @@ export default {
                 this.chartExpenseData = expenselist;
                 // 填入数据
                 this.updateChart(0);
+            }).finally(() => {
+                uni.hideLoading();
             })
         },
         dateChange(option) {
@@ -171,6 +190,10 @@ export default {
                     this.detailClick(data);
                 }, 200);
             })
+        },
+        surplusStyle() {
+            let percent = this.expenseSurplus/this.expenseLimit;
+            return percent <= 0.1 ? 'color: #d83d34;' : percent <= 0.3 ? 'color: #00a151;' : 'color: #00a151;'
         }
     },
     computed: {
@@ -213,6 +236,12 @@ export default {
                 list = list.filter(x => x.income);
             }
             return list;
+        },
+        expenseLimitText() {
+            return formatNumber(this.expenseLimit);
+        },
+        expenseSurplusText() {
+            return formatNumber(this.expenseSurplus);
         }
     },
     watch: {
@@ -279,6 +308,12 @@ export default {
         flex-direction: row;
         display: flex;
     }
+    .expenseLimit {
+        display: flex;
+        width: 90%;
+        justify-content: space-around;
+        color: rgb(133, 133, 133);
+    }
     .chartView { 
         width: 100%;
         height: 440rpx;
@@ -296,6 +331,12 @@ export default {
     flex-direction: column;
     align-items: center;
     justify-content: flex-start;
+    .scroll {
+        display: flex;
+        width: 100%;
+        height: 700rpx;
+        // padding: 0rpx 30rpx 0 30rpx;
+    }
     .detailRow {
         width: 100%;
         height: 120rpx;

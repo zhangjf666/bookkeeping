@@ -45,9 +45,9 @@ public class CodeGenerator {
         dsc.setDbType(DbType.MYSQL);
         dsc.setTypeConvert(new MySqlTypeConvert());
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
-        dsc.setUsername("root");
-        dsc.setPassword("123456");
-        dsc.setUrl("jdbc:mysql://192.168.80.132:3306/bookkeeping?characterEncoding=utf8&serverTimezone=Asia/Shanghai" +
+        dsc.setUsername("zjf");
+        dsc.setPassword("39518605");
+        dsc.setUrl("jdbc:mysql://192.168.2.89:3306/bookkeeping?characterEncoding=utf8&serverTimezone=Asia/Shanghai" +
                 "&&useSSL=false");
         mpg.setDataSource(dsc);
         // 包配置
@@ -70,7 +70,7 @@ public class CodeGenerator {
         //数据库表字段映射到实体的命名策略
         strategy.setColumnNaming(NamingStrategy.underline_to_camel);
         // 需要生成的表
-        strategy.setInclude(new String[]{"icon_config","user_search"});
+        strategy.setInclude(new String[]{"user_remark"});
         strategy.setEntityLombokModel(true);
         strategy.setRestControllerStyle(true);
         strategy.setControllerMappingHyphenStyle(true);

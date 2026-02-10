@@ -10,7 +10,7 @@
 			</view>
 		</u-navbar>
         <view class="option">
-            <bill-selector @change="dateChange"></bill-selector>
+            <bill-selector ref="billSelector" @change="dateChange"></bill-selector>
         </view>
         <view class="chartContent">
             <u-radio-group class="chartRadio" v-model="radioValue" size="28">
@@ -21,6 +21,10 @@
                     <text style="color: #00a151;">{{incomeValue}}</text>
                 </u-radio>
             </u-radio-group>
+            <view class="expenseLimit">
+                <text>当前支出限额: {{ expenseLimitText }}</text>
+                <text :style="surplusStyle()">剩余限额: {{ expenseSurplusText }}</text>
+            </view>
             <view class="chartView">
                 <echarts :option="option" class="echarts" @click="echartsClick"></echarts>
             </view>
@@ -30,28 +34,30 @@
                 <view class="text">账单明细</view>
                 <view v-if="mode == 0 || mode == 2" class="detailButton" @click="billSortClick">{{btnText}}</view>
             </view>
-            <record-list v-if="mode == 0 || mode == 2" :list="incomeExpenseList" :sortType="billSort"></record-list>
-            <view class="detailYear" v-if="mode == 1">
-                <view class="row" v-for="(item, index) in yearRow" :key="index">
-                    <view class="rowSum" @click="rowClick(item)">
-                        <u-icon class="arrow" :name="yearArrow(item)"></u-icon>
-                        <view class="month">{{yearMonth(item)}}</view>
-                        <view class="income">
-                            <view>收入</view>
-                            <text>{{yearIncome(item)}}</text>
+            <scroll-view scroll-y class="scroll">
+                <record-list v-if="mode == 0 || mode == 2" :list="incomeExpenseList" :sortType="billSort"></record-list>
+                <view class="detailYear" v-if="mode == 1">
+                    <view class="row" v-for="(item, index) in yearRow" :key="index">
+                        <view class="rowSum" @click="rowClick(item)">
+                            <u-icon class="arrow" :name="yearArrow(item)"></u-icon>
+                            <view class="month">{{yearMonth(item)}}</view>
+                            <view class="income">
+                                <view>收入</view>
+                                <text>{{yearIncome(item)}}</text>
+                            </view>
+                            <view class="expense">
+                                <view>支出</view>
+                                <text>{{yearExpense(item)}}</text>
+                            </view>
+                            <view class="remain">
+                                <view>结余</view>
+                                <text>{{yearRemain(item)}}</text>
+                            </view>
                         </view>
-                        <view class="expense">
-                            <view>支出</view>
-                            <text>{{yearExpense(item)}}</text>
-                        </view>
-                        <view class="remain">
-                            <view>结余</view>
-                            <text>{{yearRemain(item)}}</text>
-                        </view>
+                        <record-list style="background-color: #FAFAFA;" v-if="rowDetailShow(item)" :list="rowDetailList(item)" :sortType="0"></record-list>
                     </view>
-                    <record-list style="background-color: #FAFAFA;" v-if="rowDetailShow(item)" :list="rowDetailList(item)" :sortType="0"></record-list>
                 </view>
-            </view>
+            </scroll-view>
         </view>
     </view>
 </template>
@@ -75,6 +81,8 @@ export default {
             mode: 0,
             expenseTotal: 0,
             incomeTotal: 0,
+            expenseLimit: 0,
+            expenseSurplus: 0,
             radioValue: 'expense',
             incomeExpenseList: [],
             //图表横坐标
@@ -119,6 +127,10 @@ export default {
 			}
         }
     },
+    onPullDownRefresh() {
+        this.$refs.billSelector.selectOver();
+        uni.stopPullDownRefresh();
+    },
     onLoad() {
         //默认获取当月数据
         var param = {userId: this.user.id, queryMode: '0', mode: '0'};
@@ -135,9 +147,14 @@ export default {
 		},
         //获取统计数据
         getSumPeriod(data) {
+            uni.showLoading({
+				title: '加载中'
+			});
             querySumPeriod(data).then(res => {
                 this.incomeTotal = res.incomeTotal;
                 this.expenseTotal = res.expenseTotal;
+                this.expenseLimit = res.expenseLimit;
+                this.expenseSurplus = res.expenseSurplus;
                 this.incomeExpenseList = res.incomeExpenseList;
                 //更新图表
                 this.xAxisList = [];
@@ -188,6 +205,8 @@ export default {
                 }
                 // 填入数据
                 this.updateChart(0);
+            }).finally(() => {
+                uni.hideLoading();
             })
         },
         goSearch() {
@@ -242,6 +261,10 @@ export default {
         //自定义图表提示
         tooltipFormatter(param) {
             return param[0].name + ' ￥' + formatNumber(param[0].data.fact); 
+        },
+        surplusStyle() {
+            let percent = this.expenseSurplus/this.expenseLimit;
+            return percent <= 0.1 ? 'color: #d83d34;' : percent <= 0.3 ? 'color: #00a151;' : 'color: #00a151;'
         }
     },
     computed: {
@@ -310,6 +333,12 @@ export default {
             return (item) => {
                 return this.rowDetailOpen.indexOf(item.date) != -1;
             }
+        },
+        expenseLimitText() {
+            return formatNumber(this.expenseLimit);
+        },
+        expenseSurplusText() {
+            return formatNumber(this.expenseSurplus);
         }
     },
     watch: {
@@ -367,7 +396,7 @@ export default {
 .chartContent {
     margin-top: -100rpx;
     width: 95%;
-    height: 360rpx;
+    height: 400rpx;
     align-items: center;
     justify-content: space-between;
     flex-direction: column;
@@ -383,12 +412,18 @@ export default {
         flex-direction: row;
         display: flex;
     }
+    .expenseLimit {
+        display: flex;
+        width: 90%;
+        justify-content: space-around;
+        color: rgb(133, 133, 133);
+    }
     .chartView { 
         width: 100%;
-        height: 280rpx;
+        height: 300rpx;
 		.echarts {
 			width: 100%;
-			height: 280rpx;
+			height: 300rpx;
 		}
     }
 }
@@ -421,6 +456,12 @@ export default {
             border-color: rgb(0, 0, 0);
             border-radius: 6rpx;
         }
+    }
+    .scroll {
+        display: flex;
+        width: 100%;
+        height: 750rpx;
+        // padding: 0rpx 30rpx 0 30rpx;
     }
     .detailYear {
         width: 100%;

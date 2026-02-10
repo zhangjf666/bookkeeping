@@ -135,10 +135,23 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         user.setNickName(RandomUtil.randomString(12));
         user.setPassword(new BCryptPasswordEncoder().encode(dto.getPassword()));
         baseMapper.insert(user);
-        //用户校色
+        //用户角色
         UserRole userRole = new UserRole(user.getId(), normalRole.getId());
         userRoleMapper.insert(userRole);
-        //创建默认账本
+        //账本
+        createAccountBook(user);
+        //用户配置
+        createUserConfig(user);
+        //用户栏目
+        createDefaultClassify(user);
+        return true;
+    }
+
+    /**
+     * 创建账本
+     * @param user
+     */
+    private void createAccountBook(User user){
         AccountBook ab = new AccountBook();
         ab.setName("默认账本");
         ab.setImage("red");
@@ -146,16 +159,35 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         ab.setDescription("默认账本");
         ab.setIsDefault(BoolEnum.True);
         accountBookMapper.insert(ab);
-        //用户配置
+    }
+
+    /**
+     * 创建用户配置
+     * @param user 用户
+     */
+    private void createUserConfig(User user){
         UserConfig uc = new UserConfig();
         uc.setUserId(user.getId());
         uc.setName("is_credit_card");
         uc.setValue("0");
         uc.setDescription("流水记录时默认不选中信用卡");
         userConfigMapper.insert(uc);
-        //创建默认栏目
-        createDefaultClassify(user);
-        return true;
+        uc = new UserConfig();
+        uc.setUserId(user.getId());
+        uc.setName("show_expense_limit");
+        uc.setValue("1");
+        uc.setDescription("支出限额显示模式(1:不显示,2:显示月限额,3:显示年限额)");
+        uc = new UserConfig();
+        uc.setUserId(user.getId());
+        uc.setName("default_monthly_expense_limit");
+        uc.setValue("0");
+        uc.setDescription("默认每月支出限额");
+        uc = new UserConfig();
+        uc.setUserId(user.getId());
+        uc.setName("default_yearly_expense_limit");
+        uc.setValue("0");
+        uc.setDescription("默认每年支出限额");
+        userConfigMapper.insert(uc);
     }
 
     /**

@@ -16,4 +16,8 @@ public class SummaryDto {
     private BigDecimal incomeAmount;
 
     private List<IncomeExpenseDto> incomeExpenseList;
+
+    private BigDecimal expenseLimit;
+
+    private BigDecimal expenseSurplus;
 }

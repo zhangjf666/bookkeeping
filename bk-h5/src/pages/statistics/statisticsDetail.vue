@@ -10,7 +10,9 @@
             <view class="option">
                 <u-subsection :list="optionList" :current="optionType" @change="subsectionChange" active-color="#252569" mode="subsection" font-size="26" height="56"></u-subsection>
             </view>
-            <record-list :list="recordList" :sortType="optionType"></record-list>
+            <scroll-view scroll-y class="scroll">
+                <record-list :list="recordList" :sortType="optionType"></record-list>
+            </scroll-view>
         </view>
     </view>
 </template>
@@ -87,6 +89,12 @@ export default {
         flex-direction: column;
         width: 100%;
         margin-bottom: 20rpx;
+    }
+    .scroll {
+        display: flex;
+        width: 100%;
+        height: 1340rpx;
+        // padding: 0rpx 30rpx 0 30rpx;
     }
 }
 </style>

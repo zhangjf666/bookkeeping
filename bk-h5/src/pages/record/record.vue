@@ -52,12 +52,28 @@
           </view>
           <view class="options-remark">
               <u-input v-model="remark" placeholder="请输入备注信息" />
+              <u-checkbox v-model="addRemark" active-color="#d83d34" shape="circle" class="credit-check">加入常用备注</u-checkbox>
+          </view>
+      </view>
+      <!-- 内容显示 -->
+      <view class="remark">
+          <view class="remarkTitle">
+              <view>常用备注</view>
+              <text v-if="remarkDeleteMode == false" class="iconfont icon-shanchu" @click="checkRemarkMode(true)"></text>
+              <u-icon v-else name="checkmark" @click="checkRemarkMode(false)"></u-icon>
+          </view>
+          <view class="remarkContent">
+              <!-- <view class="contentButton" v-for="(item) in userRemark" :key="item.id" @click="remarkClick(item)">
+                  <text>{{item.remark}}</text>
+                  <u-icon size="10" v-if="remarkDeleteMode" name="close" class="delIcon"></u-icon>
+              </view> -->
+              <u-tag class="contentButton" v-for="(item) in userRemark" :key="item.id" :text="item.remark" type="info" :closeable="remarkDeleteMode" @click="remarkClick(item)" @close="deleteRemark(item)"/>
           </view>
       </view>
     </view>
     <view class="buttom">
-        <u-button class="again" @click="recordAgain" type="error">{{buttonText}}</u-button>
-        <u-button class="save" @click="recordSave" type="error">保 存</u-button>
+        <u-button class="again" @click="recordAgain" :loading="againBtnLoading" type="error">{{buttonText}}</u-button>
+        <u-button class="save" @click="recordSave" :loading="saveBtnLoading" type="error">保 存</u-button>
     </view>
     <u-calendar v-model="isShowCalendar" @change="changeDate" :selectedDate="date"></u-calendar>
     <u-keyboard ref="uKeyboard" mode="number" :tooltip="false" v-model="isShowKeyboard" @change="valChange" @backspace="backspace"></u-keyboard>
@@ -67,6 +83,7 @@
 <script>
 import { mapGetters, mapMutations, mapState } from "vuex";
 import { createIncomeExpense, deleteIncomeExpense, updateIncomeExpense } from "@/api/incomeExpense.js";
+import { deleteUserRemark } from "@/api/user.js";
 import moment from 'moment'
 
 export default {
@@ -89,6 +106,8 @@ export default {
       subClassify: "",
       //信用卡
       isCreditCard: "",
+      //加入常用备注
+      isAddRemark: "0",
       //发生日期
       date: "",
       //发生日期是否是当天
@@ -118,7 +137,13 @@ export default {
       isShowKeyboard: false,
       //swiper显示第几个
       expenseSwiperCurrent: 0,
-      incomeSwiperCurrent:0
+      incomeSwiperCurrent:0,
+      //备注删除模式
+      remarkDeleteMode: false,
+      //再记一笔按钮加载
+      againBtnLoading: false,
+      //保存按钮加载
+      saveBtnLoading: false
     };
   },
   onLoad(option) {
@@ -143,11 +168,12 @@ export default {
         }
         this.remark = item.remark;
         this.isCreditCard = item.isCreditCard;
+        this.updateSwiper()
       }
       this.getFocus();
   },
   computed: {
-      ...mapState(['accountBook','classify','userConfig', 'user']),
+      ...mapState(['accountBook','classify','userConfig', 'user', 'userRemark']),
       formatAmount() {
         return '￥' + this.amount
       },
@@ -166,6 +192,14 @@ export default {
               this.setUserConfigItem({name: 'is_credit_card', value: this.isCreditCard});
           }
       },
+      addRemark: {
+          get: function() {
+            return this.isAddRemark == '0' ? false: true;
+          },
+          set: function(e) {
+              this.isAddRemark = e ? '1' : '0';
+          }
+      },
       inputStyle() {
         return this.type == 0 ? 'color: #d83d34;' : 'color: #00a151;';
       },
@@ -178,7 +212,7 @@ export default {
       }
   },
   methods: {
-    ...mapMutations(['updateSummary','setUserConfigItem']),
+    ...mapMutations(['updateSummary','setUserConfigItem','updateUserRemark']),
     initUserConfig() {
       //初始选中默认账本
       this.accountBook.forEach(item => {
@@ -205,9 +239,10 @@ export default {
     },
     subsectionChange(index) {
       this.type = index
+      this.updateSwiper()
     },
     isSelect(item) {
-      if(this.type === 0){
+      if(this.type == 0){
         return item.id == this.expenseMainClassify ? 'color: #d83d34;' : 'color: #7A7E83';
       } else {
         return item.id == this.incomeMainClassify ? 'color: #00a151;' : 'color: #7A7E83';
@@ -245,12 +280,38 @@ export default {
           this.incomeSwiperCurrent = 0;
         }
     },
+    //更新swiper,指向选中的分类的那一页
+    updateSwiper(){
+        if(this.type == 0){
+          if(this.expenseMainClassify == null || this.expenseMainClassify == '') {
+            this.expenseSwiperCurrent = 0
+          }
+          let expenseList = this.showClassifyList['expense']
+          for(let i = 0; i , expenseList.length; i++){
+            if(expenseList[i].some(item => item.id == this.expenseMainClassify)){
+              this.expenseSwiperCurrent = i
+              break
+            }
+          }
+        } else {
+          if(this.incomeMainClassify == null || this.incomeMainClassify == '') {
+            this.incomeSwiperCurrent = 0
+          }
+          let incomeList = this.showClassifyList['income']
+          for(let i = 0; i , incomeList.length; i++){
+            if(incomeList[i].some(item => item.id == this.incomeMainClassify)){
+              this.incomeSwiperCurrent = i
+              break
+            }
+          }
+        }
+    },
     valChange(val) {
       //判断是否是初始状态
       var isDefault = this.amount == "0.00" ? true : false;
       if(isDefault) {
         if(val != '.') {
-          this.amount = val
+          this.amount = String(val)
         } else {
           this.amount = "0."
         }
@@ -281,54 +342,123 @@ export default {
     },
     //保存记录
     recordSave() {
+      if(this.againBtnLoading == true){
+        return;
+      }
+      if(this.amount == 0){
+        uni.showToast({
+            icon: 'none',   
+            duration: 3000,
+            title: `请输入金额`
+        });
+        return;
+      }
+      this.saveBtnLoading = true;
       if(this.id == null || this.id == ''){
-        var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+        var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date, isAddRemark:this.isAddRemark};
         data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
         if(this.type == 0) {
           data['isCreditCard'] = this.isCreditCard;
         }
         createIncomeExpense(data).then((res) => {
           this.updateSummary();
+          if(this.isAddRemark == '1'){
+            this.updateUserRemark();
+          }
           //跳转到首页
           uni.switchTab({
             url: `/pages/index/index`,
           });
+        }).finally(() => {
+          this.saveBtnLoading = false;
         });
       } else {
-        var data = {id:this.id, userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+        var data = {id:this.id, userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date, isAddRemark:this.isAddRemark};
         data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
         if(this.type == 0) {
           data['isCreditCard'] = this.isCreditCard;
         }
         updateIncomeExpense(data).then((res) => {
           this.updateSummary();
+          if(this.isAddRemark == '1'){
+            this.updateUserRemark();
+          }
           //跳转回之前页面
           uni.navigateBack();
+        }).finally(() => {
+          this.saveBtnLoading = false;
         });
       }
       
     },
     //再记一笔或者是删除
     recordAgain() {
+      if(this.saveBtnLoading == true){
+        return;
+      }
+      if(this.amount == 0){
+        uni.showToast({
+            icon: 'none',   
+            duration: 3000,
+            title: `请输入金额`
+        });
+        return;
+      }
+      this.againBtnLoading = true;
       if(this.id == null || this.id == ''){
-        var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date};
+        var data = {userId : this.user.id, accountBookId: this.accountBookId, amount: this.amount, type : this.type + "", remark:this.remark, date: this.date, isAddRemark:this.isAddRemark};
         data['mainClassify'] = this.type == 0 ? this.expenseMainClassify : this.incomeMainClassify;
         if(this.type == 0) {
           data['isCreditCard'] = this.isCreditCard;
         }
         createIncomeExpense(data).then((res) => {
           this.updateSummary();
+          if(this.isAddRemark == '1'){
+            this.updateUserRemark();
+          }
           //清空数据
           this.amount = "0.00";
           this.remark = "";
-        });
+          this.isAddRemark = "0";
+        }).finally(() => {
+          this.againBtnLoading = false;
+        })
       } else {
         deleteIncomeExpense([this.id]).then((res) => {
           this.updateSummary();
           //跳转回之前页面
           uni.navigateBack();
+        }).finally(() => {
+          this.againBtnLoading = false;
         })
       }
+    },
+    remarkClick(item) {
+      if(!this.remarkDeleteMode){
+        this.remark = item.remark;
+        let tlist = this.mainClassifyList.filter(c => { return c.id == item.classifyId})
+        if(tlist.length != 0){
+          this.type = tlist[0].type
+          if(this.type == 0){
+            this.expenseMainClassify = item.classifyId
+          } else {
+            this.incomeMainClassify = item.classifyId
+          }
+        }
+        this.updateSwiper()
+      }
+    },
+    deleteRemark(item) {
+      deleteUserRemark([item.id]).then((res) => {
+        //移除备注
+        var index = this.userRemark.findIndex(x=> x.id == item.id)
+        if(index != -1){
+          this.userRemark.splice(index, 1);
+        }
+      });
+    },
+    checkRemarkMode(e) {
+      this.remarkDeleteMode = e;
     }
   },
   watch: {
@@ -434,6 +564,46 @@ $mColor: #d83d34;
         border-bottom-style: solid;
         border-bottom-width: 1rpx;
         border-bottom-color: rgb(220, 220, 220);
+        display: flex;
+        align-items: center;
+        .credit-check {
+            height: 40rpx;
+            margin-left: auto;
+        }
+    }
+}
+.remark {
+    padding-left: 30rpx;
+    padding-right: 30rpx;
+    display: flex;
+    flex-direction: column;
+    width: 100%;
+    height: 100%;
+    font-size: 30rpx;
+    .remarkTitle {
+        display: flex;
+        flex-direction: row;
+        align-items: center;
+        justify-content: space-between;
+        :last-child {
+            font-size: 30rpx;
+        }
+    }
+    .remarkContent {
+        display: flex;
+        flex-direction: row;
+        width: 100%;
+        flex-wrap: wrap;
+        .contentButton {
+            display: flex;
+            flex-direction: row;
+            align-items: center;
+            justify-content: center;
+            margin: 20rpx 20rpx 0 0;
+            font-size: 26rpx;
+            background-color: #f3f3f3;
+            border-radius: 4rpx;
+        }
     }
 }
 .buttom {

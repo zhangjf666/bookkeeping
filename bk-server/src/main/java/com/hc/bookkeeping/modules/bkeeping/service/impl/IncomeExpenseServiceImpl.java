@@ -7,13 +7,20 @@ import cn.hutool.core.date.DateUtil;
 import cn.hutool.core.lang.Dict;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hc.bookkeeping.common.base.BaseServiceImpl;
+import com.hc.bookkeeping.common.exception.BusinessException;
+import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
+import com.hc.bookkeeping.modules.admin.entity.User;
+import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
+import com.hc.bookkeeping.modules.bkeeping.constants.OperateType;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
 import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
+import com.hc.bookkeeping.modules.bkeeping.entity.UserConfig;
 import com.hc.bookkeeping.modules.bkeeping.entity.UserSearch;
 import com.hc.bookkeeping.modules.bkeeping.mapper.IncomeExpenseMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapper.UserSearchMapper;
@@ -21,6 +28,8 @@ import com.hc.bookkeeping.modules.bkeeping.mapstruct.IncomeExpenseMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
 import com.hc.bookkeeping.modules.bkeeping.service.ClassifyService;
 import com.hc.bookkeeping.modules.bkeeping.service.IncomeExpenseService;
+import com.hc.bookkeeping.modules.bkeeping.service.UserConfigService;
+import com.hc.bookkeeping.modules.bkeeping.service.UserRemarkService;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -28,8 +37,9 @@ import org.springframework.stereotype.Service;
 import java.math.BigDecimal;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 
-import static com.hc.bookkeeping.modules.bkeeping.constants.constants.*;
+import static com.hc.bookkeeping.modules.bkeeping.constants.Constants.*;
 
 /**
  * <p>
@@ -46,6 +56,10 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
     private ClassifyService classifyService;
     @Autowired
     private UserSearchMapper userSearchMapper;
+    @Autowired
+    private UserConfigService userConfigService;
+    @Autowired
+    private UserRemarkService userRemarkService;
 
     @Override
     public List<IncomeExpenseDto> queryList(IncomeExpenseQueryDto queryDto) {
@@ -86,7 +100,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
-            if(dict.getInt("type") == 0){
+            if(OperateType.EXPENSE.code.equals(dict.getStr("type"))){
                 expense = dict.getBigDecimal("amount");
             } else {
                 income = dict.getBigDecimal("amount");
@@ -99,10 +113,41 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 .ge(IncomeExpense::getCreateTime, detail)
                 .orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));
         fillClassify(list);
+        //限额情况
+        List<UserConfig> userConfigs = userConfigService.list(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, userId));
+        UserConfig expenseShowType = userConfigs.stream().filter(userConfig -> SHOW_EXPENSE_LIMIT.equals(userConfig.getName())).findAny().orElseThrow(() -> new BusinessException("支出限额显示设置不存在"));
+        BigDecimal expenseLimit = BigDecimal.ZERO;
+        BigDecimal expenseSurplus = BigDecimal.ZERO;
+        if(ExpenseLimitShowType.MONTHLY_SHOW.code.equals(expenseShowType.getValue())){
+            Optional<UserConfig> config = userConfigs.stream().filter(userConfig -> (EXPENSE_LIMIT_PREFIX + DateUtil.format(new Date(), DatePattern.SIMPLE_MONTH_PATTERN)).equals(userConfig.getName())).findAny();
+            if(!config.isPresent()){
+                config = userConfigs.stream().filter(userConfig -> DEFAULT_MONTHLY_EXPENSE_LIMIT.equals(userConfig.getName())).findAny();
+                if(!config.isPresent()){
+                    throw new BusinessException("默认月支出限额配置不存在");
+                }
+            }
+            expenseLimit = new BigDecimal(config.get().getValue());
+            expenseSurplus = expenseLimit.subtract(expense);
+        } else if(ExpenseLimitShowType.YEARLY_SHOW.code.equals(expenseShowType.getValue())){
+            Optional<UserConfig> config = userConfigs.stream().filter(userConfig -> (EXPENSE_LIMIT_PREFIX + DateUtil.year(new Date())).equals(userConfig.getName())).findAny();
+            if(!config.isPresent()){
+                config = userConfigs.stream().filter(userConfig -> DEFAULT_YEARLY_EXPENSE_LIMIT.equals(userConfig.getName())).findAny();
+                if(!config.isPresent()){
+                    throw new BusinessException("默认年支出限额配置不存在");
+                }
+            }
+            expenseLimit = new BigDecimal(config.get().getValue());
+            //统计年支出
+            List<Dict> sumYear = baseMapper.querySumAmount(userId, DateUtil.beginOfYear(new Date()), DateUtil.endOfYear(new Date()), null);
+            Dict expenseYear = sumYear.stream().filter(dict -> OperateType.EXPENSE.code.equals(dict.getStr("type"))).findAny().orElse(null);
+            expenseSurplus = expenseYear == null ? expenseLimit : expenseLimit.subtract(expenseYear.getBigDecimal("amount"));
+        }
 
         summaryDto.setExpenseAmount(expense);
         summaryDto.setIncomeAmount(income);
         summaryDto.setIncomeExpenseList(list);
+        summaryDto.setExpenseLimit(expenseLimit);
+        summaryDto.setExpenseSurplus(expenseSurplus);
         return summaryDto;
     }
 
@@ -136,6 +181,35 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         billResultDto.setIncomeTotal(income);
         billResultDto.setExpenseTotal(expense);
 
+        //查询支出限额及剩余
+        BigDecimal expenseLimit = BigDecimal.ZERO;
+        BigDecimal expenseSurplus = BigDecimal.ZERO;
+        UserConfig userConfig = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                .eq(UserConfig::getName, SHOW_EXPENSE_LIMIT));
+        if(!ExpenseLimitShowType.NOT_SHOW.code.equals(userConfig.getValue())){
+            if(SUM_PERIOD_MONTH.equals(billQueryDto.getMode())){
+                UserConfig uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                        .eq(UserConfig::getName, EXPENSE_LIMIT_PREFIX+DateUtil.format(beginDate, DatePattern.SIMPLE_MONTH_PATTERN)), false);
+                if(uc == null){
+                    uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                            .eq(UserConfig::getName, DEFAULT_MONTHLY_EXPENSE_LIMIT));
+                }
+                expenseLimit = new BigDecimal(uc.getValue());
+            } else if(SUM_PERIOD_YEAR.equals(billQueryDto.getMode())){
+                UserConfig uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                        .eq(UserConfig::getName, EXPENSE_LIMIT_PREFIX+DateUtil.year(beginDate)), false);
+                if(uc == null){
+                    uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
+                            .eq(UserConfig::getName, DEFAULT_YEARLY_EXPENSE_LIMIT));
+                }
+                expenseLimit = new BigDecimal(uc.getValue());
+            }
+            List<Dict> sumExpenseAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), beginDate, endDate, null);
+            Dict expenseSum = sumExpenseAmount.stream().filter(dict -> OperateType.EXPENSE.code.equals(dict.getStr("type"))).findAny().orElse(null);
+            expenseSurplus = expenseSum == null ? expenseLimit : expenseLimit.subtract(expenseSum.getBigDecimal("amount"));
+        }
+        billResultDto.setExpenseLimit(expenseLimit);
+        billResultDto.setExpenseSurplus(expenseSurplus);
         //查询统计信息
         //账单
         Dict incomeExpenseSum = Dict.create();
@@ -219,5 +293,31 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 }
             }
         }
+    }
+
+    @Override
+    public IncomeExpenseDto create(IncomeExpenseDto dto) {
+        if(dto.getIsAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
+            //remark添加到常用备注
+            UserRemarkDto ur = new UserRemarkDto();
+            ur.setUserId(dto.getUserId());
+            ur.setRemark(dto.getRemark());
+            ur.setClassifyId(dto.getMainClassify());
+            userRemarkService.create(ur);
+        }
+        return super.create(dto);
+    }
+
+    @Override
+    public boolean update(IncomeExpenseDto dto) {
+        if(dto.getIsAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
+            //remark添加到常用备注
+            UserRemarkDto ur = new UserRemarkDto();
+            ur.setUserId(dto.getUserId());
+            ur.setRemark(dto.getRemark());
+            ur.setClassifyId(dto.getMainClassify());
+            userRemarkService.create(ur);
+        }
+        return super.update(dto);
     }
 }
