@@ -63,6 +63,10 @@ public class IncomeExpense implements Serializable {
     @TableField("is_credit_card")
     private BoolEnum isCreditCard;
 
+    @ApiModelProperty(value = "所属标签id列表")
+    @TableField("tag_codes")
+    private String tagCodes;
+
     @ApiModelProperty(value = "创建时间")
     @TableField(value = "create_time", fill = FieldFill.INSERT)
     private LocalDateTime createTime;

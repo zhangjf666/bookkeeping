@@ -23,7 +23,7 @@ public class CodeGenerator {
         // 全局配置
         GlobalConfig gc = new GlobalConfig();
         String projectPath = System.getProperty("user.dir");
-        gc.setOutputDir("D:\\iJeeScaffold");
+        gc.setOutputDir("D:\\opt");
         gc.setFileOverride(true);
         gc.setSwagger2(true);
         // XML 二级缓存
@@ -45,10 +45,10 @@ public class CodeGenerator {
         dsc.setDbType(DbType.MYSQL);
         dsc.setTypeConvert(new MySqlTypeConvert());
         dsc.setDriverName("com.mysql.cj.jdbc.Driver");
-        dsc.setUsername("zjf");
-        dsc.setPassword("39518605");
-        dsc.setUrl("jdbc:mysql://192.168.2.89:3306/bookkeeping?characterEncoding=utf8&serverTimezone=Asia/Shanghai" +
-                "&&useSSL=false");
+        dsc.setUsername("root");
+        dsc.setPassword("123456");
+        dsc.setUrl("jdbc:mysql://192.168.80.132:3306/bookkeeping?characterEncoding=utf8&serverTimezone=Asia/Shanghai" +
+                "&&useSSL=false&allowPublicKeyRetrieval=true");
         mpg.setDataSource(dsc);
         // 包配置
         PackageConfig pc = new PackageConfig();
@@ -70,7 +70,7 @@ public class CodeGenerator {
         //数据库表字段映射到实体的命名策略
         strategy.setColumnNaming(NamingStrategy.underline_to_camel);
         // 需要生成的表
-        strategy.setInclude(new String[]{"user_remark"});
+        strategy.setInclude(new String[]{"user_tag"});
         strategy.setEntityLombokModel(true);
         strategy.setRestControllerStyle(true);
         strategy.setControllerMappingHyphenStyle(true);

@@ -1,5 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.service.impl;
 
+import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.date.DateField;
 import cn.hutool.core.date.DatePattern;
 import cn.hutool.core.date.DateTime;
@@ -35,6 +36,7 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -67,15 +69,17 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         fillClassify(list);
         //记录搜索记录
         try {
-            if(queryDto.getUserId() != null && StringUtils.isNotBlank(queryDto.getRemark())) {
-                Integer count = userSearchMapper.selectCount(Wrappers.<UserSearch>lambdaQuery()
-                        .eq(UserSearch::getUserId, queryDto.getUserId())
-                        .eq(UserSearch::getContent, queryDto.getRemark()));
-                if(count <= 0) {
-                    UserSearch us = new UserSearch();
-                    us.setUserId(queryDto.getUserId());
-                    us.setContent(queryDto.getRemark());
-                    userSearchMapper.insert(us);
+            if(queryDto.getUserId() != null && CollUtil.isNotEmpty(queryDto.getRemark())) {
+                for (String re : queryDto.getRemark()) {
+                    Integer count = userSearchMapper.selectCount(Wrappers.<UserSearch>lambdaQuery()
+                            .eq(UserSearch::getUserId, queryDto.getUserId())
+                            .eq(UserSearch::getContent, re));
+                    if(count <= 0) {
+                        UserSearch us = new UserSearch();
+                        us.setUserId(queryDto.getUserId());
+                        us.setContent(re);
+                        userSearchMapper.insert(us);
+                    }
                 }
             }
         } catch (Exception ex){

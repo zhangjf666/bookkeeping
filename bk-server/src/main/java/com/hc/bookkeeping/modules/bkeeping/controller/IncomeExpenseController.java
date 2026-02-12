@@ -1,5 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
+import com.hc.bookkeeping.common.annotation.Anonymous;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.exception.BusinessException;
 import com.hc.bookkeeping.common.model.Response;
@@ -14,6 +15,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
+import javax.servlet.http.HttpServletRequest;
 import java.util.List;
 import java.util.Set;
 
@@ -32,6 +34,19 @@ public class IncomeExpenseController {
     public Response get(@Validated IncomeExpenseQueryDto queryDto){
         List<IncomeExpenseDto> list = incomeExpenseService.queryList(queryDto);
         return Response.ok(list);
+    }
+
+    @GetMapping("/test")
+    @Anonymous
+    public String test(HttpServletRequest request) {
+        // 1. 直接获取原始字符串
+        String queryString = request.getQueryString();
+        // 2. 获取参数数组
+        String[] rawIds = request.getParameterValues("remark");
+
+        System.out.println("原始 QueryString: " + queryString);
+        System.out.println("ParameterValues 长度: " + (rawIds != null ? rawIds.length : 0));
+        return "Check your console!";
     }
 
     @Log("创建收入支出")

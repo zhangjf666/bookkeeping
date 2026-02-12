@@ -37,7 +37,7 @@ public class IncomeExpenseQueryDto implements Serializable {
     private Long userId;
 
     @ApiModelProperty(value = "账本id")
-    @Query
+    @Query(column = "account_book_id")
     private Long accountBookId;
 
     @ApiModelProperty(value = "金额")
@@ -54,22 +54,26 @@ public class IncomeExpenseQueryDto implements Serializable {
     private List<LocalDate> date;
 
     @ApiModelProperty(value = "备注")
-    @Query(match = Query.Matching.INNER_LIKE)
-    private String remark;
+    @Query(linkType = Query.LinkType.OR)
+    private List<String> remark;
+
+    @ApiModelProperty(value = "所属标签id列表")
+    @Query(column = "tag_codes", linkType = Query.LinkType.OR, type = Query.Type.SQL, sql = "FIND_IN_SET({0}, #{column}) > 0")
+    private List<String> tagCodes;
 
     @ApiModelProperty(value = "主分类id")
-    @Query
+    @Query(column = "main_classify")
     private Long mainClassify;
 
     @ApiModelProperty(value = "子分类id")
-    @Query
+    @Query(column = "sub_classify")
     private Long subClassify;
 
     @ApiModelProperty(value = "是否信用卡消费(0:否,1;是)")
-    @Query
+    @Query(column = "is_credit_card")
     private BoolEnum isCreditCard;
 
     @ApiModelProperty(value = "创建时间")
     @Sort(column = "create_time", sort = Sort.SortType.DESC, sortOrder = 1)
-    private List<LocalDateTime> createTime;
+    private LocalDateTime createTime;
 }

@@ -43,8 +43,8 @@ public class UserRemarkController {
         return Response.ok();
     }
 
-    @Log("编辑用户配置")
-    @ApiOperation("编辑用户配置")
+    @Log("编辑用户常用备注")
+    @ApiOperation("编辑用户常用备注")
     @PutMapping
     public Response update(@Validated(Update.class) @RequestBody UserRemarkDto dto){
         userRemarkService.update(dto);
