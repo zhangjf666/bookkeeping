@@ -3,6 +3,7 @@ package com.hc.bookkeeping.modules.bkeeping.controller;
 import com.hc.bookkeeping.common.annotation.Anonymous;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.exception.BusinessException;
+import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
@@ -27,6 +28,14 @@ import java.util.Set;
 public class IncomeExpenseController {
 
     private final IncomeExpenseService incomeExpenseService;
+
+    @Log("分页查询收入支出")
+    @ApiOperation("分页查询收入支出")
+    @GetMapping("/page")
+    public Response<Page<IncomeExpenseDto>> getPage(@Validated IncomeExpenseQueryDto queryDto, Page page) {
+        Page<IncomeExpenseDto> result = incomeExpenseService.queryPage(queryDto, page);
+        return Response.ok(result);
+    }
 
     @Log("查询收入支出")
     @ApiOperation("查询收入支出")
@@ -77,8 +86,9 @@ public class IncomeExpenseController {
     @ApiOperation("查询首页摘要信息")
     @GetMapping("/summary")
     public Response<SummaryDto> getSummary(@RequestParam(name = "userId") Long userId,
+                                           @RequestParam(name = "accountBookId", required = false) Long accountBookId,
                                            @RequestParam(name = "days", required = false, defaultValue = "2") int days) {
-        return Response.ok(incomeExpenseService.querySummary(userId, days));
+        return Response.ok(incomeExpenseService.querySummary(userId, accountBookId, days));
     }
 
     @Log("查询账单报表信息")

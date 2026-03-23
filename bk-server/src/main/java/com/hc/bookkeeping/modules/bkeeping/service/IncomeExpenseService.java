@@ -36,10 +36,11 @@ public interface IncomeExpenseService extends BaseService<IncomeExpenseDto, Inco
     /**
      * 查询首页摘要信息
      * @param userId 用户id
+     * @param accountBookId 账本id（可选）
      * @param days 查询最近几天的数据
      * @return
      */
-    SummaryDto querySummary(Long userId, int days) throws BusinessException;
+    SummaryDto querySummary(Long userId, Long accountBookId, int days) throws BusinessException;
 
     /**
      * 按月,日统计收入支出信息

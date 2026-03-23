@@ -19,27 +19,36 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
 
     /**
      * 查询某一时间段内总收入支出
-     * @param beginDate
-     * @param endDate
+     * @param userId 用户id
+     * @param accountBookId 账本id（可选）
+     * @param beginDate 开始日期
+     * @param endDate 结束日期
+     * @param classify 分类列表
      * @return
      */
-    List<Dict> querySumAmount(Long userId, Date beginDate, Date endDate, List<Long> classify);
+    List<Dict> querySumAmount(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
 
     /**
      * 按月统计总收入支出
-     * @param beginDate
-     * @param endDate
+     * @param userId 用户id
+     * @param accountBookId 账本id（可选）
+     * @param beginDate 开始日期
+     * @param endDate 结束日期
+     * @param classify 分类列表
      * @return
      */
-    List<Dict> querySumAmountMonthly(Long userId, Date beginDate, Date endDate, List<Long> classify);
+    List<Dict> querySumAmountMonthly(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
 
     /**
      * 按日统计总收入支出
-     * @param beginDate
-     * @param endDate
+     * @param userId 用户id
+     * @param accountBookId 账本id（可选）
+     * @param beginDate 开始日期
+     * @param endDate 结束日期
+     * @param classify 分类列表
      * @return
      */
-    List<Dict> querySumAmountDayly(Long userId, Date beginDate, Date endDate,List<Long> classify);
+    List<Dict> querySumAmountDayly(Long userId, Long accountBookId, Date beginDate, Date endDate,List<Long> classify);
 
     /**
      * 按分类统计总收入支出

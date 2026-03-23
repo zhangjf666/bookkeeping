@@ -26,6 +26,9 @@
     <select id="querySumAmount" resultType="cn.hutool.core.lang.Dict">
         SELECT ie.type, sum(ie.amount) amount from income_expense ie
         where ie.user_id = #{userId}
+        <if test="accountBookId != null">
+            and ie.account_book_id = #{accountBookId}
+        </if>
         and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
         <if test="classify != null and classify.size() != 0">
             and ie.main_classify in
@@ -40,7 +43,11 @@
     <select id="querySumAmountMonthly" resultType="cn.hutool.core.lang.Dict">
         select date_format(ie.`date` , '%Y-%m') period, ie.`type` ,SUM(ie.amount) amount
         from income_expense ie
-        where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        where ie.user_id = #{userId}
+        <if test="accountBookId != null">
+            and ie.account_book_id = #{accountBookId}
+        </if>
+        and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
         <if test="classify != null and classify.size() != 0">
             and ie.main_classify in
             <foreach collection="classify" item="id" index="index"
@@ -55,7 +62,11 @@
     <select id="querySumAmountDayly" resultType="cn.hutool.core.lang.Dict">
         select date_format(ie.`date` , '%Y-%m-%d') period, ie.`type` ,SUM(ie.amount) amount
         from income_expense ie
-        where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        where ie.user_id = #{userId}
+        <if test="accountBookId != null">
+            and ie.account_book_id = #{accountBookId}
+        </if>
+        and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
         <if test="classify != null and classify.size() != 0">
             and ie.main_classify in
             <foreach collection="classify" item="id" index="index"

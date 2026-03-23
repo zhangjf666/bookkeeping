@@ -65,7 +65,9 @@ GET /incomeExpense/summary
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| accountBookId | Long | 否 | 账本ID，不传则查询当前账本 |
+| userId | Long | 是 | 用户ID |
+| accountBookId | Long | 否 | 账本ID，不传则查询所有账本 |
+| days | Integer | 否 | 查询最近几天的记录，默认2 |
 
 **响应**
 
@@ -82,7 +84,7 @@ GET /incomeExpense/summary
       {
         "id": 1,
         "amount": 50.00,
-        "type": "0",
+        "type": 0,
         "date": "2026-03-18",
         "remark": "午餐",
         "mainClassifyName": "餐饮",
@@ -93,6 +95,16 @@ GET /incomeExpense/summary
   }
 }
 ```
+
+**响应字段说明**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| expenseAmount | BigDecimal | 本月支出总额 |
+| incomeAmount | BigDecimal | 本月收入总额 |
+| expenseLimit | BigDecimal | 支出预算 |
+| expenseSurplus | BigDecimal | 预算剩余 |
+| incomeExpenseList | Array | 最近记账记录列表 |
 
 ### 3.2 获取收支趋势
 
@@ -106,10 +118,13 @@ GET /incomeExpense/sumPeriod
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| periodType | String | 是 | 统计周期：day(天)、week(周)、month(月) |
-| startDate | String | 是 | 开始日期 (yyyy-MM-dd) |
+| userId | Long | 是 | 用户ID |
+| accountBookId | Long | 否 | 账本ID，不传则查询所有账本 |
+| mode | String | 是 | 查询模式：0-月，1-年，2-自定义 |
+| queryMode | String | 否 | 查询方式：0-账单，1-报表，默认0 |
+| beginDate | String | 是 | 开始日期 (yyyy-MM-dd) |
 | endDate | String | 是 | 结束日期 (yyyy-MM-dd) |
-| accountBookId | Long | 否 | 账本ID |
+| classifyList | Array | 否 | 分类ID列表 |
 
 **响应**
 
@@ -117,20 +132,46 @@ GET /incomeExpense/sumPeriod
 {
   "code": 0,
   "msg": "ok",
-  "data": [
-    {
-      "date": "2026-03-12",
-      "expenseAmount": 150.00,
-      "incomeAmount": 0.00
+  "data": {
+    "expenseTotal": 5000.00,
+    "incomeTotal": 8000.00,
+    "expenseLimit": 10000.00,
+    "expenseSurplus": 5000.00,
+    "incomeExpenseSum": {
+      "2026-03-12": {
+        "income": 0.00,
+        "expense": 150.00
+      },
+      "2026-03-13": {
+        "income": 5000.00,
+        "expense": 80.00
+      }
     },
-    {
-      "date": "2026-03-13",
-      "expenseAmount": 80.00,
-      "incomeAmount": 5000.00
-    }
-  ]
+    "incomeExpenseList": [
+      {
+        "id": 1,
+        "amount": 50.00,
+        "type": 0,
+        "date": "2026-03-18",
+        "remark": "午餐",
+        "mainClassifyName": "餐饮",
+        "subClassifyName": "午餐"
+      }
+    ]
+  }
 }
 ```
+
+**响应字段说明**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| expenseTotal | BigDecimal | 总支出 |
+| incomeTotal | BigDecimal | 总收入 |
+| expenseLimit | BigDecimal | 当前支出限额 |
+| expenseSurplus | BigDecimal | 当���支出剩余 |
+| incomeExpenseSum | Dict | 收入支出统计列表，key为日期(yyyy-MM-dd)，value包含income和expense |
+| incomeExpenseList | List | 收支详细列表 |
 
 ### 3.3 获取账本列表
 
@@ -175,9 +216,12 @@ GET /accountBook
 
 | 字段 | 类型 | 说明 |
 |------|------|------|
-| date | String | 日期 |
-| expenseAmount | BigDecimal | 支出金额 |
-| incomeAmount | BigDecimal | 收入金额 |
+| expenseTotal | BigDecimal | 总支出 |
+| incomeTotal | BigDecimal | 总收入 |
+| expenseLimit | BigDecimal | 当前支出限额 |
+| expenseSurplus | BigDecimal | 当前支出剩余 |
+| incomeExpenseSum | Dict | 收入支出统计列表，key为日期(yyyy-MM-dd)，value包含income和expense |
+| incomeExpenseList | List | 收支详细列表 |
 
 ### 4.3 最近记录
 

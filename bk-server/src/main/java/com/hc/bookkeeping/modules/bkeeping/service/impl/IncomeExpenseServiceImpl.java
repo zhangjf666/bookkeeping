@@ -94,13 +94,13 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
     }
 
     @Override
-    public SummaryDto querySummary(Long userId, int days) {
+    public SummaryDto querySummary(Long userId, Long accountBookId, int days) {
         SummaryDto summaryDto = new SummaryDto();
         //查询本月收支情况
         Date beginDate = DateUtil.beginOfMonth(new Date());
         Date endDate = DateUtil.endOfMonth(new Date());
         //收入支出
-        List<Dict> sumAmount = baseMapper.querySumAmount(userId, beginDate, endDate, null);
+        List<Dict> sumAmount = baseMapper.querySumAmount(userId, accountBookId, beginDate, endDate, null);
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
@@ -112,10 +112,14 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         };
         //收支明细
         Date detail = DateUtil.beginOfDay(DateUtil.offsetDay(new Date(), -days));
-        List<IncomeExpenseDto> list = queryList(Wrappers.<IncomeExpense>lambdaQuery()
+        LambdaQueryWrapper<IncomeExpense> wrapper = Wrappers.<IncomeExpense>lambdaQuery()
                 .eq(IncomeExpense::getUserId, userId)
                 .ge(IncomeExpense::getCreateTime, detail)
-                .orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));
+                .orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime);
+        if (accountBookId != null) {
+            wrapper.eq(IncomeExpense::getAccountBookId, accountBookId);
+        }
+        List<IncomeExpenseDto> list = queryList(wrapper);
         fillClassify(list);
         //限额情况
         List<UserConfig> userConfigs = userConfigService.list(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, userId));
@@ -142,7 +146,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             }
             expenseLimit = new BigDecimal(config.get().getValue());
             //统计年支出
-            List<Dict> sumYear = baseMapper.querySumAmount(userId, DateUtil.beginOfYear(new Date()), DateUtil.endOfYear(new Date()), null);
+            List<Dict> sumYear = baseMapper.querySumAmount(userId, accountBookId, DateUtil.beginOfYear(new Date()), DateUtil.endOfYear(new Date()), null);
             Dict expenseYear = sumYear.stream().filter(dict -> OperateType.EXPENSE.code.equals(dict.getStr("type"))).findAny().orElse(null);
             expenseSurplus = expenseYear == null ? expenseLimit : expenseLimit.subtract(expenseYear.getBigDecimal("amount"));
         }
@@ -172,7 +176,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             endDate = DateUtil.endOfDay(endDate);
         }
         //查询收入支出统计
-        List<Dict> sumAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), beginDate, endDate, billQueryDto.getClassifyList());
+        List<Dict> sumAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
@@ -208,7 +212,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 }
                 expenseLimit = new BigDecimal(uc.getValue());
             }
-            List<Dict> sumExpenseAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), beginDate, endDate, null);
+            List<Dict> sumExpenseAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, null);
             Dict expenseSum = sumExpenseAmount.stream().filter(dict -> OperateType.EXPENSE.code.equals(dict.getStr("type"))).findAny().orElse(null);
             expenseSurplus = expenseSum == null ? expenseLimit : expenseLimit.subtract(expenseSum.getBigDecimal("amount"));
         }
@@ -229,8 +233,8 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             //查询数据
             List<Dict> datas;
             datas = SUM_PERIOD_YEAR.equals(billQueryDto.getMode()) ?
-                    baseMapper.querySumAmountMonthly(billQueryDto.getUserId(), beginDate, endDate, billQueryDto.getClassifyList()) :
-                    baseMapper.querySumAmountDayly(billQueryDto.getUserId(), beginDate, endDate, billQueryDto.getClassifyList());
+                    baseMapper.querySumAmountMonthly(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList()) :
+                    baseMapper.querySumAmountDayly(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
             for (Dict data:datas) {
                 Dict ies = (Dict) incomeExpenseSum.get(data.getStr("period"));
                 if(BillType.Income.getValue().equals(data.getStr("type"))) {

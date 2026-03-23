@@ -18,6 +18,11 @@ public class BillQueryDto {
     private Long userId;
 
     /**
+     * 账本id
+     */
+    private Long accountBookId;
+
+    /**
      * 查询方式(0:账单,1:报表)
      */
     private String queryMode;
