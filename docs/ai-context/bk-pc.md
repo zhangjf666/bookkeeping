@@ -467,28 +467,61 @@ ECharts 渲染图表
 
 ## 八、HTTP 请求封装
 
-### 8.1 请求拦截器
+### 8.1 统一响应数据结构
 
-- 自动注入 Token 到请求头
-- Token 过期自动刷新
-- 请求 loading 状态管理
+所有 API 接口返回统一的数据结构：
 
-### 8.2 响应拦截器
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": { },
+  "timestamp": 1774322474199
+}
+```
 
-- 统一处理 success/failure
-- 401 自动跳转登录
-- 统一错误提示
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| code | Integer | 返回码，0 代表成功，其他代表错误 |
+| msg | String | 返回信息描述，code 不为 0 时为错误描述 |
+| data | Object | 实际的数据内容 |
+| timestamp | Long | 时间戳 |
 
-### 8.3 请求示例
+### 8.2 前端处理机制
+
+HTTP 拦截器统一处理响应：
+
+- **code = 0**：返回 `data` 部分，API 直接获取数据
+- **code ≠ 0**：抛出错误，错误信息为 `msg`，在调用处统一 catch 处理
+
+### 8.3 请求拦截器
+
+- 自动注入 Token 到请求头 (Bearer 格式)
+- 白名单接口不携带 Token：`/auth/captcha`, `/auth/login`, `/auth/register`
+
+### 8.4 响应拦截器
+
+- 统一处理 code 判断
+- 401 自动跳转登录页
+- 错误统一抛出
+
+### 8.5 请求示例
 
 ```typescript
-// GET 请求
-http.get('/incomeExpense', { params: { page: 1, size: 10 } })
+// GET 请��� - 直接返回 data 部分
+const result = await http.get('/incomeExpense', { params: { page: 1 } })
+// result 就是 data 内容，无需 res.data 访问
 
 // POST 请求
-http.post('/incomeExpense', { ...data })
+await http.post('/auth/login', { data: { username: 'xxx', password: 'xxx' } })
 
-// 带 Token 的请求 (自动携带)
+// 错误处理 - 统一在 catch 中处理
+try {
+  await http.get('/some/api')
+} catch (error) {
+  // error.message 就是后端返回的 msg
+  ElMessage.error(error.message)
+}
 ```
 
 ---
@@ -562,3 +595,122 @@ pnpm preview      # 预览构建结果
 | .env.development | 开发环境 |
 | .env.staging | 测试环境 |
 | .env.production | 生产环境 |
+
+---
+
+## 十三、国际化支持 (i18n)
+
+### 13.1 技术选型
+
+| 类别 | 框架/库 | 版本 |
+|------|---------|------|
+| 国际化 | vue-i18n | ^11.1.3 |
+| 格式 | YAML | - |
+
+### 13.2 目录结构
+
+```
+bk-pc/
+├── locales/                              # 国际化语言文件
+│   ├── zh-CN.yaml                        # 中文简体
+│   └── en.yaml                           # 英文
+└── src/
+    └── plugins/
+        └── i18n.ts                       # i18n 配置文件
+```
+
+### 13.3 国际化文件格式
+
+国际化文件采用 YAML 格式，按功能模块分组：
+
+```yaml
+# 示例：zh-CN.yaml
+buttons:
+  pureLoginOut: 退出系统
+  pureLogin: 登录
+  pureConfirm: 确认
+  pureClose: 关闭
+
+menus:
+  pureHome: 首页
+  pureLogin: 登录
+  pureAbnormal: 异��页面
+
+login:
+  pureUsername: 账号
+  purePassword: 密码
+  pureLoginSuccess: 登录成功
+  pureLoginFail: 登录失败
+```
+
+### 13.4 使用方式
+
+#### 模板中使用
+
+```vue
+<template>
+  <!-- 方式1: $t 函数 -->
+  <span>{{ $t('menus.pureHome') }}</span>
+  
+  <!-- 方式2: v-t 指令 -->
+  <span v-t="'menus.pureHome'"></span>
+</template>
+```
+
+#### Script 中使用
+
+```typescript
+import { useI18n } from "vue-i18n";
+
+const { t } = useI18n();
+
+// 在 setup 中使用
+const title = t('menus.pureHome');
+```
+
+#### 动态路由标题
+
+路由的 `meta.title` 支持国际化：
+
+```typescript
+{
+  path: '/dashboard',
+  name: 'Dashboard',
+  meta: {
+    title: { zh: '首页', en: 'Dashboard' }
+  }
+}
+```
+
+### 13.5 语言切换
+
+- 语言设置存储在本地存储中，默认语言为 `zh-CN`
+- 支持在系统设置面板中切换语言
+- 切换后自动应用到整个应用，包括 Element Plus 组件
+
+### 13.6 添加新语言
+
+1. 在 `locales/` 目录下创建新的 YAML 文件（如 `ja.yaml`）
+2. 在 `src/plugins/i18n.ts` 中添加新语言的配置
+3. 在系统设置中添加语言切换选项
+
+### 13.7 添加新国际化文案
+
+在对应的 YAML 文件中添加新的 key-value 对：
+
+```yaml
+# 在 zh-CN.yaml 中添加
+bill:
+  addBill: 新增账单
+  editBill: 编辑账单
+  deleteBill: 删除账单
+  amount: 金额
+  type: 类型
+  expense: 支出
+  income: 收入
+```
+
+使用方式：
+```vue
+<span>{{ $t('bill.addBill') }}</span>
+```

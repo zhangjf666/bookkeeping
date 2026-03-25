@@ -375,9 +375,28 @@ switch (error.code) {
 
 ### 9.1 Token 存储
 
-- 使用 localStorage 存储 token
-- 字段名：`bk_token`
-- 格式：`Bearer <token>`
+- 使用 localStorage 存储 token 和用户信息
+- 字段名：`user-info`
+- 存储内容：
+  ```typescript
+  {
+    accessToken: string,      // 访问令牌
+    refreshToken: string,     // 刷新令牌
+    expires: number,          // 过期时间戳
+    id: number,               // 用户ID（重要：用于后续接口调用）
+    avatar: string,           // 头像
+    username: string,         // 用户名
+    nickname: string,         // 昵称
+    roles: string[],          // 角色列表
+    permissions: string[]     // 权限列表
+  }
+  ```
+
+### 9.2 用户信息持久化
+
+登录成功后，用户信息（包含 userId）需要持久化到本地存储，确保：
+- 刷新页面后可以获取用户ID
+- 后续接口调用需要使用 userId 参数
 
 ### 9.2 路由守卫
 

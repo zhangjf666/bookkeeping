@@ -38,6 +38,14 @@
         ↓
 跳转首页 /dashboard
         ↓
+调用 /accountBook 获取账本列表
+        ↓
+调用 /classify 获取用户分类列表（存储供收支记录页面使用）
+        ↓
+调用 /userTag 获取用户标签列表（存储供收支记录页面使用）
+        ↓
+调用 /userRemark 获取用户备注列表（存储供收支记录页面使用）
+        ↓
 调用 /incomeExpense/summary 获取本月摘要数据
         ↓
 调用 /incomeExpense/sumPeriod 获取趋势数据
@@ -48,6 +56,8 @@
         ↓
 渲染最近记账记录列表
 ```
+
+**说明**：分类、标签和备注数据在首页加载后存储到状态管理中，供收支记录页面直接使用，避免重复请求。
 
 ---
 
@@ -198,6 +208,109 @@ GET /accountBook
 }
 ```
 
+### 3.4 获取用户分类列表
+
+**请求**
+
+```
+GET /classify
+```
+
+**请求参数**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| userId | number | 是 | 用户ID |
+| type | number | 否 | 类型: 0-支出, 1-收入 |
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": [
+    {
+      "id": 1,
+      "pid": 0,
+      "name": "餐饮",
+      "userId": 62,
+      "image": "food",
+      "sort": 1,
+      "type": 0,
+      "enable": true
+    }
+  ],
+  "timestamp": 1706512345678
+}
+```
+
+### 3.5 获取用户标签列表
+
+**请求**
+
+```
+GET /userTag
+```
+
+**请求参数**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| userId | number | 是 | 用户ID |
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": [
+    {
+      "id": 10001,
+      "name": "重要",
+      "color": "#ff4d4f"
+    },
+    {
+      "id": 10002,
+      "name": "日常",
+      "color": "#1890ff"
+    }
+  ],
+  "timestamp": 1706512345678
+}
+```
+
+### 3.5 获取用户备注列表
+
+**请求**
+
+```
+GET /userRemark
+```
+
+**请求参数**
+
+| 参数 | 类型 | 必填 | 说明 |
+|------|------|------|------|
+| userId | number | 是 | 用户ID |
+
+**响应**
+
+```json
+{
+  "code": 0,
+  "msg": "ok",
+  "data": [
+    "午饭",
+    "晚饭",
+    "工资",
+    "购物"
+  ],
+  "timestamp": 1706512345678
+}
+```
+
 ---
 
 ## 四、数据结构
@@ -244,6 +357,34 @@ GET /accountBook
 | name | String | 账本名称 |
 | image | String | 图标 |
 | isDefault | Boolean | 是否默认 |
+
+### 4.5 分类 (Classify)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Long | 分类ID |
+| pid | Long | 父分类ID |
+| name | String | 分类名称 |
+| userId | Long | 用户ID |
+| image | String | 图标 |
+| sort | Integer | 排序 |
+| type | Integer | 类型: 0-支出, 1-收入 |
+| enable | Boolean | 是否启用 |
+| children | Array | 子分类列表 |
+
+### 4.6 标签 (Tag)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Long | 标签ID |
+| name | String | 标签名称 |
+| color | String | 标签颜色 |
+
+### 4.7 备注 (Remark)
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| - | string[] | 用户备注列表 |
 
 ---
 
@@ -358,14 +499,18 @@ GET /accountBook
 ```
 页面加载
     ↓
-DashboardStore.loadSummary() → API调用 → 更新store.state.summary
+BillStore.loadAccountBooks() → API调用 → 更新store.state.accountBooks
     ↓
-DashboardStore.loadTrend() → API调用 → 更新store.state.trendData
+BillStore.loadClassifyAndTag() → API调用 → 获取分类和标签列表存储
     ↓
-DashboardStore.loadAccountBooks() → API调用 → 更新store.state.accountBooks
+BillStore.loadSummary() → API调用 → 更新store.state.summary
+    ↓
+BillStore.loadTrendData() → API调用 → 更新store.state.trendData
     ↓
 组件从store获取数据渲染
 ```
+
+**注意**：分类(classify)和标签(userTag)数据在首页加载时获取，存储在 BillStore 中供收支记录页面使用，无需在收支记录页面重复请求。
 
 ### 9.2 缓存策略
 

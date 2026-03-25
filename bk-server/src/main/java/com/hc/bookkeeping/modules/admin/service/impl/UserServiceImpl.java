@@ -157,7 +157,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         ab.setImage("red");
         ab.setUserId(user.getId());
         ab.setDescription("默认账本");
-        ab.setIsDefault(BoolEnum.True);
+        ab.setIsDefault(BoolEnum.YES);
         accountBookMapper.insert(ab);
     }
 
@@ -201,7 +201,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("餐饮");
         classify.setSort(0);
         classify.setImage("canyin");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //零食烟酒
@@ -209,7 +209,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("零食烟酒");
         classify.setSort(1);
         classify.setImage("lingshiyanjiu");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //零食烟酒--小类
@@ -217,7 +217,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("零食");
         classify1.setSort(1);
         classify1.setImage("lingshi");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -225,7 +225,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("饮料");
         classify1.setSort(1);
         classify1.setImage("yinliao");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -233,7 +233,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("水果");
         classify1.setSort(1);
         classify1.setImage("shuiguo");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -242,7 +242,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("购物");
         classify.setSort(2);
         classify.setImage("gouwu");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //购物-小类
@@ -250,7 +250,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("数码");
         classify1.setSort(2);
         classify1.setImage("shuma");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -258,7 +258,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("日用");
         classify1.setSort(2);
         classify1.setImage("riyong");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -266,7 +266,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("玩具");
         classify1.setSort(2);
         classify1.setImage("wanju");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -274,7 +274,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("电器");
         classify1.setSort(2);
         classify1.setImage("dianqi");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -282,7 +282,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("美妆");
         classify1.setSort(2);
         classify1.setImage("meizhuang");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -290,7 +290,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("运动");
         classify1.setSort(2);
         classify1.setImage("yundong");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -298,7 +298,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("鞋服");
         classify1.setSort(2);
         classify1.setImage("xiefu");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -306,7 +306,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("饰品");
         classify1.setSort(2);
         classify1.setImage("shipin");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -315,7 +315,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("住房");
         classify.setSort(3);
         classify.setImage("shouye");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //住房-小类
@@ -323,7 +323,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("家纺");
         classify1.setSort(3);
         classify1.setImage("jiafang");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -331,7 +331,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("家具");
         classify1.setSort(3);
         classify1.setImage("jiaju");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -339,7 +339,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("物业水电");
         classify1.setSort(3);
         classify1.setImage("wuyeshuidian");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -348,7 +348,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("交通");
         classify.setSort(4);
         classify.setImage("jiaotong");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //交通-小类
@@ -356,7 +356,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("公交出租");
         classify1.setSort(4);
         classify1.setImage("gongjiao");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -364,7 +364,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("火车");
         classify1.setSort(4);
         classify1.setImage("huoche");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -372,7 +372,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("机票");
         classify1.setSort(4);
         classify1.setImage("jipiao");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -381,7 +381,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("汽车");
         classify1.setSort(5);
         classify1.setImage("qiche");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classifyMapper.insert(classify1);
         //娱乐
@@ -389,7 +389,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("娱乐");
         classify.setSort(5);
         classify.setImage("yule");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //娱乐-小类
@@ -397,7 +397,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("游戏");
         classify1.setSort(4);
         classify1.setImage("youxi");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -405,7 +405,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("电影");
         classify1.setSort(4);
         classify1.setImage("dianying");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -413,7 +413,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("K歌");
         classify1.setSort(4);
         classify1.setImage("kge");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -422,7 +422,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("文教");
         classify.setSort(6);
         classify.setImage("wenjiao");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //通讯
@@ -430,7 +430,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("通讯");
         classify.setSort(6);
         classify.setImage("tongxun");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //育儿
@@ -438,7 +438,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("育儿");
         classify.setSort(7);
         classify.setImage("yuer");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //人情
@@ -446,7 +446,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("人情");
         classify.setSort(8);
         classify.setImage("renqing");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //人情-小类
@@ -454,7 +454,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("礼品礼金");
         classify1.setSort(8);
         classify1.setImage("lipinlijin");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -462,7 +462,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify1.setName("请客");
         classify1.setSort(8);
         classify1.setImage("qingke");
-        classify1.setType(BillType.Expense);
+        classify1.setType(BillType.EXPENSE);
         classify1.setUserId(user.getId());
         classify1.setPid(classify.getId());
         classifyMapper.insert(classify1);
@@ -471,7 +471,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("医疗");
         classify.setSort(9);
         classify.setImage("yiliao");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //旅行
@@ -479,7 +479,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("旅行");
         classify.setSort(10);
         classify.setImage("lvxing");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //其他
@@ -487,7 +487,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("其他");
         classify.setSort(11);
         classify.setImage("qita");
-        classify.setType(BillType.Expense);
+        classify.setType(BillType.EXPENSE);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
 
@@ -497,7 +497,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("薪资");
         classify.setSort(12);
         classify.setImage("xinzi");
-        classify.setType(BillType.Income);
+        classify.setType(BillType.INCOME);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //奖金
@@ -505,7 +505,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("奖金");
         classify.setSort(13);
         classify.setImage("jiangjin");
-        classify.setType(BillType.Income);
+        classify.setType(BillType.INCOME);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //投资收益
@@ -513,7 +513,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("投资收益");
         classify.setSort(14);
         classify.setImage("touzishouyi");
-        classify.setType(BillType.Income);
+        classify.setType(BillType.INCOME);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
         //其他收入
@@ -521,7 +521,7 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
         classify.setName("其他收入");
         classify.setSort(15);
         classify.setImage("qitashouru");
-        classify.setType(BillType.Income);
+        classify.setType(BillType.INCOME);
         classify.setUserId(user.getId());
         classifyMapper.insert(classify);
     }

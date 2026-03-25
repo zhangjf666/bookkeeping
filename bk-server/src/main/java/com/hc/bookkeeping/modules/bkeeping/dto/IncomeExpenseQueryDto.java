@@ -54,7 +54,7 @@ public class IncomeExpenseQueryDto implements Serializable {
     private List<LocalDate> date;
 
     @ApiModelProperty(value = "备注")
-    @Query(linkType = Query.LinkType.OR)
+    @Query(match = Query.Matching.INNER_LIKE, linkType = Query.LinkType.OR)
     private List<String> remark;
 
     @ApiModelProperty(value = "所属标签id列表")

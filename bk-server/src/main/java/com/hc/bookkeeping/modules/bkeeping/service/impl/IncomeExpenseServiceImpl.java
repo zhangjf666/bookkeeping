@@ -16,7 +16,6 @@ import com.hc.bookkeeping.common.exception.BusinessException;
 import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
-import com.hc.bookkeeping.modules.admin.entity.User;
 import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
 import com.hc.bookkeeping.modules.bkeeping.constants.OperateType;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
@@ -36,7 +35,6 @@ import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
-import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
@@ -90,7 +88,27 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
 
     @Override
     public Page queryPage(IncomeExpenseQueryDto queryDto, Page page) {
-        return queryPage(page, QueryUtil.bulid(queryDto));
+        Page<IncomeExpenseDto> pageResult = queryPage(page, QueryUtil.bulid(queryDto));
+        fillClassify(pageResult.getRecord());
+        //记录搜索记录
+        try {
+            if(queryDto.getUserId() != null && CollUtil.isNotEmpty(queryDto.getRemark())) {
+                for (String re : queryDto.getRemark()) {
+                    Integer count = userSearchMapper.selectCount(Wrappers.<UserSearch>lambdaQuery()
+                            .eq(UserSearch::getUserId, queryDto.getUserId())
+                            .eq(UserSearch::getContent, re));
+                    if(count <= 0) {
+                        UserSearch us = new UserSearch();
+                        us.setUserId(queryDto.getUserId());
+                        us.setContent(re);
+                        userSearchMapper.insert(us);
+                    }
+                }
+            }
+        } catch (Exception ex){
+            log.error(StrUtil.format("{} 保存搜索记录失败:{}",queryDto.getUserId(), ex.getMessage()), ex);
+        }
+        return pageResult;
     }
 
     @Override
@@ -237,7 +255,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                     baseMapper.querySumAmountDayly(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
             for (Dict data:datas) {
                 Dict ies = (Dict) incomeExpenseSum.get(data.getStr("period"));
-                if(BillType.Income.getValue().equals(data.getStr("type"))) {
+                if(BillType.INCOME.getValue().equals(data.getStr("type"))) {
                     ies.set("income", data.getBigDecimal("amount"));
                 } else {
                     ies.set("expense", data.getBigDecimal("amount"));
@@ -251,7 +269,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 if(ies == null){
                     ies = Dict.create();
                 }
-                if(BillType.Income.getValue().equals(data.getStr("type"))) {
+                if(BillType.INCOME.getValue().equals(data.getStr("type"))) {
                     BigDecimal amount = data.getBigDecimal("amount");
                     ies.set("percent", NumberUtil.round(amount.divide(income, 4,BigDecimal.ROUND_HALF_UP).doubleValue() * 100, 2));
                     ies.set("income", amount);
@@ -305,7 +323,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
 
     @Override
     public IncomeExpenseDto create(IncomeExpenseDto dto) {
-        if(dto.getIsAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
+        if(dto.getIsAddRemark() == BoolEnum.YES && StringUtils.isNotBlank(dto.getRemark())){
             //remark添加到常用备注
             UserRemarkDto ur = new UserRemarkDto();
             ur.setUserId(dto.getUserId());
@@ -318,7 +336,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
 
     @Override
     public boolean update(IncomeExpenseDto dto) {
-        if(dto.getIsAddRemark() == BoolEnum.True && StringUtils.isNotBlank(dto.getRemark())){
+        if(dto.getIsAddRemark() == BoolEnum.YES && StringUtils.isNotBlank(dto.getRemark())){
             //remark添加到常用备注
             UserRemarkDto ur = new UserRemarkDto();
             ur.setUserId(dto.getUserId());

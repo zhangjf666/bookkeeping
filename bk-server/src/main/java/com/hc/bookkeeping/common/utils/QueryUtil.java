@@ -124,7 +124,7 @@ public class QueryUtil {
                     } else if(linkType == Query.LinkType.OR){
                         wrapper.and(r -> {
                             for (int i = 0; i < ((List<Object>) val).size(); i++) {
-                                setWrapperValue(column, matching, wrapper, ((List<Object>) val).get(i));
+                                setWrapperValue(column, matching, r, ((List<Object>) val).get(i));
                                 if(i != ((List<Object>) val).size()-1){
                                     r.or();
                                 }

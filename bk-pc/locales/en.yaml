@@ -1,0 +1,171 @@
+buttons:
+  pureLoginOut: LoginOut
+  pureLogin: Login
+  pureOpenSystemSet: Open System Configs
+  pureReload: Reload
+  pureCloseCurrentTab: Close CurrentTab
+  pureCloseLeftTabs: Close LeftTabs
+  pureCloseRightTabs: Close RightTabs
+  pureCloseOtherTabs: Close OtherTabs
+  pureCloseAllTabs: Close AllTabs
+  pureContentFullScreen: Content FullScreen
+  pureContentExitFullScreen: Content ExitFullScreen
+  pureClickCollapse: Collapse
+  pureClickExpand: Expand
+  pureConfirm: Confirm
+  pureSwitch: Switch
+  pureClose: Close
+  pureBackTop: BackTop
+  pureOpenText: Open
+  pureCloseText: Close
+search:
+  pureTotal: Total
+  pureHistory: History
+  pureCollect: Collect
+  pureDragSort: （Drag Sort）
+  pureEmpty: Empty
+  purePlaceholder: Search Menu
+panel:
+  pureSystemSet: System Configs
+  pureCloseSystemSet: Close System Configs
+  pureClearCacheAndToLogin: Clear cache and return to login page
+  pureClearCache: Clear Cache
+  pureOverallStyle: Overall Style
+  pureOverallStyleLight: Light
+  pureOverallStyleLightTip: Set sail freshly and light up the comfortable work interface
+  pureOverallStyleDark: Dark
+  pureOverallStyleDarkTip: Moonlight Overture, indulge in the tranquility and elegance of the night
+  pureOverallStyleSystem: Auto
+  pureOverallStyleSystemTip: Synchronize time, the interface naturally responds to morning and dusk
+  pureThemeColor: Theme Color
+  pureLayoutModel: Layout Model
+  pureVerticalTip: The menu on the left is familiar and friendly
+  pureHorizontalTip: Top menu, concise overview
+  pureMixTip: Mixed menu, flexible
+  pureStretch: Stretch Page
+  pureStretchFixed: Fixed
+  pureStretchFixedTip: Compact pages make it easy to find the information you need
+  pureStretchCustom: Custom
+  pureStretchCustomTip: Minimum 1280, maximum 1600
+  pureTagsStyle: Tags Style
+  pureTagsStyleSmart: Smart
+  pureTagsStyleSmartTip: Smart tags add fun and brilliance
+  pureTagsStyleCard: Card
+  pureTagsStyleCardTip: Card tags for efficient browsing
+  pureTagsStyleChrome: Chrome
+  pureTagsStyleChromeTip: Chrome style is classic and elegant
+  pureInterfaceDisplay: Interface Display
+  pureGreyModel: Grey Model
+  pureWeakModel: Weak Model
+  pureHiddenTags: Hidden Tags
+  pureHiddenFooter: Hidden Footer
+  pureMultiTagsCache: MultiTags Cache
+menus:
+  pureHome: Home
+  pureLogin: Login
+  pureAbnormal: Abnormal Page
+  purePageNotFound: "404"
+  pureAccessDenied: "403"
+  pureServerError: "500"
+  purePermission: Permission Manage
+  purePermissionPage: Page Permission
+  purePermissionButton: Button Permission
+  purePermissionButtonRouter: Route return button permission
+  purePermissionButtonLogin: Login interface return button permission
+status:
+  pureLoad: Loading...
+  pureMessage: Message
+  pureNotify: Notify
+  pureTodo: Todo
+  pureNoMessage: No Message
+  pureNoNotify: No Notify
+  pureNoTodo: No Todo
+login:
+  pureUsername: Username
+  purePassword: Password
+  pureLogin: Login
+  pureLoginSuccess: Login Success
+  pureLoginFail: Login Fail
+  pureUsernameReg: Please enter username
+  purePassWordReg: Please enter password
+  purePassWordRuleReg: The password format should be any combination of 8-18 digits
+  pureCaptcha: Please enter captcha
+  pureCaptchaReg: Please enter captcha
+  pureUsernameLengthReg: Username must be 3-20 characters
+  purePasswordLengthReg: Password must be 6-20 characters
+  pureRepeatPasswordReg: Please confirm password
+  pureNoAccount: No account?
+  pureGoRegister: Register now
+  pureRegisterSuccess: Register Success
+  pureRegisterFail: Register Fail
+  purePasswordNotMatch: Passwords do not match
+register:
+  pureTitle: Register
+  pureUsername: Please enter username
+  purePassword: Please enter password
+  pureRepeatPassword: Please confirm password
+  pureCaptcha: Please enter captcha
+  pureRegister: Register
+  pureHasAccount: Already have an account? Login
+  pureGoLogin: Login now
+dashboard:
+  pureAdd: Add Record
+  pureExpense: Expense
+  pureIncome: Income
+  pureExpenseLimit: Budget
+  pureExpenseSurplus: Remaining
+  pureTrend: Trend
+  pureRecentRecords: Recent Records (3 Days)
+  pureDate: Date
+  pureClassify: Classify
+  pureRemark: Remark
+  pureAmount: Amount
+  pureType: Type
+  pureNoRecords: No records
+  pureCurrentBook: Current Book
+  pureDefault: Default
+bill:
+  pureTitle: Records
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureBatchDelete: Batch Delete
+  pureQuery: Query
+  pureReset: Reset
+  pureMoreFilter: More Filter
+  pureAccountBook: Book
+  pureType: Type
+  pureDate: Date
+  pureStartDate: Start Date
+  pureEndDate: End Date
+  pureAmount: Amount
+  pureClassify: Classify
+  pureMainClassify: Main Classify
+  pureSubClassify: Sub Classify
+  pureRemark: Remark
+  pureTag: Tag
+  pureSelectPlaceholder: Select
+  pureRemarkPlaceholder: Enter remark
+  pureOperation: Operation
+  pureExpense: Expense
+  pureIncome: Income
+  pureCancel: Cancel
+  pureConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureSelectFirst: Please select records first
+  pureAddToCommon: Add to common remark
+  pureCreditCard: Credit Card
+  pureAmountRequired: Please enter amount
+  pureAmountInvalid: Amount must be greater than 0
+  pureTypeRequired: Please select type
+  pureClassifyRequired: Please select classify
+  pureDateRequired: Please select date
+  pureAccountBookRequired: Please select book
+  pureWarning: Warning
+  pureDeleteConfirm: Are you sure to delete this record?
+  pureBatchDeleteConfirm: Are you sure to delete the selected {count} records?
+  pureYes: Yes
+  pureNo: No

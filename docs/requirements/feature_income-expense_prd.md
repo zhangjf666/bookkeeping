@@ -86,17 +86,18 @@
 **请求**
 
 ```
-GET /incomeExpense
+GET /incomeExpense/page
 ```
 
 **请求参数** (Query Params)
 
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
-| page | number | 否 | 页码 (从1开始) |
-| size | number | 否 | 每页条数 |
+| userId | number | 是 | 用户ID |
+| pageNo | number | 否 | 页码 (从1开始) |
+| pageSize | number | 否 | 每页条数 |
 | accountBookId | number | 否 | 账本ID |
-| type | number | 否 | 类型: 0-支出, 1-收入 |
+| type | string | 否 | 类型: EXPENSE-支出, INCOME-收入 |
 | date | string[] | 否 | 日期范围 [start, end] |
 | amount | number[] | 否 | 金额范围 [min, max] |
 | mainClassify | number | 否 | 主分类ID |
@@ -109,36 +110,61 @@ GET /incomeExpense
 ```json
 {
   "code": 0,
-  "data": [
-    {
-      "id": 1,
-      "userId": 1,
-      "accountBookId": 1,
-      "amount": 100.00,
-      "type": 0,
-      "date": "2024-01-15",
-      "remark": "午餐",
-      "mainClassify": 1,
-      "subClassify": 2,
-      "isCreditCard": false,
-      "isAddRemark": false,
-      "tagCodes": "1,2,3",
-      "createTime": "2024-01-15T12:00:00",
-      "updateTime": "2024-01-15T12:00:00",
-      "mainClassifyName": "餐饮",
-      "subClassifyName": "午餐",
-      "mainClassifyImage": "food",
-      "subClassifyImage": "lunch",
-      "tags": [
-        { "id": 1, "name": "重要", "color": "#ff4d4f" },
-        { "id": 2, "name": "日常", "color": "#1890ff" },
-        { "id": 3, "name": "月度", "color": "#52c41a" }
-      ]
-    }
-  ],
-  "msg": "success"
+  "msg": "ok",
+  "data": {
+    "pageNo": 1,
+    "pageSize": 20,
+    "totalCount": 3311,
+    "totalPages": 166,
+    "record": [
+      {
+        "id": 3312,
+        "userId": 62,
+        "accountBookId": 1,
+        "amount": 22.00,
+        "type": "EXPENSE",
+        "date": "2026-01-29",
+        "remark": "晚饭",
+        "mainClassify": 1,
+        "subClassify": null,
+        "isCreditCard": "YES",
+        "isAddRemark": "NO",
+        "tagCodes": "10001,10002,10003,10004",
+        "createTime": "2026-01-29 12:38:31",
+        "updateTime": "2026-01-29 12:38:31",
+        "mainClassifyName": null,
+        "subClassifyName": null,
+        "mainClassifyImage": null,
+        "subClassifyImage": null
+      }
+    ]
+  },
+  "timestamp": 1706512345678
 }
 ```
+
+**响应字段说明**
+
+| 字段 | 类型 | 说明 |
+|------|------|------|
+| id | Long | 记录ID |
+| userId | Long | 用户ID |
+| accountBookId | Long | 账本ID |
+| amount | BigDecimal | 金额 |
+| type | String | 类型: EXPENSE-支出, INCOME-收入 |
+| date | String | 日期 (yyyy-MM-dd) |
+| remark | String | 备注 |
+| mainClassify | Long | 主分类ID |
+| subClassify | Long | 子分类ID |
+| isCreditCard | String | 是否信用卡消费: YES-是, NO-否 |
+| isAddRemark | String | 是否加入常用备注: YES-是, NO-否 |
+| tagCodes | String | 标签ID列表 (逗号分隔) |
+| createTime | String | 创建时间 |
+| updateTime | String | 更新时间 |
+| mainClassifyName | String | 主分类名称 |
+| subClassifyName | String | 子分类名称 |
+| mainClassifyImage | String | 主分类图标 |
+| subClassifyImage | String | 子分类图标 |
 
 ### 3.2 创建收支记录
 
@@ -153,6 +179,7 @@ Content-Type: application/json
 
 ```json
 {
+  "userId": 62,
   "accountBookId": 1,
   "amount": 100.00,
   "type": 0,
@@ -170,6 +197,7 @@ Content-Type: application/json
 
 | 字段 | 类型 | 必填 | 说明 |
 |------|------|------|------|
+| userId | number | 是 | 用户ID |
 | accountBookId | number | 是 | 账本ID |
 | amount | number | 是 | 金额 |
 | type | number | 是 | 类型: 0-支出, 1-收入 |
@@ -187,7 +215,8 @@ Content-Type: application/json
 {
   "code": 0,
   "data": null,
-  "msg": "success"
+  "msg": "ok",
+  "timestamp": 1706512345678
 }
 ```
 
@@ -204,6 +233,7 @@ Content-Type: application/json
 
 ```json
 {
+  "userId": 62,
   "id": 1,
   "accountBookId": 1,
   "amount": 150.00,
@@ -224,7 +254,8 @@ Content-Type: application/json
 {
   "code": 0,
   "data": null,
-  "msg": "success"
+  "msg": "ok",
+  "timestamp": 1706512345678
 }
 ```
 
@@ -264,25 +295,40 @@ Content-Type: application/json
 **布局结构**:
 
 ```
-┌────────────────────────────────────────────────────────┐
-│  [新增] [批量删除]                    [更多筛选 ▼]     │
-├────────────────────────────────────────────────────────┤
-│  账本: [全部 ▼]  类型: [全部 ▼]  日期: [日期范围]      │
-│  金额: [Min]-[Max]   分类: [选择]                       │
-│  备注: [___________]  标签: [选择标签 ▼]               │
-│  [重置] [查询]                                        │
-├────────────────────────────────────────────────────────┤
-│  ┌─────┬────────┬────────┬───────┬────────┬─────────┐  │
-│  │ ☐   │ 金额   │ 类型   │ 分类  │ 标签   │ 操作    │  │
-│  ├─────┼────────┼────────┼───────┼────────┼─────────┤  │
-│  │ ☐   │ 100.00 │ 支出   │ 餐饮  │ 重要   │ [编辑] │  │
-│  │     │        │        │       │ 日常   │ [删除] │  │
-│  └─────┴────────┴────────┴───────┴────────┴─────────┘  │
-├────────────────────────────────────────────────────────┤
-│                              共 100 条  [首页] [上页]  │
-│                                    [下页] [末页]       │
-└────────────────────────────────────────────────────────┘
+┌────────────────────────────────────────────────────────────────────┐
+│  账本: [全部 ▼]  类型: [全部 ▼]  日期: [日期范围]                   │
+│  金额: [Min]-[Max]   分类: [选择]                                    │
+│  备注: [___________]  标签: [选择标签 ▼]                            │
+│  [重置] [查询]                                                     │
+├────────────────────────────────────────────────────────────────────┤
+│  [新增] [批量删除]                                                  │
+├────────────────────────────────────────────────────────────────────┤
+│  ┌─────┬────────┬────────┬────────┬───────┬────────┬─────────┬──┐  │
+│  │ ☐   │ 日期   │ 账本   │ 金额   │ 类型  │ 分类   │ 标签    │信│  │
+│  ├─────┼────────┼────────┼────────┼───────┼────────┼─────────┼──┤  │
+│  │ ☐   │01-29   │日常账本│-50.00  │支出   │餐饮/午 │重要,日常│是│  │
+│  │     │01-28   │日常账本│+5000.00│收入   │工资    │月度    │否│  │
+│  └─────┴────────┴────────┴────────┴───────┴────────┴─────────┴──┘  │
+├────────────────────────────────────────────────────────────────────┤
+│                              共 100 条  [首页] [上页]               │
+│                                    [下页] [末页]                    │
+└────────────────────────────────────────────────────────────────────┘
 ```
+
+**表格列说明**:
+- 日期：记账日期
+- 账本：所属账本名称
+- 金额：支出显示负数，收入显示正数
+- 类型：支出/收入
+- 分类：主分类/子分类（如有子分类）
+- 标签：选中的标签（如有）
+- 是否信用卡：是/否
+- 操作：编辑、删除
+
+**说明**:
+- 筛选条件默认展开显示，无需点击"更多筛选"展开
+- 新增和批量删除按钮放置在筛选条件下方
+- 进入页面时默认加载当前选择的账本下的收支记录
 
 ### 4.2 新增/编辑弹窗
 
