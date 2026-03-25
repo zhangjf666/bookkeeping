@@ -30,8 +30,8 @@ public class UserTagDto {
     @ApiModelProperty(value = "标签颜色")
     private String color;
 
-    @ApiModelProperty(value = "是否置顶(0:不置顶,1:置顶)")
-    private String pinned;
+    @ApiModelProperty(value = "排序号")
+    private Integer sort;
 
     @ApiModelProperty(value = "创建时间")
     private LocalDateTime createTime;

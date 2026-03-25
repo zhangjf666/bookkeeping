@@ -16,7 +16,7 @@ export default [
     name: "Register",
     component: () => import("@/views/register/index.vue"),
     meta: {
-      title: $t("register.pureTitle"),
+      title: $t("menus.pureRegister"),
       showLink: false
     }
   },

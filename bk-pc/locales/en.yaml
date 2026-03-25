@@ -72,6 +72,10 @@ menus:
   purePermissionButton: Button Permission
   purePermissionButtonRouter: Route return button permission
   purePermissionButtonLogin: Login interface return button permission
+  pureSettings: Settings
+  pureTagSetting: Tag Setting
+  pureRegister: Register
+  pureBill: Records
 status:
   pureLoad: Loading...
   pureMessage: Message
@@ -169,3 +173,31 @@ bill:
   pureBatchDeleteConfirm: Are you sure to delete the selected {count} records?
   pureYes: Yes
   pureNo: No
+
+tag:
+  pureAddTag: Add Tag
+  pureTagName: Tag Name
+  pureColor: Color
+  pureSort: Sort
+  pureTagOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureTagConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureTagWarning: Warning
+  pureTagNameRequired: Please enter tag name
+  pureTagNameLength: Tag name cannot exceed 20 characters
+  pureColorRequired: Please select color
+  pureTagNamePlaceholder: Enter tag name
+  pureColorHint: Supports RGBA format, e.g. #FF6B6B80
+  purePreview: Preview
+  pureDeleteTagConfirm: Are you sure to delete this tag?
+  pureBatchDelete: Batch Delete
+  pureTagNameQuery: Tag Name
+  pureSelectFirst: Please select tags to delete
+  pureBatchDeleteConfirm: Are you sure to delete the selected {count} tags?

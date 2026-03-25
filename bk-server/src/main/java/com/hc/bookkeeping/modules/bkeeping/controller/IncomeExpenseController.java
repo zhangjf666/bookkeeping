@@ -33,7 +33,7 @@ public class IncomeExpenseController {
     @ApiOperation("分页查询收入支出")
     @GetMapping("/page")
     public Response<Page<IncomeExpenseDto>> getPage(@Validated IncomeExpenseQueryDto queryDto, Page page) {
-        Page<IncomeExpenseDto> result = incomeExpenseService.queryPage(queryDto, page);
+        Page<IncomeExpenseDto> result = incomeExpenseService.queryPage(page, queryDto);
         return Response.ok(result);
     }
 

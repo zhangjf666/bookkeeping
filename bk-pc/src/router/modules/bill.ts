@@ -8,7 +8,7 @@ export default {
   redirect: "/bill-list",
   meta: {
     icon: "ep:ticket",
-    title: $t("bill.pureTitle"),
+    title: $t("menus.pureBill"),
     rank: 1
   },
   children: [
@@ -17,7 +17,7 @@ export default {
       name: "BillList",
       component: () => import("@/views/bill/index.vue"),
       meta: {
-        title: $t("bill.pureTitle")
+        title: $t("menus.pureBill")
       }
     }
   ]

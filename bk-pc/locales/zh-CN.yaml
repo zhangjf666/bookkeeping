@@ -18,6 +18,7 @@ buttons:
   pureBackTop: 回到顶部
   pureOpenText: 开
   pureCloseText: 关
+
 search:
   pureTotal: 共
   pureHistory: 搜索历史
@@ -25,6 +26,7 @@ search:
   pureDragSort: （可拖拽排序）
   pureEmpty: 暂无搜索结果
   purePlaceholder: 搜索菜单（支持拼音搜索）
+
 panel:
   pureSystemSet: 系统配置
   pureCloseSystemSet: 关闭配置
@@ -60,6 +62,16 @@ panel:
   pureHiddenTags: 隐藏标签页
   pureHiddenFooter: 隐藏页脚
   pureMultiTagsCache: 页签持久化
+
+status:
+  pureLoad: 加载中...
+  pureMessage: 消息
+  pureNotify: 通知
+  pureTodo: 待办
+  pureNoMessage: 暂无消息
+  pureNoNotify: 暂无通知
+  pureNoTodo: 暂无待办
+
 menus:
   pureHome: 首页
   pureLogin: 登录
@@ -72,14 +84,11 @@ menus:
   purePermissionButton: 按钮权限
   purePermissionButtonRouter: 路由返回按钮权限
   purePermissionButtonLogin: 登录接口返回按钮权限
-status:
-  pureLoad: 加载中...
-  pureMessage: 消息
-  pureNotify: 通知
-  pureTodo: 待办
-  pureNoMessage: 暂无消息
-  pureNoNotify: 暂无通知
-  pureNoTodo: 暂无待办
+  pureSettings: 设置
+  pureTagSetting: 标签设置
+  pureRegister: 用户注册
+  pureBill: 收支记录
+
 login:
   pureUsername: 账号
   purePassword: 密码
@@ -99,6 +108,7 @@ login:
   pureRegisterSuccess: 注册成功
   pureRegisterFail: 注册失败
   purePasswordNotMatch: 两次输入密码不一致
+
 register:
   pureTitle: 用户注册
   pureUsername: 请输入用户名
@@ -108,6 +118,7 @@ register:
   pureRegister: 注册
   pureHasAccount: 已有账号？去登录
   pureGoLogin: 立即登录
+
 dashboard:
   pureAdd: 记一笔
   pureExpense: 支出
@@ -124,6 +135,7 @@ dashboard:
   pureNoRecords: 暂无记账记录
   pureCurrentBook: 当前账本
   pureDefault: 默认
+
 bill:
   pureTitle: 收支记录
   pureAdd: 新增
@@ -150,7 +162,7 @@ bill:
   pureExpense: 支出
   pureIncome: 收入
   pureCancel: 取消
-  pureConfirm: 确定
+  pureConfirm: 确认
   pureCreateSuccess: 创建成功
   pureUpdateSuccess: 更新成功
   pureDeleteSuccess: 删除成功
@@ -170,3 +182,31 @@ bill:
   pureBatchDeleteConfirm: 确定要删除选中的 {count} 条记录吗？
   pureYes: 是
   pureNo: 否
+
+tag:
+  pureAddTag: 新增标签
+  pureTagName: 标签名称
+  pureColor: 颜色
+  pureSort: 排序
+  pureTagOperation: 操作
+  pureAdd: 新增
+  pureEdit: 编辑
+  pureDelete: 删除
+  pureCancel: 取消
+  pureTagConfirm: 确认
+  pureCreateSuccess: 创建成功
+  pureUpdateSuccess: 更新成功
+  pureDeleteSuccess: 删除成功
+  pureOperationFail: 操作失败
+  pureTagWarning: 提示
+  pureTagNameRequired: 请输入标签名称
+  pureTagNameLength: 标签名称最多20个字符
+  pureColorRequired: 请选择颜色
+  pureTagNamePlaceholder: 请输入标签名称
+  pureColorHint: 支持RGBA格式，如 #FF6B6B80
+  purePreview: 预览
+  pureDeleteTagConfirm: 确定要删除该标签吗？
+  pureBatchDelete: 批量删除
+  pureTagNameQuery: 标签名称
+  pureSelectFirst: 请先选择要删除的标签
+  pureBatchDeleteConfirm: 确定要删除选中的 {count} 个标签吗？

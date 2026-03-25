@@ -24,7 +24,7 @@ public interface IncomeExpenseService extends BaseService<IncomeExpenseDto, Inco
      * @param page 分页
      * @return
      */
-    Page queryPage(IncomeExpenseQueryDto queryDto, Page page);
+    Page queryPage(Page page, IncomeExpenseQueryDto queryDto);
 
     /**
      * 查询收支记录

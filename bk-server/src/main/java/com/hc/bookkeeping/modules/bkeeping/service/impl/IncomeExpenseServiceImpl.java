@@ -87,7 +87,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
     }
 
     @Override
-    public Page queryPage(IncomeExpenseQueryDto queryDto, Page page) {
+    public Page queryPage(Page page, IncomeExpenseQueryDto queryDto) {
         Page<IncomeExpenseDto> pageResult = queryPage(page, QueryUtil.bulid(queryDto));
         fillClassify(pageResult.getRecord());
         //记录搜索记录
