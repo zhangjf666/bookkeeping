@@ -6,19 +6,15 @@ import type {
   AccountBook,
   IncomeExpenseQuery
 } from "@/types/dashboard";
-import type {
-  IncomeExpense,
-  IncomeExpenseForm,
-  Classify,
-  Tag
-} from "@/types/bill";
+import type { IncomeExpense, IncomeExpenseForm, Tag } from "@/types/bill";
+import type { Classify } from "@/types/classify";
 import { getSummary, getTrendData, getAccountBooks } from "@/api/dashboard";
+import { getClassifyList as getClassifyListNew } from "@/api/classify";
 import {
   getIncomeExpenseList,
   createIncomeExpense,
   updateIncomeExpense,
   deleteIncomeExpense,
-  getClassifyList,
   getTagList,
   getRemarkList
 } from "@/api/incomeExpense";
@@ -92,7 +88,7 @@ export const useBillStore = defineStore("pure-bill", {
         this.accountBooks = result;
         if (result.length > 0 && !this.currentAccountBook) {
           const defaultBook = result.find(
-            (item: AccountBook) => item.isDefault
+            (item: AccountBook) => item.isDefault === "YES"
           );
           this.currentAccountBook = defaultBook || result[0];
         }
@@ -159,7 +155,7 @@ export const useBillStore = defineStore("pure-bill", {
     async loadClassifyAndTag(userId: number) {
       try {
         const [classifyResult, tagResult, remarkResult] = await Promise.all([
-          getClassifyList(userId),
+          getClassifyListNew(userId),
           getTagList(userId),
           getRemarkList(userId)
         ]);

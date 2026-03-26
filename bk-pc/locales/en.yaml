@@ -73,7 +73,10 @@ menus:
   purePermissionButtonRouter: Route return button permission
   purePermissionButtonLogin: Login interface return button permission
   pureSettings: Settings
+  pureAccountBookSetting: Account Book Setting
   pureTagSetting: Tag Setting
+  pureRemarkSetting: Remark Setting
+  pureClassifySetting: Classify Setting
   pureRegister: Register
   pureBill: Records
 status:
@@ -201,3 +204,90 @@ tag:
   pureTagNameQuery: Tag Name
   pureSelectFirst: Please select tags to delete
   pureBatchDeleteConfirm: Are you sure to delete the selected {count} tags?
+
+remark:
+  pureAddRemark: Add Remark
+  pureRemarkName: Remark Content
+  pureRemarkClassify: Category
+  pureRemarkOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureRemarkConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureRemarkWarning: Warning
+  pureRemarkNameRequired: Please enter remark content
+  pureRemarkNameLength: Remark content cannot exceed 20 characters
+  pureClassifyRequired: Please select category
+  pureRemarkNamePlaceholder: Enter remark content
+  pureRemarkNameQuery: Remark Content
+  pureRemarkClassifyQuery: Category
+  pureSelectFirst: Please select remarks to delete
+  pureDeleteRemarkConfirm: Are you sure to delete this remark?
+  pureBatchDeleteConfirm: Are you sure to delete the selected {count} remarks?
+
+accountBook:
+  pureAddAccountBook: Add Account Book
+  pureAccountBookName: Account Book Name
+  pureAccountBookImage: Account Book Icon
+  pureIsDefault: Set as Default
+  pureAccountBookOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureAccountBookConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureAccountBookWarning: Warning
+  pureAccountBookNameRequired: Please enter account book name
+  pureAccountBookNameLength: Account book name cannot exceed 20 characters
+  pureAccountBookImagePlaceholder: Select account book icon
+  pureAccountBookNameQuery: Account Book Name
+  pureAccountBookSelectFirst: Please select account books to delete
+  pureDeleteAccountBookConfirm: Are you sure to delete this account book?
+  pureAccountBookBatchDeleteConfirm: Are you sure to delete the selected {count} account books?
+  pureCannotDeleteDefault: Cannot delete default account book, please set another account book as default first
+  pureSetAsDefault: Set as Default
+  pureDefault: Default
+
+classify:
+  pureAddClassify: Add Classify
+  pureEditClassify: Edit Classify
+  pureClassifyName: Classify Name
+  pureClassifyIcon: Classify Icon
+  pureParentClassify: Parent Classify
+  pureType: Type
+  pureSort: Sort
+  pureEnable: Enable
+  pureClassifyOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureClassifyConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureClassifyWarning: Warning
+  pureClassifyNameRequired: Please enter classify name
+  pureClassifyNameLength: Classify name cannot exceed 20 characters
+  pureIconRequired: Please select classify icon
+  pureTypeRequired: Please select classify type
+  pureClassifyNameQuery: Classify Name
+  pureSelectFirst: Please select classifies to delete
+  pureDeleteClassifyConfirm: Are you sure to delete this classify? (If there are sub-classifies, they will also be deleted)
+  pureBatchDeleteConfirm: Are you sure to delete the selected {count} classifies?
+  pureTypePlaceholder: Select type
+  pureIconPlaceholder: Select icon
+  pureParentClassifyPlaceholder: Select parent classify
+  pureParentClassifyHint: Empty for top-level classify, can only select main classify
+  pureTopLevel: Top Level (No Parent)
+  pureSelectClassifyToEdit: Select a classify on the left to edit or add new

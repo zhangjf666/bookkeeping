@@ -35,7 +35,7 @@ export interface AccountBook {
   id: number;
   name: string;
   image: string;
-  isDefault: boolean;
+  isDefault: "YES" | "NO";
 }
 
 export interface SummaryParams {

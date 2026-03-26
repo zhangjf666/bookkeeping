@@ -85,7 +85,10 @@ menus:
   purePermissionButtonRouter: 路由返回按钮权限
   purePermissionButtonLogin: 登录接口返回按钮权限
   pureSettings: 设置
+  pureAccountBookSetting: 账本设置
   pureTagSetting: 标签设置
+  pureRemarkSetting: 备注设置
+  pureClassifySetting: 分类设置
   pureRegister: 用户注册
   pureBill: 收支记录
 
@@ -210,3 +213,91 @@ tag:
   pureTagNameQuery: 标签名称
   pureSelectFirst: 请先选择要删除的标签
   pureBatchDeleteConfirm: 确定要删除选中的 {count} 个标签吗？
+
+remark:
+  pureAddRemark: 新增备注
+  pureRemarkName: 备注内容
+  pureRemarkClassify: 所属分类
+  pureRemarkOperation: 操作
+  pureAdd: 新增
+  pureEdit: 编辑
+  pureDelete: 删除
+  pureCancel: 取消
+  pureRemarkConfirm: 确认
+  pureCreateSuccess: 创建成功
+  pureUpdateSuccess: 更新成功
+  pureDeleteSuccess: 删除成功
+  pureOperationFail: 操作失败
+  pureRemarkWarning: 提示
+  pureRemarkNameRequired: 请输入备注内容
+  pureRemarkNameLength: 备注内容最多20个字符
+  pureClassifyRequired: 请选择分类
+  pureRemarkNamePlaceholder: 请输入备注内容
+  pureRemarkNameQuery: 备注内容
+  pureRemarkClassifyQuery: 所属分类
+  pureSelectFirst: 请先选择要删除的备注
+  pureDeleteRemarkConfirm: 确定要删除该备注吗？
+  pureBatchDeleteConfirm: 确定要删除选中的 {count} 个备注吗？
+
+accountBook:
+  pureAddAccountBook: 新增账本
+  pureAccountBookName: 账本名称
+  pureAccountBookImage: 账本图标
+  pureIsDefault: 默认账本
+  pureAccountBookOperation: 操作
+  pureAdd: 新增
+  pureEdit: 编辑
+  pureDelete: 删除
+  pureCancel: 取消
+  pureAccountBookConfirm: 确认
+  pureCreateSuccess: 创建成功
+  pureUpdateSuccess: 更新成功
+  pureDeleteSuccess: 删除成功
+  pureOperationFail: 操作失败
+  pureAccountBookWarning: 提示
+  pureAccountBookNameRequired: 请输入账本名称
+  pureAccountBookNameLength: 账本名称最多20个字符
+  pureAccountBookImagePlaceholder: 请选择账本图标
+  pureAccountBookNameQuery: 账本名称
+  pureAccountBookSelectFirst: 请先选择要删除的账本
+  pureDeleteAccountBookConfirm: 确定要删除该账本吗？
+  pureAccountBookBatchDeleteConfirm: 确定要删除选中的 {count} 个账本吗？
+  pureCannotDeleteDefault: 无法删除默认账本，删除前请先设置其他账本为默认账本
+  pureCannotCancelDefault: 取消默认账本设置之前，请先将其他账本设置为默认账本
+  pureSetAsDefault: 设为默认
+  pureDefault: 默认
+
+classify:
+  pureAddClassify: 新增分类
+  pureEditClassify: 编辑分类
+  pureClassifyName: 分类名称
+  pureClassifyIcon: 分类图标
+  pureParentClassify: 上级分类
+  pureType: 分类类型
+  pureSort: 排序号
+  pureEnable: 启用
+  pureClassifyOperation: 操作
+  pureAdd: 新增
+  pureEdit: 编辑
+  pureDelete: 删除
+  pureCancel: 取消
+  pureClassifyConfirm: 确认
+  pureCreateSuccess: 创建成功
+  pureUpdateSuccess: 更新成功
+  pureDeleteSuccess: 删除成功
+  pureOperationFail: 操作失败
+  pureClassifyWarning: 提示
+  pureClassifyNameRequired: 请输入分类名称
+  pureClassifyNameLength: 分类名称最多20个字符
+  pureIconRequired: 请选择分类图标
+  pureTypeRequired: 请选择分类类型
+  pureClassifyNameQuery: 分类名称
+  pureSelectFirst: 请先选择要删除的分类
+  pureDeleteClassifyConfirm: 确定要删除该分类吗？（如果该分类下有子分类，将一并删除）
+  pureBatchDeleteConfirm: 确定要删除选中的 {count} 个分类吗？
+  pureTypePlaceholder: 请选择分类类型
+  pureIconPlaceholder: 请选择分类图标
+  pureParentClassifyPlaceholder: 请选择上级分类
+  pureParentClassifyHint: 为空则为顶级分类，仅可选择主分类
+  pureTopLevel: 顶级分类（无上级）
+  pureSelectClassifyToEdit: 请在左侧选择分类进行编辑或新增

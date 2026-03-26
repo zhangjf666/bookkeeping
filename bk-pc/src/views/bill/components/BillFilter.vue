@@ -2,13 +2,15 @@
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBillStoreHook } from "@/store/modules/bill";
+import { getAccountBookIcon } from "@/utils/accountBook";
+import { getClassifyIcon } from "@/utils/classifyIcons";
 
 defineOptions({
   name: "BillFilter"
 });
 
 const emit = defineEmits<{
-  query: [];
+  query: [accountBookId: number | undefined];
   reset: [];
 }>();
 
@@ -17,6 +19,17 @@ const billStore = useBillStoreHook();
 
 const classifyTreeData = computed(() => billStore.classifyTree);
 const currentAccountBookId = computed(() => billStore.currentAccountBook?.id);
+
+const classifyTreeDataWithIcon = computed(() => {
+  const transformNode = (node: any): any => {
+    return {
+      ...node,
+      name: `${getClassifyIcon(node.image)} ${node.name}`,
+      children: node.children?.map(transformNode)
+    };
+  };
+  return classifyTreeData.value.map(transformNode);
+});
 
 const filterForm = ref({
   accountBookId: undefined as number | undefined,
@@ -37,6 +50,15 @@ watch(
     }
   },
   { immediate: true }
+);
+
+watch(
+  () => filterForm.value.mainClassify,
+  (newVal, oldVal) => {
+    if (!newVal && oldVal) {
+      filterForm.value.subClassify = undefined;
+    }
+  }
 );
 
 const typeOptions = [
@@ -68,27 +90,47 @@ const handleQuery = () => {
     })
     .filter(code => code !== null) as number[];
 
-  const queryParams: any = {
-    accountBookId: filterForm.value.accountBookId,
-    date: filterForm.value.date,
-    amount: filterForm.value.amount,
-    mainClassify,
-    subClassify,
-    remark: filterForm.value.remark || undefined,
-    tagCodes: selectedTagCodes.length > 0 ? selectedTagCodes : undefined
-  };
+  const queryParams: any = {};
+
+  if (filterForm.value.accountBookId !== undefined) {
+    queryParams.accountBookId = filterForm.value.accountBookId;
+  }
+  if (filterForm.value.date && filterForm.value.date.length === 2) {
+    queryParams.date = filterForm.value.date;
+  }
+  if (filterForm.value.amount && filterForm.value.amount.length === 2) {
+    queryParams.amount = filterForm.value.amount;
+  }
+  if (mainClassify) {
+    queryParams.mainClassify = mainClassify;
+  }
+  if (subClassify) {
+    queryParams.subClassify = subClassify;
+  }
+  if (filterForm.value.remark) {
+    queryParams.remark = filterForm.value.remark;
+  }
+  if (selectedTagCodes.length > 0) {
+    queryParams.tagCodes = selectedTagCodes;
+  }
 
   if (filterForm.value.type !== undefined) {
     queryParams.type = filterForm.value.type;
   }
 
   billStore.setQueryParams(queryParams);
-  emit("query");
+
+  if (!selectedId && billStore.queryParams) {
+    delete (billStore.queryParams as any).mainClassify;
+    delete (billStore.queryParams as any).subClassify;
+  }
+
+  emit("query", filterForm.value.accountBookId);
 };
 
 const handleReset = () => {
   filterForm.value = {
-    accountBookId: currentAccountBookId.value,
+    accountBookId: undefined,
     type: undefined,
     date: [],
     amount: [],
@@ -140,7 +182,22 @@ const queryRemarks = (
                 :key="book.id"
                 :label="book.name"
                 :value="book.id"
-              />
+              >
+                <div class="book-option">
+                  <span style="margin-right: 8px">{{
+                    getAccountBookIcon(book.image)
+                  }}</span>
+                  <span>{{ book.name }}</span>
+                  <el-tag
+                    v-if="book.isDefault === 'YES'"
+                    size="small"
+                    type="success"
+                    style="margin-left: 28px"
+                  >
+                    {{ t("dashboard.pureDefault") }}
+                  </el-tag>
+                </div>
+              </el-option>
             </el-select>
           </el-form-item>
         </el-col>
@@ -199,7 +256,7 @@ const queryRemarks = (
           <el-form-item :label="t('bill.pureClassify')">
             <el-tree-select
               v-model="filterForm.mainClassify"
-              :data="classifyTreeData"
+              :data="classifyTreeDataWithIcon"
               :props="{ label: 'name', value: 'id', children: 'children' }"
               :placeholder="t('bill.pureSelectPlaceholder')"
               check-strictly

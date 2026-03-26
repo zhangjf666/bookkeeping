@@ -68,13 +68,13 @@ const handleBatchDelete = async () => {
   selectedIds.value = [];
 };
 
-const handleQuery = () => {
-  billStore.loadList(userId.value, accountBookId.value);
+const handleQuery = (accountBookId?: number) => {
+  billStore.loadList(userId.value, accountBookId);
 };
 
 const handleReset = () => {
   billStore.resetQueryParams();
-  billStore.loadList(userId.value, accountBookId.value);
+  billStore.loadList(userId.value, undefined);
 };
 
 const handleSelectionChange = (selection: IncomeExpense[]) => {

@@ -23,25 +23,31 @@
         ↓
 查看已有的常用备注列表
         ↓
-点击"新增"按钮 → 输入备注内容 → 保存
+(可选) 输入备注内容/选择分类进行搜索 → 点击"查询"或按回车
+        ↓
+点击"新增"按钮 → 输入备注内容、选择分类 → 保存
+        ↓
+备注数据更新 → 刷新全局备注缓存（供其他页面使用）
         ↓
 点击某条备注的"编辑"按钮 → 修改内容 → 保存
         ↓
+备注数据更新 → 刷新全局备注缓存
+        ↓
 点击"删除"按钮 → 确认删除
         ↓
-列表刷新
+备注数据更新 → 刷新全局备注缓存 → 列表刷新
 ```
 
 ---
 
 ## 三、接口定义
 
-### 3.1 查询用户备注
+### 3.1 查询用户备注（分页）
 
 **请求**
 
 ```
-GET /userRemark
+GET /userRemark/page
 ```
 
 **请求参数**
@@ -49,6 +55,10 @@ GET /userRemark
 | 参数 | 类型 | 必填 | 说明 |
 |------|------|------|------|
 | userId | Long | 是 | 用户ID |
+| remark | String | 否 | 备注内容（模糊搜索） |
+| classifyId | Long | 否 | 分类ID |
+| pageNo | Integer | 否 | 页码（默认1） |
+| pageSize | Integer | 否 | 每页条数（默认10） |
 
 **响应**
 
@@ -56,24 +66,27 @@ GET /userRemark
 {
   "code": 0,
   "msg": "ok",
-  "data": [
-    {
-      "id": 1,
-      "userId": 1,
-      "remark": "午餐",
-      "sort": 1,
-      "createTime": "2026-03-01 10:00:00",
-      "updateTime": "2026-03-01 10:00:00"
-    },
-    {
-      "id": 2,
-      "userId": 1,
-      "remark": "晚餐",
-      "sort": 2,
-      "createTime": "2026-03-01 10:00:00",
-      "updateTime": "2026-03-01 10:00:00"
-    }
-  ]
+  "data": {
+    "totalCount": 2,
+    "list": [
+      {
+        "id": 1,
+        "userId": 1,
+        "remark": "午餐",
+        "classifyId": 1,
+        "createTime": "2026-03-01 10:00:00",
+        "updateTime": "2026-03-01 10:00:00"
+      },
+      {
+        "id": 2,
+        "userId": 1,
+        "remark": "晚餐",
+        "classifyId": 2,
+        "createTime": "2026-03-01 10:00:00",
+        "updateTime": "2026-03-01 10:00:00"
+      }
+    ]
+  }
 }
 ```
 
@@ -91,7 +104,7 @@ POST /userRemark
 {
   "userId": 1,
   "remark": "早餐",
-  "sort": 3
+  "classifyId": 1
 }
 ```
 
@@ -101,7 +114,7 @@ POST /userRemark
 |------|------|------|------|
 | userId | Long | 是 | 用户ID |
 | remark | String | 是 | 备注内容 |
-| sort | Integer | 否 | 排序号 |
+| classifyId | Long | 是 | 分类ID |
 
 ### 3.3 更新用户备注
 
@@ -118,7 +131,7 @@ PUT /userRemark
   "id": 1,
   "userId": 1,
   "remark": "午餐（修改）",
-  "sort": 1
+  "classifyId": 2
 }
 ```
 
@@ -147,7 +160,7 @@ DELETE /userRemark
 | id | Long | 主键ID |
 | userId | Long | 用户ID |
 | remark | String | 备注内容 |
-| sort | Integer | 排序号 |
+| classifyId | Long | 分类ID |
 | createTime | LocalDateTime | 创建时间 |
 | updateTime | LocalDateTime | 更新时间 |
 
@@ -210,41 +223,80 @@ DELETE /userRemark
 
 ---
 
-## 八、文件清单
+## 八、数据缓存管理
+
+备注数据用于收支记录等页面的备注选择功能，因此在备注发生新增、修改、删除操作后，需要刷新全局备注缓存。
+
+**缓存刷新时机：**
+- 新增备注成功后
+- 修改备注成功后
+- 删除备注成功后
+
+**实现方式：**
+调用 `getRemarkList(userId)` API 获取最新备注数据，更新到 `billStore.remarkList`。
+
+---
+
+## 九、文件清单
 
 ### 8.1 需要新建的文件
 
 | 文件路径 | 职责描述 |
 |----------|----------|
-| `bk-pc/src/api/bookkeeping/userRemark.ts` | 用户备注 API |
-| `bk-pc/src/types/bookkeeping/userRemark.ts` | 类型定义 |
-| `bk-pc/src/views/settings/remark.vue` | 备注设置页面 |
+| `bk-pc/src/api/remark.ts` | 用户备注 API |
+| `bk-pc/src/types/remark.ts` | 类型定义 |
+| `bk-pc/src/views/settings/remark/index.vue` | 备注设置页面 |
+| `bk-pc/src/router/modules/settings.ts` | 路由配置 |
 
-### 8.2 需要修改的文件
+### 9.2 需要修改的文件
 
 | 文件路径 | 修改内容 |
 |----------|----------|
-| `bk-pc/src/router/modules/settings.ts` | 添加路由（已添加） |
+| `bk-pc/locales/zh-CN.yaml` | 添加备注相关国际化文案 |
+| `bk-pc/locales/en.yaml` | 添加备注相关国际化文案 |
+| `docs/requirements/feature_remark_prd.md` | 更新页面设计和验收标准 |
 
 ---
 
-## 九、验收标准
+## 十、验收标准
 
-### 9.1 功能验收
+### 10.1 功能验收
 
-- [ ] 备注列表正常显示
-- [ ] 新增备注成功
-- [ ] 编辑备注成功
-- [ ] 删除备注成功
-- [ ] 拖拽排序功能正常
+- [x] 备注列表正常显示
+- [x] 备注内容搜索功能
+- [x] 分类筛选功能
+- [x] 新增备注成功
+- [x] 编辑备注成功
+- [x] 删除备注成功
+- [x] 批量删除功能
+- [x] 表格多选功能
+- [x] 分页功能正常
 
-### 9.2 交互验收
+### 10.2 交互验收
 
-- [ ] 备注内���字数限制（最多20字）
-- [ ] 必填校验提示
-- [ ] 删除确认弹窗
+- [x] 备注内容字符限制（最多20字）
+- [x] 必填校验提示（备注内容、分类）
+- [x] 删除确认弹窗
+- [x] 批量删除确认弹窗
+- [x] 查询按钮按回车键可触发搜索
+- [x] 重置按钮清空搜索条件
+- [x] 批量删除按钮禁用状态（未选中时不可点击）
+- [x] 批量删除按钮显示选中数量
 
-### 9.3 数据校验
+### 10.3 数据校验
 
-- [ ] 备注内容不能为空
-- [ ] 备注内容不能超过20个字符
+- [x] 备注内容不能为空
+- [x] 备注内容不能超过20个字符
+- [x] 分类为必填项
+
+### 10.4 分类显示验收
+
+- [x] 主分类显示正常
+- [x] 子分类显示为"主分类/子分类"格式
+- [x] 分类下拉框使用树形结构（与收支记录一致）
+
+### 10.5 缓存验收
+
+- [x] 新增备注后刷新全局备注缓存
+- [x] 修改备注后刷新全局备注缓存
+- [x] 删除备注后刷新全局备注缓存

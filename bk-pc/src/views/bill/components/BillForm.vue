@@ -5,6 +5,7 @@ import { message } from "@/utils/message";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import type { IncomeExpense, IncomeExpenseForm } from "@/types/bill";
+import { getClassifyIcon } from "@/utils/classifyIcons";
 import dayjs from "dayjs";
 
 defineOptions({
@@ -85,6 +86,17 @@ const typeOptions = [
 const classifyTreeData = computed(() => {
   const type = formData.value.type || "EXPENSE";
   return billStore.classifyTree.filter((c: any) => c.type === type);
+});
+
+const classifyTreeDataWithIcon = computed(() => {
+  const transformNode = (node: any): any => {
+    return {
+      ...node,
+      name: `${getClassifyIcon(node.image)} ${node.name}`,
+      children: node.children?.map(transformNode)
+    };
+  };
+  return classifyTreeData.value.map(transformNode);
 });
 
 const selectedClassifyId = ref<number | undefined>(undefined);
@@ -290,7 +302,7 @@ const handleSubmit = async () => {
     <el-form-item :label="t('bill.pureClassify')" prop="mainClassify">
       <el-tree-select
         v-model="selectedClassifyId"
-        :data="classifyTreeData"
+        :data="classifyTreeDataWithIcon"
         :props="{ label: 'name', value: 'id', children: 'children' }"
         :placeholder="t('bill.pureSelectPlaceholder')"
         check-strictly

@@ -1,12 +1,15 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
+import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.common.utils.QueryUtil;
 import com.hc.bookkeeping.modules.bkeeping.dto.AccountBookDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.AccountBookQueryDto;
+import com.hc.bookkeeping.modules.bkeeping.dto.UserRemarkDto;
+import com.hc.bookkeeping.modules.bkeeping.dto.UserRemarkQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.service.AccountBookService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -26,6 +29,14 @@ import java.util.Set;
 public class AccountBookController {
 
     private final AccountBookService accountBookService;
+
+    @Log("分页查询账本")
+    @ApiOperation("分页查询账本")
+    @GetMapping("/page")
+    public Response<Page<AccountBookDto>> getPage(@Validated AccountBookQueryDto queryDto, Page page) {
+        Page<AccountBookDto> result = accountBookService.queryPage(page, QueryUtil.bulid(queryDto));
+        return Response.ok(result);
+    }
 
     @Log("查询账本")
     @ApiOperation("查询账本")

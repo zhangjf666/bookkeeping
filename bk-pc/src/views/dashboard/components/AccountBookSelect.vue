@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import { useBillStoreHook } from "@/store/modules/bill";
+import { getAccountBookIcon } from "@/utils/accountBook";
 
 defineOptions({
   name: "AccountBookSelect"
@@ -36,8 +37,8 @@ const handleChange = (value: number) => {
         :value="book.id"
       >
         <div class="book-option">
-          <span>{{ book.name }}</span>
-          <el-tag v-if="book.isDefault" size="small" type="success">
+          <span>{{ getAccountBookIcon(book.image) }} {{ book.name }}</span>
+          <el-tag v-if="book.isDefault === 'YES'" size="small" type="success">
             {{ t("dashboard.pureDefault") }}
           </el-tag>
         </div>
