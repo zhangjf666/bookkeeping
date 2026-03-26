@@ -189,8 +189,8 @@ POST /userConfig/additionalExpenseLimit
 
 | 文件路径 | 职责描述 |
 |----------|----------|
-| `bk-pc/src/api/bookkeeping/userConfig.ts` | 用户配置 API |
-| `bk-pc/src/types/bookkeeping/userConfig.ts` | 类型定义 |
+| `bk-pc/src/api/userConfig.ts` | 用户配置 API |
+| `bk-pc/src/types/userConfig.ts` | 类型定义 |
 | `bk-pc/src/views/settings/limit.vue` | 支出限额设置页面 |
 
 ### 8.2 需要修改的文件
