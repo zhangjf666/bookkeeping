@@ -1,14 +1,9 @@
 import { defineStore } from "pinia";
 import { store } from "../utils";
-import type {
-  Summary,
-  TrendData,
-  AccountBook,
-  IncomeExpenseQuery
-} from "@/types/dashboard";
+import type { AccountBook, IncomeExpenseQuery } from "@/types/dashboard";
 import type { IncomeExpense, IncomeExpenseForm, Tag } from "@/types/bill";
 import type { Classify } from "@/types/classify";
-import { getSummary, getTrendData, getAccountBooks } from "@/api/dashboard";
+import { getAccountBooks } from "@/api/dashboard";
 import { getClassifyList as getClassifyListNew } from "@/api/classify";
 import {
   getIncomeExpenseList,
@@ -18,16 +13,11 @@ import {
   getTagList,
   getRemarkList
 } from "@/api/incomeExpense";
-import dayjs from "dayjs";
 
 export const useBillStore = defineStore("pure-bill", {
   state: () => ({
-    summary: null as Summary | null,
-    trendData: null as TrendData | null,
     accountBooks: [] as AccountBook[],
     currentAccountBook: null as AccountBook | null,
-    loading: false,
-    trendLoading: false,
     list: [] as IncomeExpense[],
     total: 0,
     queryParams: {
@@ -42,46 +32,6 @@ export const useBillStore = defineStore("pure-bill", {
     remarkList: [] as { id: number; remark: string; classifyId: number }[]
   }),
   actions: {
-    async loadSummary(userId: number, accountBookId?: number) {
-      this.loading = true;
-      try {
-        const result = await getSummary({
-          userId,
-          accountBookId,
-          days: 3
-        });
-        this.summary = result;
-      } catch {
-        this.summary = null;
-      } finally {
-        this.loading = false;
-      }
-    },
-    async loadTrendData(
-      userId: number,
-      accountBookId?: number,
-      days: number = 7
-    ) {
-      this.trendLoading = true;
-      const endDate = dayjs().format("YYYY-MM-DD");
-      const beginDate = dayjs()
-        .subtract(days - 1, "day")
-        .format("YYYY-MM-DD");
-      try {
-        const result = await getTrendData({
-          userId,
-          accountBookId,
-          mode: "2",
-          beginDate,
-          endDate
-        });
-        this.trendData = result;
-      } catch {
-        this.trendData = null;
-      } finally {
-        this.trendLoading = false;
-      }
-    },
     async loadAccountBooks() {
       try {
         const result = await getAccountBooks();

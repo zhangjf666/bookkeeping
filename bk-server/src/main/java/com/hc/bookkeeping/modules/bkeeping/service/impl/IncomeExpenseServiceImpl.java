@@ -198,7 +198,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
-            if(dict.getInt("type") == 0){
+            if(OperateType.EXPENSE.code.equals(dict.getStr("type"))){
                 expense = dict.getBigDecimal("amount");
             } else {
                 income = dict.getBigDecimal("amount");

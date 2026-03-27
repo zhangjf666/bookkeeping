@@ -3,6 +3,10 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Summary } from "@/types/dashboard";
 import Edit from "~icons/ep/edit";
+import ShoppingCart from "~icons/ep/shopping-cart";
+import Money from "~icons/ep/money";
+import Odometer from "~icons/ep/odometer";
+import Coin from "~icons/ep/coin";
 
 defineOptions({
   name: "SummaryCards"
@@ -51,14 +55,14 @@ const cards = computed(() => {
       title: t("dashboard.pureExpense"),
       value: formatAmount(props.data?.expenseAmount),
       color: "#f56c6c",
-      icon: "ep:trend-charts",
+      icon: ShoppingCart,
       showEdit: shouldShowLimit.value
     },
     {
       title: t("dashboard.pureIncome"),
       value: formatAmount(props.data?.incomeAmount),
       color: "#67c23a",
-      icon: "ep:wallet",
+      icon: Money,
       showEdit: false
     }
   ];
@@ -68,14 +72,14 @@ const cards = computed(() => {
       title: limitTitle.value,
       value: formatAmount(props.data?.expenseLimit),
       color: "#e6a23c",
-      icon: "ep:data-line",
+      icon: Odometer,
       showEdit: true
     });
     cardList.push({
       title: surplusTitle.value,
       value: formatAmount(props.data?.expenseSurplus),
       color: "#409eff",
-      icon: "ep:coin",
+      icon: Coin,
       showEdit: false
     });
   }
@@ -147,14 +151,13 @@ const cards = computed(() => {
   }
 
   .card-info {
+    display: flex;
     flex: 1;
+    flex-direction: column;
+    justify-content: center;
   }
 
   .card-title {
-    display: flex;
-    gap: 4px;
-    align-items: center;
-    margin-bottom: 8px;
     font-size: 14px;
     color: #909399;
   }

@@ -5,6 +5,9 @@ import { ElMessage } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import { getUserConfigList, setAdditionalExpenseLimit } from "@/api/userConfig";
+import { getSummary } from "@/api/dashboard";
+import type { Summary } from "@/types/dashboard";
+import dayjs from "dayjs";
 import SummaryCards from "./components/SummaryCards.vue";
 import TrendChart from "./components/TrendChart.vue";
 import RecentRecords from "./components/RecentRecords.vue";
@@ -30,6 +33,8 @@ const limitForm = ref({
   expenseLimit: ""
 });
 
+const summaryData = ref<Summary | null>(null);
+
 const loadData = async () => {
   const userId = userStore.id;
   if (!userId) {
@@ -40,10 +45,8 @@ const loadData = async () => {
   loading.value = true;
   try {
     const accountBookId = billStore.currentAccountBook?.id;
-    await Promise.all([
-      billStore.loadSummary(userId, accountBookId),
-      billStore.loadTrendData(userId, accountBookId, 7)
-    ]);
+    const summary = await getSummary({ userId, accountBookId, days: 3 });
+    summaryData.value = summary;
   } finally {
     loading.value = false;
   }
@@ -63,10 +66,8 @@ const loadAll = async () => {
       billStore.loadClassifyAndTag(userId)
     ]);
     const accountBookId = billStore.currentAccountBook?.id;
-    await Promise.all([
-      billStore.loadSummary(userId, accountBookId),
-      billStore.loadTrendData(userId, accountBookId, 7)
-    ]);
+    const summary = await getSummary({ userId, accountBookId, days: 3 });
+    summaryData.value = summary;
 
     await loadUserConfig();
   } finally {
@@ -117,7 +118,7 @@ const handleBillFormSuccess = () => {
 };
 
 const handleEditLimit = () => {
-  const currentLimit = billStore.summary?.expenseLimit;
+  const currentLimit = summaryData.value?.expenseLimit;
   limitForm.value.expenseLimit = currentLimit ? String(currentLimit) : "";
   showLimitDialog.value = true;
 };
@@ -159,17 +160,17 @@ const summaryParams = computed(() => ({
 
     <el-skeleton :loading="loading" animated :rows="8">
       <SummaryCards
-        :data="billStore.summary"
+        :data="summaryData"
         :loading="loading"
         :show-expense-limit="showExpenseLimitMode"
         @edit-limit="handleEditLimit"
       />
       <TrendChart
-        :data="billStore.trendData"
-        :loading="billStore.trendLoading"
+        :user-id="userStore.id"
+        :account-book-id="billStore.currentAccountBook?.id"
       />
       <RecentRecords
-        :records="billStore.summary?.incomeExpenseList || []"
+        :records="summaryData?.incomeExpenseList || []"
         :loading="loading"
       />
     </el-skeleton>
