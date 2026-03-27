@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Summary } from "@/types/dashboard";
+import Edit from "~icons/ep/edit";
 
 defineOptions({
   name: "SummaryCards"
@@ -10,9 +11,17 @@ defineOptions({
 interface Props {
   data: Summary | null;
   loading: boolean;
+  showExpenseLimit?: "1" | "2" | "3";
 }
 
-const props = defineProps<Props>();
+const props = withDefaults(defineProps<Props>(), {
+  showExpenseLimit: "1"
+});
+
+const emit = defineEmits<{
+  editLimit: [];
+}>();
+
 const { t } = useI18n();
 
 const formatAmount = (amount: number | undefined) => {
@@ -20,32 +29,59 @@ const formatAmount = (amount: number | undefined) => {
   return amount.toFixed(2);
 };
 
-const cards = computed(() => [
-  {
-    title: t("dashboard.pureExpense"),
-    value: formatAmount(props.data?.expenseAmount),
-    color: "#f56c6c",
-    icon: "ep:trend-charts"
-  },
-  {
-    title: t("dashboard.pureIncome"),
-    value: formatAmount(props.data?.incomeAmount),
-    color: "#67c23a",
-    icon: "ep:wallet"
-  },
-  {
-    title: t("dashboard.pureExpenseLimit"),
-    value: formatAmount(props.data?.expenseLimit),
-    color: "#e6a23c",
-    icon: "ep:data-line"
-  },
-  {
-    title: t("dashboard.pureExpenseSurplus"),
-    value: formatAmount(props.data?.expenseSurplus),
-    color: "#409eff",
-    icon: "ep:coin"
+const shouldShowLimit = computed(() => props.showExpenseLimit !== "1");
+
+const limitTitle = computed(() => {
+  if (props.showExpenseLimit === "2") {
+    return t("dashboard.pureMonthlyExpenseLimit");
   }
-]);
+  return t("dashboard.pureYearlyExpenseLimit");
+});
+
+const surplusTitle = computed(() => {
+  if (props.showExpenseLimit === "2") {
+    return t("dashboard.pureMonthlyExpenseSurplus");
+  }
+  return t("dashboard.pureYearlyExpenseSurplus");
+});
+
+const cards = computed(() => {
+  const cardList = [
+    {
+      title: t("dashboard.pureExpense"),
+      value: formatAmount(props.data?.expenseAmount),
+      color: "#f56c6c",
+      icon: "ep:trend-charts",
+      showEdit: shouldShowLimit.value
+    },
+    {
+      title: t("dashboard.pureIncome"),
+      value: formatAmount(props.data?.incomeAmount),
+      color: "#67c23a",
+      icon: "ep:wallet",
+      showEdit: false
+    }
+  ];
+
+  if (shouldShowLimit.value) {
+    cardList.push({
+      title: limitTitle.value,
+      value: formatAmount(props.data?.expenseLimit),
+      color: "#e6a23c",
+      icon: "ep:data-line",
+      showEdit: true
+    });
+    cardList.push({
+      title: surplusTitle.value,
+      value: formatAmount(props.data?.expenseSurplus),
+      color: "#409eff",
+      icon: "ep:coin",
+      showEdit: false
+    });
+  }
+
+  return cardList;
+});
 </script>
 
 <template>
@@ -55,8 +91,8 @@ const cards = computed(() => [
         v-for="(card, index) in cards"
         :key="index"
         :xs="24"
-        :sm="12"
-        :md="6"
+        :sm="shouldShowLimit ? 12 : 12"
+        :md="shouldShowLimit ? 6 : 12"
       >
         <el-card class="summary-card" shadow="hover">
           <div class="card-content">
@@ -65,8 +101,17 @@ const cards = computed(() => [
             </div>
             <div class="card-info">
               <div class="card-title">{{ card.title }}</div>
-              <div class="card-value" :style="{ color: card.color }">
-                ¥{{ card.value }}
+              <div class="card-value-row">
+                <div class="card-value" :style="{ color: card.color }">
+                  ¥{{ card.value }}
+                </div>
+                <el-button
+                  v-if="card.showEdit"
+                  type="primary"
+                  link
+                  :icon="Edit"
+                  @click="emit('editLimit')"
+                />
               </div>
             </div>
           </div>
@@ -86,19 +131,19 @@ const cards = computed(() => [
 
   .card-content {
     display: flex;
-    align-items: center;
     gap: 16px;
+    align-items: center;
   }
 
   .card-icon {
-    width: 56px;
-    height: 56px;
-    border-radius: 12px;
     display: flex;
     align-items: center;
     justify-content: center;
+    width: 56px;
+    height: 56px;
     font-size: 28px;
     color: #fff;
+    border-radius: 12px;
   }
 
   .card-info {
@@ -106,9 +151,18 @@ const cards = computed(() => [
   }
 
   .card-title {
+    display: flex;
+    gap: 4px;
+    align-items: center;
+    margin-bottom: 8px;
     font-size: 14px;
     color: #909399;
-    margin-bottom: 8px;
+  }
+
+  .card-value-row {
+    display: flex;
+    gap: 4px;
+    align-items: center;
   }
 
   .card-value {

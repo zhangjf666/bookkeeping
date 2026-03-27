@@ -359,7 +359,7 @@ onMounted(() => {
       :page-sizes="[10, 20, 50, 100]"
       :total="pagination.total"
       layout="total, sizes, prev, pager, next, jumper"
-      style="margin-top: 16px; justify-content: flex-end"
+      style="justify-content: flex-end; margin-top: 16px"
       @size-change="handleSizeChange"
       @current-change="handlePageChange"
     />
@@ -396,7 +396,7 @@ onMounted(() => {
               :label="item.label"
               :value="item.value"
             >
-              <span style="font-size: 20px; margin-right: 8px">{{
+              <span style="margin-right: 8px; font-size: 20px">{{
                 item.label
               }}</span>
               <span>{{ item.value }}</span>

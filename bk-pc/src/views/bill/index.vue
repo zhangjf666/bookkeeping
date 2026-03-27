@@ -177,8 +177,8 @@ onMounted(async () => {
 
 .bill-toolbar {
   display: flex;
-  justify-content: space-between;
   align-items: center;
+  justify-content: space-between;
   margin-bottom: 16px;
 
   .toolbar-left {

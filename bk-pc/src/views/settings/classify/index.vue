@@ -385,7 +385,7 @@ onMounted(() => {
               <el-popover
                 v-model:visible="iconPopoverVisible"
                 placement="bottom"
-                :width="320"
+                :width="400"
                 trigger="click"
               >
                 <template #reference>
@@ -443,9 +443,9 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .classify-setting-container {
-  padding: 16px;
-  height: 100%;
   box-sizing: border-box;
+  height: 100%;
+  padding: 16px;
 }
 
 .classify-main {
@@ -455,14 +455,14 @@ onMounted(() => {
 }
 
 .classify-tree-card {
-  width: 400px;
-  flex-shrink: 0;
   display: flex;
+  flex-shrink: 0;
   flex-direction: column;
+  width: 400px;
 
   :deep(.el-card__body) {
-    flex: 1;
     display: flex;
+    flex: 1;
     flex-direction: column;
     overflow: hidden;
   }
@@ -495,14 +495,14 @@ onMounted(() => {
 
 .tree-node {
   display: flex;
-  align-items: center;
   flex: 1;
+  align-items: center;
   padding-right: 8px;
 }
 
 .tree-node-icon {
-  font-size: 16px;
   margin-right: 6px;
+  font-size: 16px;
 }
 
 .tree-node-label {
@@ -524,10 +524,10 @@ onMounted(() => {
 }
 
 .form-title {
+  padding-bottom: 12px;
+  margin-bottom: 20px;
   font-size: 18px;
   font-weight: 500;
-  margin-bottom: 20px;
-  padding-bottom: 12px;
   border-bottom: 1px solid #eee;
 }
 
@@ -548,12 +548,12 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  padding: 8px;
-  border: 1px solid #dcdfe6;
-  border-radius: 4px;
-  cursor: pointer;
   width: 42px;
   height: 42px;
+  padding: 8px;
+  cursor: pointer;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
 
   &:hover {
     border-color: #409eff;
@@ -580,10 +580,10 @@ onMounted(() => {
   display: flex;
   align-items: center;
   justify-content: center;
-  font-size: 24px;
   padding: 8px;
-  border-radius: 4px;
+  font-size: 24px;
   cursor: pointer;
+  border-radius: 4px;
 
   &:hover {
     background-color: #f5f7fa;

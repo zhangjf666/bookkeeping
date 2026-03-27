@@ -1,12 +1,17 @@
 export interface IncomeExpenseRecord {
   id: number;
+  accountBookId: number;
   amount: number;
   type: string;
   date: string;
   remark: string;
+  mainClassify: number;
+  subClassify: number | null;
   mainClassifyName: string;
   subClassifyName: string;
   mainClassifyImage: string;
+  tagCodes: string | null;
+  isCreditCard: string;
 }
 
 export interface Summary {

@@ -89,6 +89,7 @@ menus:
   pureTagSetting: 标签设置
   pureRemarkSetting: 备注设置
   pureClassifySetting: 分类设置
+  pureCommonSetting: 常规设置
   pureRegister: 用户注册
   pureBill: 收支记录
 
@@ -138,9 +139,17 @@ dashboard:
   pureNoRecords: 暂无记账记录
   pureCurrentBook: 当前账本
   pureDefault: 默认
+  pureTotalExpense: 总支出
+  pureTotalIncome: 总收入
+  pureNoData: 暂无数据
+  pureMonthlyExpenseLimit: 月支出限额
+  pureYearlyExpenseLimit: 年支出限额
+  pureMonthlyExpenseSurplus: 月剩余限额
+  pureYearlyExpenseSurplus: 年剩余限额
 
 bill:
   pureTitle: 收支记录
+  pureAddRecord: 记一笔
   pureAdd: 新增
   pureEdit: 编辑
   pureDelete: 删除
@@ -301,3 +310,26 @@ classify:
   pureParentClassifyHint: 为空则为顶级分类，仅可选择主分类
   pureTopLevel: 顶级分类（无上级）
   pureSelectClassifyToEdit: 请在左侧选择分类进行编辑或新增
+
+commonConfig:
+  pureGeneralConfig: 常规配置
+  pureLimitConfig: 限额配置
+  pureDefaultCreditCard: 新增收支记录时默认选中信用卡
+  pureShowExpenseLimit: 首页支出限额显示模式
+  pureNotDisplay: 不显示
+  pureMonthlyLimit: 月限额
+  pureYearlyLimit: 年限额
+  pureDefaultMonthlyLimit: 默认每月支出限额
+  pureDefaultYearlyLimit: 默认每年支出限额
+  pureAmountPlaceholder: 请输入金额
+  pureInvalidAmount: 请输入有效的金额
+  pureUpdateSuccess: 保存成功
+  pureOperationFail: 操作失败
+  pureSetMonthlyLimit: 设置当月支出限额
+  pureSetYearlyLimit: 设置当年支出限额
+  pureMonthlyExpenseLimit: 月支出限额
+  pureYearlyExpenseLimit: 年支出限额
+  pureMonthlyExpenseSurplus: 月剩余限额
+  pureYearlyExpenseSurplus: 年剩余限额
+
+  bill:

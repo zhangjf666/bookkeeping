@@ -1,7 +1,8 @@
 <script setup lang="ts">
+import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { IncomeExpenseRecord } from "@/types/dashboard";
-import dayjs from "dayjs";
+import { useBillStoreHook } from "@/store/modules/bill";
 
 defineOptions({
   name: "RecentRecords"
@@ -14,18 +15,61 @@ interface Props {
 
 const props = defineProps<Props>();
 const { t } = useI18n();
+const billStore = useBillStoreHook();
 
 const formatAmount = (amount: number, type: string) => {
-  const prefix = type === "0" ? "-" : "+";
+  const prefix = type === "EXPENSE" ? "-" : "+";
   return `${prefix}¥${amount.toFixed(2)}`;
 };
 
-const formatDate = (date: string) => {
-  return dayjs(date).format("MM-DD");
+const isExpense = (type: string) => {
+  return type === "EXPENSE";
 };
 
 const getTypeLabel = (type: string) => {
-  return type === "0" ? t("dashboard.pureExpense") : t("dashboard.pureIncome");
+  return type === "EXPENSE" ? t("bill.pureExpense") : t("bill.pureIncome");
+};
+
+const getAccountBookName = (accountBookId: number) => {
+  const book = billStore.accountBooks.find(b => b.id === accountBookId);
+  return book ? book.name : "";
+};
+
+const findClassifyName = (
+  mainClassifyId: number,
+  subClassifyId: number | null
+): { mainName: string; subName: string } => {
+  const classifyList = billStore.classifyList;
+
+  const mainClassify = classifyList.find(
+    c => c.id === mainClassifyId && c.pid === -1
+  );
+  if (!mainClassify) {
+    return { mainName: String(mainClassifyId), subName: "" };
+  }
+
+  if (subClassifyId) {
+    const subClassify = classifyList.find(
+      c => c.id === subClassifyId && c.pid === mainClassifyId
+    );
+    if (subClassify) {
+      return { mainName: mainClassify.name, subName: subClassify.name };
+    }
+  }
+
+  return { mainName: mainClassify.name, subName: "" };
+};
+
+const getClassifyDisplay = (row: IncomeExpenseRecord) => {
+  return findClassifyName(row.mainClassify, row.subClassify);
+};
+
+const getTagsByCodes = (tagCodes: string | null | undefined) => {
+  if (!tagCodes) return [];
+  const tagIdStrs = tagCodes.split(",").map(t => t.trim());
+  return billStore.tagList.filter(tag =>
+    tagIdStrs.includes(String((tag as any).code))
+  );
 };
 </script>
 
@@ -36,41 +80,66 @@ const getTypeLabel = (type: string) => {
         <span>{{ t("dashboard.pureRecentRecords") }}</span>
       </div>
     </template>
-    <el-table v-loading="loading" :data="records" style="width: 100%">
-      <el-table-column prop="date" :label="t('dashboard.pureDate')" width="80">
+    <el-table v-loading="loading" :data="records" border stripe>
+      <el-table-column prop="date" :label="t('bill.pureDate')" width="120" />
+      <el-table-column :label="t('bill.pureAmount')" width="120" align="right">
         <template #default="{ row }">
-          {{ formatDate(row.date) }}
-        </template>
-      </el-table-column>
-      <el-table-column
-        prop="mainClassifyName"
-        :label="t('dashboard.pureClassify')"
-        width="100"
-      />
-      <el-table-column
-        prop="remark"
-        :label="t('dashboard.pureRemark')"
-        min-width="120"
-      />
-      <el-table-column
-        :label="t('dashboard.pureAmount')"
-        width="120"
-        align="right"
-      >
-        <template #default="{ row }">
-          <span :style="{ color: row.type === '0' ? '#f56c6c' : '#67c23a' }">
+          <span :style="{ color: isExpense(row.type) ? '#f56c6c' : '#67c23a' }">
             {{ formatAmount(row.amount, row.type) }}
           </span>
         </template>
       </el-table-column>
+      <el-table-column :label="t('bill.pureType')" width="80" align="center">
+        <template #default="{ row }">
+          <el-tag
+            :type="isExpense(row.type) ? 'danger' : 'success'"
+            size="small"
+          >
+            {{ getTypeLabel(row.type) }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column :label="t('bill.pureClassify')" min-width="120">
+        <template #default="{ row }">
+          <div class="classify-cell">
+            <span>{{ getClassifyDisplay(row).mainName }}</span>
+            <span v-if="getClassifyDisplay(row).subName" class="sub-classify">
+              / {{ getClassifyDisplay(row).subName }}
+            </span>
+          </div>
+        </template>
+      </el-table-column>
       <el-table-column
-        :label="t('dashboard.pureType')"
-        width="80"
+        prop="remark"
+        :label="t('bill.pureRemark')"
+        min-width="120"
+      />
+      <el-table-column :label="t('bill.pureTag')" width="200">
+        <template #default="{ row }">
+          <el-tag
+            v-for="tag in getTagsByCodes(row.tagCodes)"
+            :key="tag.id"
+            :color="tag.color"
+            size="small"
+            :style="{ color: '#fff', marginRight: '4px' }"
+          >
+            {{ tag.name }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        :label="t('bill.pureCreditCard')"
+        width="120"
         align="center"
       >
         <template #default="{ row }">
-          <el-tag :type="row.type === '0' ? 'danger' : 'success'" size="small">
-            {{ getTypeLabel(row.type) }}
+          <el-tag
+            :type="row.isCreditCard === 'YES' ? 'warning' : 'info'"
+            size="small"
+          >
+            {{
+              row.isCreditCard === "YES" ? t("bill.pureYes") : t("bill.pureNo")
+            }}
           </el-tag>
         </template>
       </el-table-column>
@@ -86,6 +155,13 @@ const getTypeLabel = (type: string) => {
 .recent-records {
   .card-header {
     font-weight: 600;
+  }
+
+  .classify-cell {
+    .sub-classify {
+      font-size: 12px;
+      color: #909399;
+    }
   }
 }
 </style>

@@ -377,7 +377,7 @@ onMounted(() => {
       :page-sizes="[10, 20, 50, 100]"
       :total="pagination.total"
       layout="total, sizes, prev, pager, next, jumper"
-      style="margin-top: 16px; justify-content: flex-end"
+      style="justify-content: flex-end; margin-top: 16px"
       @size-change="handleSizeChange"
       @current-change="handlePageChange"
     />
@@ -447,21 +447,21 @@ onMounted(() => {
 
 .color-preview {
   display: flex;
-  align-items: center;
   gap: 8px;
+  align-items: center;
 }
 
 .color-box {
   display: inline-block;
   width: 20px;
   height: 20px;
-  border-radius: 4px;
   border: 1px solid #dcdfe6;
+  border-radius: 4px;
 }
 
 .color-input-hint {
   margin-left: 12px;
-  color: #909399;
   font-size: 12px;
+  color: #909399;
 }
 </style>

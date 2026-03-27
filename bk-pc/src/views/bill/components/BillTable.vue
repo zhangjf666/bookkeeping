@@ -178,8 +178,8 @@ const handleDelete = (row: IncomeExpense) => {
 <style lang="scss" scoped>
 .classify-cell {
   .sub-classify {
-    color: #909399;
     font-size: 12px;
+    color: #909399;
   }
 }
 </style>

@@ -1,5 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
+import cn.hutool.core.lang.Validator;
 import cn.hutool.core.util.NumberUtil;
 import cn.hutool.core.util.StrUtil;
 import com.hc.bookkeeping.common.annotation.Log;
@@ -68,7 +69,7 @@ public class UserConfigController {
     @ApiOperation("设置额外的支出限额")
     @PostMapping(value = "/additionalExpenseLimit")
     public Response setAdditionalExpenseLimit(@RequestBody AdditionalExpenseLimitDto dto){
-        if(!StrUtil.isNumeric(dto.getExpenseLimit())){
+        if(!Validator.isMoney(dto.getExpenseLimit())){
             throw new BusinessException(ResponseCode.PARAM_ERROR, "支出限额格式错误");
         }
         userConfigService.setAdditionalExpenseLimit(dto.getUserId(), dto.getType(), dto.getExpenseLimit());

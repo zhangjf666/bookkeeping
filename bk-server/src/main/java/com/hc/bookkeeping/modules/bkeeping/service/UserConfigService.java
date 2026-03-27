@@ -2,6 +2,7 @@ package com.hc.bookkeeping.modules.bkeeping.service;
 
 import com.hc.bookkeeping.common.base.BaseService;
 import com.hc.bookkeeping.common.model.Page;
+import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
 import com.hc.bookkeeping.modules.bkeeping.dto.UserConfigDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.UserConfigQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.entity.UserConfig;
@@ -31,5 +32,5 @@ public interface UserConfigService extends BaseService<UserConfigDto, UserConfig
      * @param type 1:设置月限额(当月),2:设置年限额(当年)
      * @param expenseLimit 限额数值
      */
-    void setAdditionalExpenseLimit(Long userId, String type, String expenseLimit);
+    void setAdditionalExpenseLimit(Long userId, ExpenseLimitShowType type, String expenseLimit);
 }

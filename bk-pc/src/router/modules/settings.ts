@@ -47,6 +47,15 @@ export default {
         icon: "ep:folder",
         title: $t("menus.pureClassifySetting")
       }
+    },
+    {
+      path: "/settings/common",
+      name: "CommonConfigSetting",
+      component: () => import("@/views/settings/common/index.vue"),
+      meta: {
+        icon: "ep:setting",
+        title: $t("menus.pureCommonSetting")
+      }
     }
   ]
 } satisfies RouteConfigsTable;

@@ -144,7 +144,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         UserConfig expenseShowType = userConfigs.stream().filter(userConfig -> SHOW_EXPENSE_LIMIT.equals(userConfig.getName())).findAny().orElseThrow(() -> new BusinessException("支出限额显示设置不存在"));
         BigDecimal expenseLimit = BigDecimal.ZERO;
         BigDecimal expenseSurplus = BigDecimal.ZERO;
-        if(ExpenseLimitShowType.MONTHLY_SHOW.code.equals(expenseShowType.getValue())){
+        if(ExpenseLimitShowType.MONTHLY.getCode().equals(expenseShowType.getValue())){
             Optional<UserConfig> config = userConfigs.stream().filter(userConfig -> (EXPENSE_LIMIT_PREFIX + DateUtil.format(new Date(), DatePattern.SIMPLE_MONTH_PATTERN)).equals(userConfig.getName())).findAny();
             if(!config.isPresent()){
                 config = userConfigs.stream().filter(userConfig -> DEFAULT_MONTHLY_EXPENSE_LIMIT.equals(userConfig.getName())).findAny();
@@ -154,7 +154,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             }
             expenseLimit = new BigDecimal(config.get().getValue());
             expenseSurplus = expenseLimit.subtract(expense);
-        } else if(ExpenseLimitShowType.YEARLY_SHOW.code.equals(expenseShowType.getValue())){
+        } else if(ExpenseLimitShowType.YEARLY.getCode().equals(expenseShowType.getValue())){
             Optional<UserConfig> config = userConfigs.stream().filter(userConfig -> (EXPENSE_LIMIT_PREFIX + DateUtil.year(new Date())).equals(userConfig.getName())).findAny();
             if(!config.isPresent()){
                 config = userConfigs.stream().filter(userConfig -> DEFAULT_YEARLY_EXPENSE_LIMIT.equals(userConfig.getName())).findAny();
@@ -212,7 +212,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         BigDecimal expenseSurplus = BigDecimal.ZERO;
         UserConfig userConfig = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
                 .eq(UserConfig::getName, SHOW_EXPENSE_LIMIT));
-        if(!ExpenseLimitShowType.NOT_SHOW.code.equals(userConfig.getValue())){
+        if(!ExpenseLimitShowType.NOT.getCode().equals(userConfig.getValue())){
             if(SUM_PERIOD_MONTH.equals(billQueryDto.getMode())){
                 UserConfig uc = userConfigService.getOne(new LambdaQueryWrapper<UserConfig>().eq(UserConfig::getUserId, billQueryDto.getUserId())
                         .eq(UserConfig::getName, EXPENSE_LIMIT_PREFIX+DateUtil.format(beginDate, DatePattern.SIMPLE_MONTH_PATTERN)), false);
@@ -261,7 +261,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                     ies.set("expense", data.getBigDecimal("amount"));
                 }
             }
-        } else {
+        } else if(SUM_MODE_REPORT.equals(billQueryDto.getQueryMode())) {
             //报表
             List<Dict> datas = baseMapper.queryReportAmount(billQueryDto.getUserId(), beginDate, endDate, billQueryDto.getClassifyList());
             for(Dict data: datas) {

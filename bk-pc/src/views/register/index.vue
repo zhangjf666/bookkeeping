@@ -259,8 +259,8 @@ const toLogin = () => {
   height: 40px;
   margin-left: 5%;
   cursor: pointer;
-  border-radius: 4px;
   border: 1px solid #dcdfe6;
+  border-radius: 4px;
 }
 
 .captcha-btn {
@@ -280,8 +280,8 @@ const toLogin = () => {
 
 .login-link {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   margin-top: 16px;
   font-size: 14px;
   color: #999;

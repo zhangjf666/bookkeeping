@@ -396,7 +396,7 @@ onMounted(async () => {
       :page-sizes="[10, 20, 50, 100]"
       :total="pagination.total"
       layout="total, sizes, prev, pager, next, jumper"
-      style="margin-top: 16px; justify-content: flex-end"
+      style="justify-content: flex-end; margin-top: 16px"
       @size-change="handleSizeChange"
       @current-change="handlePageChange"
     />
@@ -462,9 +462,9 @@ onMounted(async () => {
 
 .classify-cell {
   .sub-classify {
+    margin-left: 4px;
     font-size: 12px;
     color: #909399;
-    margin-left: 4px;
   }
 }
 </style>

@@ -1,11 +1,13 @@
 <script setup lang="ts">
-import { ref, watch, computed } from "vue";
+import { ref, watch, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { message } from "@/utils/message";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import type { IncomeExpense, IncomeExpenseForm } from "@/types/bill";
 import { getClassifyIcon } from "@/utils/classifyIcons";
+import { getUserConfig } from "@/api/userConfig";
+import type { UserConfig } from "@/types/userConfig";
 import dayjs from "dayjs";
 
 defineOptions({
@@ -44,6 +46,24 @@ const formData = ref<IncomeExpenseForm>({
   isCreditCard: "NO",
   isAddRemark: "NO",
   tagCodes: ""
+});
+
+const initCreditCardFromConfig = async () => {
+  if (!userId.value) return;
+  try {
+    const config = await getUserConfig(userId.value, "is_credit_card");
+    if (config && (config as any).value === "1") {
+      formData.value.isCreditCard = "YES";
+    } else {
+      formData.value.isCreditCard = "NO";
+    }
+  } catch {
+    formData.value.isCreditCard = "NO";
+  }
+};
+
+onMounted(() => {
+  initCreditCardFromConfig();
 });
 
 const rules = {
@@ -199,19 +219,7 @@ watch(
       }
       selectedTags.value = getTagIdsByCodes(val.tagCodes);
     } else {
-      formData.value = {
-        id: undefined,
-        accountBookId: billStore.currentAccountBook?.id || 0,
-        amount: 0,
-        type: "EXPENSE",
-        date: dayjs().format("YYYY-MM-DD"),
-        remark: "",
-        mainClassify: 0,
-        subClassify: undefined,
-        isCreditCard: "NO",
-        isAddRemark: "NO",
-        tagCodes: ""
-      };
+      initCreditCardFromConfig();
       selectedClassifyId.value = undefined;
       selectedTags.value = [];
     }

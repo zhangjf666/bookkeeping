@@ -77,6 +77,7 @@ menus:
   pureTagSetting: Tag Setting
   pureRemarkSetting: Remark Setting
   pureClassifySetting: Classify Setting
+  pureCommonSetting: Common Setting
   pureRegister: Register
   pureBill: Records
 status:
@@ -131,8 +132,13 @@ dashboard:
   pureNoRecords: No records
   pureCurrentBook: Current Book
   pureDefault: Default
+  pureMonthlyExpenseLimit: Monthly Budget
+  pureYearlyExpenseLimit: Yearly Budget
+  pureMonthlyExpenseSurplus: Monthly Remaining
+  pureYearlyExpenseSurplus: Yearly Remaining
 bill:
   pureTitle: Records
+  pureAddRecord: Add Record
   pureAdd: Add
   pureEdit: Edit
   pureDelete: Delete
@@ -291,3 +297,18 @@ classify:
   pureParentClassifyHint: Empty for top-level classify, can only select main classify
   pureTopLevel: Top Level (No Parent)
   pureSelectClassifyToEdit: Select a classify on the left to edit or add new
+
+commonConfig:
+  pureGeneralConfig: General Config
+  pureLimitConfig: Limit Config
+  pureDefaultCreditCard: Default Credit Card When Adding Record
+  pureShowExpenseLimit: Expense Limit Display Mode
+  pureNotDisplay: Not Display
+  pureMonthlyLimit: Monthly Limit
+  pureYearlyLimit: Yearly Limit
+  pureDefaultMonthlyLimit: Default Monthly Expense Limit
+  pureDefaultYearlyLimit: Default Yearly Expense Limit
+  pureAmountPlaceholder: Enter amount
+  pureInvalidAmount: Please enter valid amount
+  pureUpdateSuccess: Saved Successfully
+  pureOperationFail: Operation Failed
