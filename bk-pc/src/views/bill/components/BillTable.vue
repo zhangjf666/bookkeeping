@@ -125,6 +125,22 @@ const handleDelete = (row: IncomeExpense) => {
       </template>
     </el-table-column>
     <el-table-column
+      :label="t('bill.pureCreditCard')"
+      width="120"
+      align="center"
+    >
+      <template #default="{ row }">
+        <el-tag
+          :type="row.isCreditCard === 'YES' ? 'warning' : 'info'"
+          size="small"
+        >
+          {{
+            row.isCreditCard === "YES" ? t("bill.pureYes") : t("bill.pureNo")
+          }}
+        </el-tag>
+      </template>
+    </el-table-column>
+    <el-table-column
       prop="remark"
       :label="t('bill.pureRemark')"
       min-width="120"
@@ -139,22 +155,6 @@ const handleDelete = (row: IncomeExpense) => {
           :style="{ color: '#fff', marginRight: '4px' }"
         >
           {{ tag.name }}
-        </el-tag>
-      </template>
-    </el-table-column>
-    <el-table-column
-      :label="t('bill.pureCreditCard')"
-      width="120"
-      align="center"
-    >
-      <template #default="{ row }">
-        <el-tag
-          :type="row.isCreditCard === 'YES' ? 'warning' : 'info'"
-          size="small"
-        >
-          {{
-            row.isCreditCard === "YES" ? t("bill.pureYes") : t("bill.pureNo")
-          }}
         </el-tag>
       </template>
     </el-table-column>

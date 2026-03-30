@@ -92,6 +92,8 @@ menus:
   pureCommonSetting: 常规设置
   pureRegister: 用户注册
   pureBill: 收支记录
+  pureReport: 统计报表
+  pureBillReport: 账单统计
 
 login:
   pureUsername: 账号
@@ -130,7 +132,7 @@ dashboard:
   pureExpenseLimit: 支出限额
   pureExpenseSurplus: 剩余限额
   pureTrend: 收支趋势
-  pureRecentRecords: 最近三天记账记录
+  pureRecentRecords: 最近三天收支记录
   pureDate: 日期
   pureClassify: 分类
   pureRemark: 备注

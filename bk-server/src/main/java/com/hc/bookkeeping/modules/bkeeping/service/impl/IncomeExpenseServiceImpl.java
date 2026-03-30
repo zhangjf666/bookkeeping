@@ -17,7 +17,6 @@ import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
 import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
-import com.hc.bookkeeping.modules.bkeeping.constants.OperateType;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
 import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
 import com.hc.bookkeeping.modules.bkeeping.entity.UserConfig;
@@ -122,7 +121,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
-            if(OperateType.EXPENSE.code.equals(dict.getStr("type"))){
+            if(BillType.EXPENSE.getValue().equals(dict.getStr("type"))){
                 expense = dict.getBigDecimal("amount");
             } else {
                 income = dict.getBigDecimal("amount");
@@ -165,7 +164,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             expenseLimit = new BigDecimal(config.get().getValue());
             //统计年支出
             List<Dict> sumYear = baseMapper.querySumAmount(userId, accountBookId, DateUtil.beginOfYear(new Date()), DateUtil.endOfYear(new Date()), null);
-            Dict expenseYear = sumYear.stream().filter(dict -> OperateType.EXPENSE.code.equals(dict.getStr("type"))).findAny().orElse(null);
+            Dict expenseYear = sumYear.stream().filter(dict -> BillType.EXPENSE.getValue().equals(dict.getStr("type"))).findAny().orElse(null);
             expenseSurplus = expenseYear == null ? expenseLimit : expenseLimit.subtract(expenseYear.getBigDecimal("amount"));
         }
 
@@ -183,22 +182,13 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         //确定开始结束时间
         Date beginDate = DateUtil.date(billQueryDto.getBeginDate());
         Date endDate = DateUtil.date(billQueryDto.getEndDate());
-        if(SUM_PERIOD_MONTH.equals(billQueryDto.getMode())){
-            beginDate = DateUtil.beginOfMonth(beginDate);
-            endDate = DateUtil.endOfMonth(beginDate);
-        } else if(SUM_PERIOD_YEAR.equals(billQueryDto.getMode())){
-            beginDate = DateUtil.beginOfYear(beginDate);
-            endDate = DateUtil.endOfYear(beginDate);
-        } else {
-            beginDate = DateUtil.beginOfDay(beginDate);
-            endDate = DateUtil.endOfDay(endDate);
-        }
+
         //查询收入支出统计
         List<Dict> sumAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
-            if(OperateType.EXPENSE.code.equals(dict.getStr("type"))){
+            if(BillType.EXPENSE.getValue().equals(dict.getStr("type"))){
                 expense = dict.getBigDecimal("amount");
             } else {
                 income = dict.getBigDecimal("amount");
@@ -231,7 +221,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 expenseLimit = new BigDecimal(uc.getValue());
             }
             List<Dict> sumExpenseAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, null);
-            Dict expenseSum = sumExpenseAmount.stream().filter(dict -> OperateType.EXPENSE.code.equals(dict.getStr("type"))).findAny().orElse(null);
+            Dict expenseSum = sumExpenseAmount.stream().filter(dict -> BillType.EXPENSE.getValue().equals(dict.getStr("type"))).findAny().orElse(null);
             expenseSurplus = expenseSum == null ? expenseLimit : expenseLimit.subtract(expenseSum.getBigDecimal("amount"));
         }
         billResultDto.setExpenseLimit(expenseLimit);
@@ -244,7 +234,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             List<DateTime> dateTimes = DateUtil.rangeToList(beginDate, endDate, DateField.DAY_OF_MONTH);
             for (DateTime date: dateTimes) {
                 Dict dict = Dict.create();
-                String dateStr = SUM_PERIOD_YEAR.equals(billQueryDto.getMode()) ? date.toString("yyyy-MM") : date.toString(DatePattern.NORM_DATE_PATTERN);
+                String dateStr = SUM_PERIOD_YEAR.equals(billQueryDto.getMode()) ? date.toString(DatePattern.NORM_MONTH_PATTERN) : date.toString(DatePattern.NORM_DATE_PATTERN);
                 dict.set("income", BigDecimal.ZERO).set("expense", BigDecimal.ZERO);
                 incomeExpenseSum.set(dateStr, dict);
             }
@@ -252,7 +242,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             List<Dict> datas;
             datas = SUM_PERIOD_YEAR.equals(billQueryDto.getMode()) ?
                     baseMapper.querySumAmountMonthly(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList()) :
-                    baseMapper.querySumAmountDayly(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
+                    baseMapper.querySumAmountDaily(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
             for (Dict data:datas) {
                 Dict ies = (Dict) incomeExpenseSum.get(data.getStr("period"));
                 if(BillType.INCOME.getValue().equals(data.getStr("type"))) {
@@ -294,6 +284,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         //查询收支明细
         List<IncomeExpenseDto> list = queryList(Wrappers.<IncomeExpense>lambdaQuery().ge(IncomeExpense::getDate, beginDate)
                 .eq(IncomeExpense::getUserId, billQueryDto.getUserId())
+                .eq(billQueryDto.getAccountBookId() != null, IncomeExpense::getAccountBookId, billQueryDto.getAccountBookId())
                 .le(IncomeExpense::getDate, endDate)
                 .in(!billQueryDto.getClassifyList().isEmpty(), IncomeExpense::getMainClassify, billQueryDto.getClassifyList())
                 .orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));

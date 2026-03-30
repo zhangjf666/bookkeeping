@@ -80,6 +80,8 @@ menus:
   pureCommonSetting: Common Setting
   pureRegister: Register
   pureBill: Records
+  pureReport: Report
+  pureBillReport: Bill Report
 status:
   pureLoad: Loading...
   pureMessage: Message

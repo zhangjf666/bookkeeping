@@ -48,7 +48,7 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
      * @param classify 分类列表
      * @return
      */
-    List<Dict> querySumAmountDayly(Long userId, Long accountBookId, Date beginDate, Date endDate,List<Long> classify);
+    List<Dict> querySumAmountDaily(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
 
     /**
      * 按分类统计总收入支出

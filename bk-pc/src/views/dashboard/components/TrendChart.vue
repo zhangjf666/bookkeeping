@@ -41,12 +41,12 @@ const getDateRange = (mode: string) => {
       endDate = now.endOf("month").format("YYYY-MM-DD");
       break;
     case "quarter":
-      modeParam = "2";
+      modeParam = "0";
       beginDate = now.startOf("quarter").format("YYYY-MM-DD");
       endDate = now.endOf("quarter").format("YYYY-MM-DD");
       break;
     case "halfYear":
-      modeParam = "2";
+      modeParam = "0";
       beginDate = now.subtract(180, "day").format("YYYY-MM-DD");
       endDate = now.format("YYYY-MM-DD");
       break;

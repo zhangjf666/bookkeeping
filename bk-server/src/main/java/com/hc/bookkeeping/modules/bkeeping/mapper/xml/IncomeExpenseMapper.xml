@@ -59,7 +59,7 @@
     </select>
 
 
-    <select id="querySumAmountDayly" resultType="cn.hutool.core.lang.Dict">
+    <select id="querySumAmountDaily" resultType="cn.hutool.core.lang.Dict">
         select date_format(ie.`date` , '%Y-%m-%d') period, ie.`type` ,SUM(ie.amount) amount
         from income_expense ie
         where ie.user_id = #{userId}

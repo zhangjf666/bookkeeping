@@ -81,8 +81,8 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
       </div>
     </template>
     <el-table v-loading="loading" :data="records" border stripe>
-      <el-table-column prop="date" :label="t('bill.pureDate')" width="120" />
-      <el-table-column :label="t('bill.pureAmount')" width="120" align="right">
+      <el-table-column prop="date" :label="t('bill.pureDate')" width="100" />
+      <el-table-column :label="t('bill.pureAmount')" width="100" align="right">
         <template #default="{ row }">
           <span :style="{ color: isExpense(row.type) ? '#f56c6c' : '#67c23a' }">
             {{ formatAmount(row.amount, row.type) }}
@@ -99,7 +99,7 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
           </el-tag>
         </template>
       </el-table-column>
-      <el-table-column :label="t('bill.pureClassify')" min-width="120">
+      <el-table-column :label="t('bill.pureClassify')" width="300">
         <template #default="{ row }">
           <div class="classify-cell">
             <span>{{ getClassifyDisplay(row).mainName }}</span>
@@ -110,26 +110,8 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
         </template>
       </el-table-column>
       <el-table-column
-        prop="remark"
-        :label="t('bill.pureRemark')"
-        min-width="120"
-      />
-      <el-table-column :label="t('bill.pureTag')" width="200">
-        <template #default="{ row }">
-          <el-tag
-            v-for="tag in getTagsByCodes(row.tagCodes)"
-            :key="tag.id"
-            :color="tag.color"
-            size="small"
-            :style="{ color: '#fff', marginRight: '4px' }"
-          >
-            {{ tag.name }}
-          </el-tag>
-        </template>
-      </el-table-column>
-      <el-table-column
         :label="t('bill.pureCreditCard')"
-        width="120"
+        width="100"
         align="center"
       >
         <template #default="{ row }">
@@ -140,6 +122,24 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
             {{
               row.isCreditCard === "YES" ? t("bill.pureYes") : t("bill.pureNo")
             }}
+          </el-tag>
+        </template>
+      </el-table-column>
+      <el-table-column
+        prop="remark"
+        :label="t('bill.pureRemark')"
+        width="300"
+      />
+      <el-table-column :label="t('bill.pureTag')" min-width="300">
+        <template #default="{ row }">
+          <el-tag
+            v-for="tag in getTagsByCodes(row.tagCodes)"
+            :key="tag.id"
+            :color="tag.color"
+            size="small"
+            :style="{ color: '#fff', marginRight: '4px' }"
+          >
+            {{ tag.name }}
           </el-tag>
         </template>
       </el-table-column>

@@ -28,7 +28,7 @@ public class BillQueryDto {
     private String queryMode;
 
     /**
-     * 查询模式(0:月,1:年,2:自定义)
+     * 查询模式(0:月(按天展示),1:年(按月展示))
      */
     private String mode;
 
