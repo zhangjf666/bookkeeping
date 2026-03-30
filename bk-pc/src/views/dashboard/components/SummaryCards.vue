@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { Summary } from "@/types/dashboard";
+import type { Summary } from "@/types/bill";
 import Edit from "~icons/ep/edit";
 import ShoppingCart from "~icons/ep/shopping-cart";
 import Money from "~icons/ep/money";

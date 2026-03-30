@@ -52,10 +52,12 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
 
     /**
      * 按分类统计总收入支出
-     * @param beginDate
-     * @param endDate
-     * @param classify
+     * @param userId 用户id
+     * @param accountBookId 账本id（可选）
+     * @param beginDate 开始日期
+     * @param endDate 结束日期
+     * @param classify 分类列表
      * @return
      */
-    List<Dict> queryReportAmount(Long userId, Date beginDate, Date endDate, List<Long> classify);
+    List<Dict> queryReportAmount(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
 }

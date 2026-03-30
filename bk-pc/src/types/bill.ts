@@ -72,3 +72,77 @@ export interface Classify {
   enable: boolean;
   children?: Classify[];
 }
+
+export interface IncomeExpenseRecord {
+  id: number;
+  accountBookId: number;
+  amount: number;
+  type: string;
+  date: string;
+  remark: string;
+  mainClassify: number;
+  subClassify: number | null;
+  mainClassifyName: string;
+  subClassifyName: string;
+  mainClassifyImage: string;
+  tagCodes: string | null;
+  isCreditCard: string;
+}
+
+export interface DaySum {
+  income: number;
+  expense: number;
+}
+
+export interface ClassifySummary {
+  percent: number;
+  expense: number;
+  income: number;
+  num: number;
+  classifyName: string;
+  classifyImage: string;
+  classify: string;
+  type?: string;
+}
+
+export interface TrendData {
+  expenseTotal: number;
+  incomeTotal: number;
+  expenseLimit: number;
+  expenseSurplus: number;
+  incomeExpenseSum: Record<string, DaySum>;
+  incomeExpenseList: IncomeExpenseRecord[];
+}
+
+export interface ClassifyReportData {
+  expenseTotal: number;
+  incomeTotal: number;
+  expenseLimit: number;
+  expenseSurplus: number;
+  incomeExpenseSum: Record<string, ClassifySummary>;
+  incomeExpenseList: IncomeExpenseRecord[];
+}
+
+export interface TrendParams {
+  userId: number;
+  accountBookId?: number;
+  mode: string;
+  queryMode?: string;
+  beginDate: string;
+  endDate: string;
+  classifyList?: number[];
+}
+
+export interface Summary {
+  expenseAmount: number;
+  incomeAmount: number;
+  expenseLimit: number;
+  expenseSurplus: number;
+  incomeExpenseList: IncomeExpenseRecord[];
+}
+
+export interface SummaryParams {
+  userId: number;
+  accountBookId?: number;
+  days?: number;
+}

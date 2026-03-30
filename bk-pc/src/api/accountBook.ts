@@ -1,8 +1,13 @@
 import { http } from "@/utils/http";
 import type {
+  AccountBook,
   AccountBookForm,
   AccountBookPageResult
 } from "@/types/accountBook";
+
+export const getAccountBooks = () => {
+  return http.request<AccountBook[]>("get", "/accountBook");
+};
 
 export const getAccountBookList = (
   userId: number,

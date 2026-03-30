@@ -6,12 +6,17 @@ import dayjs from "dayjs";
 import { ElMessage } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
-import { getTrendData } from "@/api/incomeExpense";
-import type { TrendData, IncomeExpenseRecord } from "@/types/bill";
+import { getClassifyReportData } from "@/api/incomeExpense";
+import { getClassifyIcon } from "@/utils/classifyIcons";
+import type {
+  ClassifyReportData,
+  ClassifySummary,
+  IncomeExpenseRecord
+} from "@/types/bill";
 import ClassifyFilter from "../components/ClassifyFilter.vue";
 
 defineOptions({
-  name: "BillReport"
+  name: "ClassifyReport"
 });
 
 const { t } = useI18n();
@@ -30,16 +35,6 @@ interface FormData {
   classifyList: number[];
 }
 
-interface MonthGroup {
-  month: string;
-  records: IncomeExpenseRecord[];
-}
-
-interface DateGroup {
-  date: string;
-  records: IncomeExpenseRecord[];
-}
-
 const formData = ref<FormData>({
   accountBookId: undefined,
   billType: "month",
@@ -49,7 +44,7 @@ const formData = ref<FormData>({
   classifyList: []
 });
 
-const trendData = ref<TrendData | null>(null);
+const reportData = ref<ClassifyReportData | null>(null);
 
 const billTypeOptions = [
   { label: "月账单", value: "month" },
@@ -58,7 +53,7 @@ const billTypeOptions = [
 ];
 
 const detailSortType = ref<"time" | "amount">("time");
-const expandedMonths = ref<Set<string>>(new Set());
+const selectedClassify = ref<string | null>(null);
 
 const chartRef = ref<HTMLDivElement>();
 let chartInstance: echarts.ECharts | null = null;
@@ -76,47 +71,45 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
   );
 };
 
+const isIncomeClassify = () => {
+  if (!selectedClassifyData.value) return false;
+  return (
+    selectedClassifyData.value.type === "INCOME" ||
+    selectedClassifyData.value.income > 0
+  );
+};
+
 const getQueryParams = () => {
   const userId = userStore.id;
   if (!userId) return null;
 
   let mode = "0";
+  if (formData.value.billType === "year") {
+    mode = "1";
+  } else if (formData.value.billType === "custom") {
+    mode = "0";
+  }
+
   let beginDate = "";
   let endDate = "";
 
-  switch (formData.value.billType) {
-    case "month":
-      mode = "0";
-      beginDate = dayjs(formData.value.month + "-01")
-        .startOf("month")
-        .format("YYYY-MM-DD");
-      endDate = dayjs(formData.value.month + "-01")
-        .endOf("month")
-        .format("YYYY-MM-DD");
-      break;
-    case "year":
-      mode = "1";
-      beginDate = dayjs(formData.value.year + "-01-01")
-        .startOf("year")
-        .format("YYYY-MM-DD");
-      endDate = dayjs(formData.value.year + "-01-01")
-        .endOf("year")
-        .format("YYYY-MM-DD");
-      break;
-    case "custom":
-      mode = "0";
-      if (
-        formData.value.dateRange &&
-        formData.value.dateRange[0] &&
-        formData.value.dateRange[1]
-      ) {
-        beginDate = formData.value.dateRange[0];
-        endDate = formData.value.dateRange[1];
-      } else {
-        ElMessage.warning("请选择日期范围");
-        return null;
-      }
-      break;
+  if (formData.value.billType === "month") {
+    beginDate = dayjs(formData.value.month + "-01")
+      .startOf("month")
+      .format("YYYY-MM-DD");
+    endDate = dayjs(formData.value.month + "-01")
+      .endOf("month")
+      .format("YYYY-MM-DD");
+  } else if (formData.value.billType === "year") {
+    beginDate = dayjs(formData.value.year + "-01-01")
+      .startOf("year")
+      .format("YYYY-MM-DD");
+    endDate = dayjs(formData.value.year + "-01-01")
+      .endOf("year")
+      .format("YYYY-MM-DD");
+  } else if (formData.value.dateRange) {
+    beginDate = formData.value.dateRange[0];
+    endDate = formData.value.dateRange[1];
   }
 
   const getClassifyList = () => {
@@ -131,7 +124,7 @@ const getQueryParams = () => {
     userId,
     accountBookId: formData.value.accountBookId,
     mode,
-    queryMode: "0",
+    queryMode: "1",
     beginDate,
     endDate,
     classifyList: getClassifyList()
@@ -144,189 +137,174 @@ const fetchData = async () => {
 
   loading.value = true;
   chartLoading.value = true;
+
   try {
-    const result = await getTrendData(params);
-    trendData.value = result;
-    updateChart();
+    const result = await getClassifyReportData(params);
+    reportData.value = result;
+
+    if (
+      result.incomeExpenseSum &&
+      Object.keys(result.incomeExpenseSum).length > 0
+    ) {
+      const firstClassifyId = Object.keys(result.incomeExpenseSum)[0];
+      selectedClassify.value = firstClassifyId;
+    } else {
+      selectedClassify.value = null;
+    }
+
+    initChart();
   } catch (error: any) {
-    ElMessage.error(error?.message || "获取数据失败");
+    ElMessage.error(error.message || "获取数据失败");
   } finally {
     loading.value = false;
     chartLoading.value = false;
   }
 };
 
-const initChart = () => {
-  if (!chartRef.value) return;
-  chartInstance = echarts.init(chartRef.value);
-  updateChart();
+const handleReset = () => {
+  formData.value = {
+    accountBookId: billStore.currentAccountBook?.id,
+    billType: "month",
+    month: dayjs().format("YYYY-MM"),
+    year: dayjs().format("YYYY"),
+    dateRange: null,
+    classifyList: []
+  };
+  fetchData();
 };
 
-const updateChart = () => {
-  if (!chartInstance) return;
+const initChart = () => {
+  if (!chartRef.value || !reportData.value?.incomeExpenseSum) return;
 
-  const dates: string[] = [];
-  const incomeData: number[] = [];
-  const expenseData: number[] = [];
-
-  if (trendData.value?.incomeExpenseSum) {
-    const sortedKeys = Object.keys(trendData.value.incomeExpenseSum).sort();
-    sortedKeys.forEach(date => {
-      if (formData.value.billType === "year") {
-        dates.push(dayjs(date).format("YYYY-MM"));
-      } else {
-        dates.push(dayjs(date).format("MM-DD"));
-      }
-      const item = trendData.value!.incomeExpenseSum[date];
-      incomeData.push(Number(item.income) || 0);
-      expenseData.push(Number(item.expense) || 0);
-    });
+  if (!chartInstance) {
+    chartInstance = echarts.init(chartRef.value);
   }
+
+  const classifyData = Object.values(reportData.value.incomeExpenseSum).map(
+    (item: ClassifySummary) => ({
+      name: item.classifyName,
+      value: item.expense || item.income || 0,
+      percent: item.percent,
+      num: item.num,
+      classify: item.classify,
+      classifyImage: item.classifyImage,
+      type: item.type
+    })
+  );
 
   const option: echarts.EChartsOption = {
     tooltip: {
-      trigger: "axis",
+      trigger: "item",
       formatter: (params: any) => {
-        let dateLabel = params[0].axisValueLabel;
-        if (formData.value.billType === "year") {
-          const idx = params[0].dataIndex;
-          const sortedKeys = Object.keys(
-            trendData.value!.incomeExpenseSum
-          ).sort();
-          dateLabel = sortedKeys[idx] || dateLabel;
-        }
-        let result = dateLabel + "<br/>";
-        params.forEach((item: any) => {
-          result += `${item.marker} ${item.seriesName}: ¥${Number(item.value).toFixed(2)}<br/>`;
-        });
-        return result;
+        const data = params.data;
+        return `${data.classifyImage ? "" : ""}${data.name}<br/>占比: ${data.percent}%<br/>笔数: ${data.num}笔<br/>金额: ¥${data.value.toFixed(2)}`;
       }
     },
     legend: {
-      data: [t("bill.pureIncome"), t("bill.pureExpense")],
-      top: 0
-    },
-    grid: {
-      left: "3%",
-      right: "4%",
-      bottom: "3%",
-      containLabel: true
-    },
-    xAxis: {
-      type: "category",
-      data: dates
-    },
-    yAxis: {
-      type: "value"
+      orient: "vertical",
+      left: 10,
+      top: "center",
+      formatter: (name: string) => {
+        const item = classifyData.find((d: any) => d.name === name);
+        if (item) {
+          return `{name|${name}} {percent|${item.percent}%}`;
+        }
+        return name;
+      },
+      textStyle: {
+        rich: {
+          name: {
+            fontSize: 14,
+            padding: [0, 10, 0, 0]
+          },
+          percent: {
+            fontSize: 12,
+            color: "#999"
+          }
+        }
+      }
     },
     series: [
       {
-        name: t("bill.pureIncome"),
-        type: "bar",
-        data: incomeData,
-        itemStyle: { color: "#67c23a" }
-      },
-      {
-        name: t("bill.pureExpense"),
-        type: "bar",
-        data: expenseData,
-        itemStyle: { color: "#f56c6c" }
+        type: "pie",
+        radius: ["40%", "70%"],
+        center: ["45%", "50%"],
+        avoidLabelOverlap: true,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: "#fff",
+          borderWidth: 2
+        },
+        label: {
+          show: true,
+          formatter: (params: any) => {
+            return `${params.name}\n${params.percent.toFixed(1)}%`;
+          },
+          fontSize: 11,
+          color: "#333",
+          lineHeight: 16
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: 13,
+            fontWeight: "bold"
+          }
+        },
+        labelLine: {
+          show: true,
+          lineStyle: {
+            color: "#999"
+          }
+        },
+        data: classifyData
       }
     ]
   };
 
   chartInstance.setOption(option);
+
+  chartInstance.off("click");
+  chartInstance.on("click", (params: any) => {
+    if (params.data && params.data.classify) {
+      selectedClassify.value = String(params.data.classify);
+    }
+  });
 };
 
-const yearGroupedRecords = computed<MonthGroup[]>(() => {
-  if (!trendData.value?.incomeExpenseList) return [];
-
-  const records = [...trendData.value.incomeExpenseList];
-
-  if (detailSortType.value === "amount") {
-    records.sort((a, b) => b.amount - a.amount);
-    const grouped: Record<string, IncomeExpenseRecord[]> = {};
-    records.forEach(record => {
-      const monthKey = dayjs(record.date).format("YYYY-MM");
-      if (!grouped[monthKey]) {
-        grouped[monthKey] = [];
-      }
-      grouped[monthKey].push(record);
-    });
-    return Object.entries(grouped)
-      .sort((a, b) => b[0].localeCompare(a[0]))
-      .map(([month, list]) => ({
-        month,
-        records: list
-      }));
+const selectedClassifyData = computed(() => {
+  if (!selectedClassify.value || !reportData.value?.incomeExpenseSum) {
+    return null;
   }
-
-  const grouped: Record<string, IncomeExpenseRecord[]> = {};
-  records.forEach(record => {
-    const monthKey = dayjs(record.date).format("YYYY-MM");
-    if (!grouped[monthKey]) {
-      grouped[monthKey] = [];
-    }
-    grouped[monthKey].push(record);
-  });
-  return Object.entries(grouped)
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([month, list]) => ({
-      month,
-      records: list
-    }));
+  return reportData.value.incomeExpenseSum[selectedClassify.value];
 });
 
-const dateGroupedRecords = computed<DateGroup[]>(() => {
-  if (!trendData.value?.incomeExpenseList) return [];
+const filteredRecords = computed(() => {
+  if (!reportData.value?.incomeExpenseList || !selectedClassify.value) {
+    return [];
+  }
 
-  const records = [...trendData.value.incomeExpenseList];
+  return reportData.value.incomeExpenseList.filter(
+    (record: IncomeExpenseRecord) =>
+      record.mainClassify === Number(selectedClassify.value)
+  );
+});
+
+const sortedRecords = computed(() => {
+  const records = [...filteredRecords.value];
 
   if (detailSortType.value === "amount") {
     records.sort((a, b) => b.amount - a.amount);
-    return [{ date: "all", records }];
+    return records;
   }
 
-  const grouped: Record<string, IncomeExpenseRecord[]> = {};
-  records.forEach(record => {
-    const dateKey = record.date;
-    if (!grouped[dateKey]) {
-      grouped[dateKey] = [];
-    }
-    grouped[dateKey].push(record);
-  });
-  return Object.entries(grouped)
-    .sort((a, b) => b[0].localeCompare(a[0]))
-    .map(([date, list]) => ({
-      date,
-      records: list
-    }));
+  records.sort((a, b) => b.date.localeCompare(a.date));
+  return records;
 });
 
 const flatRecordsByTime = computed(() => {
-  if (!trendData.value?.incomeExpenseList) return [];
-  return [...trendData.value.incomeExpenseList].sort((a, b) =>
-    b.date.localeCompare(a.date)
-  );
+  return [...sortedRecords.value].sort((a, b) => b.date.localeCompare(a.date));
 });
-
-const getMonthSummary = (month: string) => {
-  if (!trendData.value?.incomeExpenseList) return { income: 0, expense: 0 };
-
-  const monthRecords = trendData.value.incomeExpenseList.filter(
-    record => dayjs(record.date).format("YYYY-MM") === month
-  );
-
-  const income = monthRecords
-    .filter(r => r.type === "INCOME" || r.type === "1")
-    .reduce((sum, r) => sum + r.amount, 0);
-
-  const expense = monthRecords
-    .filter(r => r.type === "EXPENSE" || r.type === "0")
-    .reduce((sum, r) => sum + r.amount, 0);
-
-  return { income, expense };
-};
 
 const formatDate = (date: string) => {
   const weekDays = ["日", "一", "二", "三", "四", "五", "六"];
@@ -367,74 +345,12 @@ const dateSpanMethod = ({
   return { rowspan: 1, colspan: 1 };
 };
 
-const groupDateSpanMethod = ({
-  row,
-  column,
-  rowIndex,
-  columnIndex,
-  data
-}: {
-  row: IncomeExpenseRecord;
-  column: any;
-  rowIndex: number;
-  columnIndex: number;
-  data: IncomeExpenseRecord[];
-}) => {
-  if (columnIndex === 0) {
-    const currentDate = row.date;
-    let rowspan = 1;
-
-    if (rowIndex === 0 || data[rowIndex - 1].date !== currentDate) {
-      for (let i = rowIndex + 1; i < data.length; i++) {
-        if (data[i].date === currentDate) {
-          rowspan++;
-        } else {
-          break;
-        }
-      }
-    } else {
-      rowspan = 0;
-    }
-
-    return { rowspan, colspan: rowspan ? 1 : 0 };
-  }
-  return { rowspan: 1, colspan: 1 };
-};
-
-const toggleMonth = (month: string) => {
-  if (expandedMonths.value.has(month)) {
-    expandedMonths.value.delete(month);
-  } else {
-    expandedMonths.value.add(month);
-  }
-};
-
-const handleReset = () => {
-  formData.value = {
-    accountBookId: billStore.currentAccountBook?.id,
-    billType: "month",
-    month: dayjs().format("YYYY-MM"),
-    year: dayjs().format("YYYY"),
-    dateRange: null,
-    classifyList: []
-  };
-  trendData.value = null;
-  expandedMonths.value.clear();
-};
-
 watch(
   () => billStore.currentAccountBook,
   val => {
     if (val && !formData.value.accountBookId) {
       formData.value.accountBookId = val.id;
     }
-  }
-);
-
-watch(
-  () => formData.value.billType,
-  () => {
-    expandedMonths.value.clear();
   }
 );
 
@@ -449,7 +365,7 @@ onMounted(async () => {
 </script>
 
 <template>
-  <div class="bill-report">
+  <div class="classify-report">
     <el-card class="query-form-card" shadow="never">
       <el-form :model="formData" inline>
         <el-form-item :label="t('bill.pureAccountBook')">
@@ -522,12 +438,12 @@ onMounted(async () => {
           <span class="total-info">
             <span class="total-item income">
               {{ t("dashboard.pureTotalIncome") }}: ¥{{
-                (trendData?.incomeTotal ?? 0).toFixed(2)
+                (reportData?.incomeTotal ?? 0).toFixed(2)
               }}
             </span>
             <span class="total-item expense">
               {{ t("dashboard.pureTotalExpense") }}: ¥{{
-                (trendData?.expenseTotal ?? 0).toFixed(2)
+                (reportData?.expenseTotal ?? 0).toFixed(2)
               }}
             </span>
           </span>
@@ -539,7 +455,36 @@ onMounted(async () => {
     <el-card class="detail-card" shadow="never">
       <template #header>
         <div class="detail-header">
-          <span>{{ t("bill.pureTitle") }}</span>
+          <span v-if="selectedClassifyData" class="classify-info">
+            <span class="classify-icon">{{
+              getClassifyIcon(selectedClassifyData.classifyImage)
+            }}</span>
+            <span class="classify-name">{{
+              selectedClassifyData.classifyName
+            }}</span>
+            <span class="classify-percent"
+              >占比：{{ selectedClassifyData.percent }}%</span
+            >
+            <span class="classify-num"
+              >记录笔数：{{ selectedClassifyData.num }}笔</span
+            >
+            <span
+              :class="
+                isIncomeClassify()
+                  ? 'classify-amount-income'
+                  : 'classify-amount-expense'
+              "
+              class="classify-amount"
+            >
+              {{ isIncomeClassify() ? "收入" : "支出" }}：¥{{
+                (
+                  selectedClassifyData.expense ||
+                  selectedClassifyData.income ||
+                  0
+                ).toFixed(2)
+              }}
+            </span>
+          </span>
           <el-radio-group v-model="detailSortType" size="small">
             <el-radio-button value="time">按时间</el-radio-button>
             <el-radio-button value="amount">按金额</el-radio-button>
@@ -547,169 +492,10 @@ onMounted(async () => {
         </div>
       </template>
       <div v-loading="loading" class="detail-content">
-        <template v-if="formData.billType === 'year'">
-          <div
-            v-for="group in yearGroupedRecords"
-            :key="group.month"
-            class="month-group"
-          >
-            <div class="month-header" @click="toggleMonth(group.month)">
-              <span class="expand-icon">{{
-                expandedMonths.has(group.month) ? "▼" : "▶"
-              }}</span>
-              <span class="month-label">{{ group.month }}</span>
-              <span class="month-summary">
-                <span class="income-text"
-                  >收入: ¥{{
-                    getMonthSummary(group.month).income.toFixed(2)
-                  }}</span
-                >
-                <span class="expense-text"
-                  >支出: ¥{{
-                    getMonthSummary(group.month).expense.toFixed(2)
-                  }}</span
-                >
-                <span
-                  :class="
-                    getMonthSummary(group.month).income -
-                      getMonthSummary(group.month).expense >=
-                    0
-                      ? 'balance-positive'
-                      : 'balance-negative'
-                  "
-                  class="balance-text"
-                  >结余: ¥{{
-                    (
-                      getMonthSummary(group.month).income -
-                      getMonthSummary(group.month).expense
-                    ).toFixed(2)
-                  }}</span
-                >
-              </span>
-            </div>
-            <el-table
-              v-if="expandedMonths.has(group.month)"
-              :data="group.records"
-              border
-              stripe
-              size="small"
-              style="width: 100%"
-              :span-method="
-                (args: any) =>
-                  groupDateSpanMethod({ ...args, data: group.records })
-              "
-            >
-              <el-table-column
-                :label="t('bill.pureDate')"
-                width="100"
-                align="center"
-              >
-                <template #default="{ row }">
-                  {{ row.date }}
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('bill.pureAccountBook')" width="100">
-                <template #default="{ row }">
-                  {{ getAccountBookName(row.accountBookId) }}
-                </template>
-              </el-table-column>
-              <el-table-column
-                :label="t('bill.pureAmount')"
-                width="100"
-                align="right"
-              >
-                <template #default="{ row }">
-                  <span
-                    :style="{
-                      color:
-                        row.type === 'EXPENSE' || row.type === '0'
-                          ? '#f56c6c'
-                          : '#67c23a'
-                    }"
-                  >
-                    {{
-                      row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                    }}¥{{ row.amount.toFixed(2) }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                :label="t('bill.pureType')"
-                width="80"
-                align="center"
-              >
-                <template #default="{ row }">
-                  <el-tag
-                    :type="
-                      row.type === 'EXPENSE' || row.type === '0'
-                        ? 'danger'
-                        : 'success'
-                    "
-                    size="small"
-                  >
-                    {{
-                      row.type === "EXPENSE" || row.type === "0"
-                        ? t("bill.pureExpense")
-                        : t("bill.pureIncome")
-                    }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('bill.pureClassify')" min-width="200">
-                <template #default="{ row }">
-                  <span>{{ row.mainClassifyName }}</span>
-                  <span v-if="row.subClassifyName" style="color: #909399">
-                    / {{ row.subClassifyName }}</span
-                  >
-                </template>
-              </el-table-column>
-              <el-table-column
-                :label="t('bill.pureCreditCard')"
-                width="100"
-                align="center"
-              >
-                <template #default="{ row }">
-                  <el-tag
-                    :type="row.isCreditCard === 'YES' ? 'warning' : 'info'"
-                    size="small"
-                  >
-                    {{
-                      row.isCreditCard === "YES"
-                        ? t("bill.pureYes")
-                        : t("bill.pureNo")
-                    }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="remark"
-                :label="t('bill.pureRemark')"
-                min-width="300"
-              />
-              <el-table-column :label="t('bill.pureTag')" min-width="300">
-                <template #default="{ row }">
-                  <el-tag
-                    v-for="tag in getTagsByCodes(row.tagCodes)"
-                    :key="tag.id"
-                    :color="tag.color"
-                    size="small"
-                    :style="{ color: '#fff', marginRight: '4px' }"
-                  >
-                    {{ tag.name }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-            </el-table>
-          </div>
-        </template>
-        <template v-else>
+        <template v-if="selectedClassify">
           <el-table
             v-if="detailSortType === 'amount'"
-            :data="
-              (dateGroupedRecords[0]?.records || []).sort(
-                (a, b) => b.amount - a.amount
-              )
-            "
+            :data="sortedRecords"
             border
             stripe
             style="width: 100%"
@@ -770,7 +556,7 @@ onMounted(async () => {
                 </el-tag>
               </template>
             </el-table-column>
-            <el-table-column :label="t('bill.pureClassify')" min-width="200">
+            <el-table-column :label="t('bill.pureClassify')" width="200">
               <template #default="{ row }">
                 <span>{{ row.mainClassifyName }}</span>
                 <span v-if="row.subClassifyName" style="color: #909399">
@@ -799,9 +585,9 @@ onMounted(async () => {
             <el-table-column
               prop="remark"
               :label="t('bill.pureRemark')"
-              min-width="300"
+              min-width="200"
             />
-            <el-table-column :label="t('bill.pureTag')" min-width="300">
+            <el-table-column :label="t('bill.pureTag')" min-width="200">
               <template #default="{ row }">
                 <el-tag
                   v-for="tag in getTagsByCodes(row.tagCodes)"
@@ -879,7 +665,7 @@ onMounted(async () => {
                   </el-tag>
                 </template>
               </el-table-column>
-              <el-table-column :label="t('bill.pureClassify')" min-width="200">
+              <el-table-column :label="t('bill.pureClassify')" width="200">
                 <template #default="{ row }">
                   <span>{{ row.mainClassifyName }}</span>
                   <span v-if="row.subClassifyName" style="color: #909399">
@@ -908,9 +694,9 @@ onMounted(async () => {
               <el-table-column
                 prop="remark"
                 :label="t('bill.pureRemark')"
-                min-width="300"
+                min-width="200"
               />
-              <el-table-column :label="t('bill.pureTag')" min-width="300">
+              <el-table-column :label="t('bill.pureTag')" min-width="200">
                 <template #default="{ row }">
                   <el-tag
                     v-for="tag in getTagsByCodes(row.tagCodes)"
@@ -927,7 +713,11 @@ onMounted(async () => {
           </template>
         </template>
         <el-empty
-          v-if="!loading && !trendData?.incomeExpenseList?.length"
+          v-if="
+            !loading &&
+            (!reportData?.incomeExpenseSum ||
+              Object.keys(reportData.incomeExpenseSum).length === 0)
+          "
           :description="t('dashboard.pureNoRecords')"
         />
       </div>
@@ -936,7 +726,7 @@ onMounted(async () => {
 </template>
 
 <style lang="scss" scoped>
-.bill-report {
+.classify-report {
   .query-form-card {
     margin-bottom: 20px;
   }
@@ -967,7 +757,7 @@ onMounted(async () => {
 
     .chart-container {
       width: 100%;
-      height: 300px;
+      height: 400px;
     }
   }
 
@@ -976,63 +766,38 @@ onMounted(async () => {
       display: flex;
       justify-content: space-between;
       align-items: center;
-    }
 
-    .month-group {
-      margin-bottom: 16px;
-
-      .month-header {
+      .classify-info {
         display: flex;
         align-items: center;
-        padding: 8px 12px;
-        background: #f5f7fa;
-        border-radius: 4px;
-        cursor: pointer;
-        margin-bottom: 8px;
+        gap: 12px;
 
-        .expand-icon {
-          margin-right: 8px;
-          color: #409eff;
+        .classify-icon {
+          font-size: 20px;
         }
 
-        .month-label {
+        .classify-name {
           font-weight: 600;
           font-size: 14px;
         }
 
-        .month-summary {
-          margin-left: 30px;
-
-          .income-text {
-            color: #67c23a;
-            margin-right: 16px;
-          }
-
-          .expense-text {
-            color: #f56c6c;
-            margin-right: 16px;
-          }
-
-          .balance-positive {
-            color: #67c23a;
-          }
-
-          .balance-negative {
-            color: #f56c6c;
-          }
+        .classify-percent {
+          color: #409eff;
         }
-      }
-    }
 
-    .date-group {
-      margin-bottom: 16px;
+        .classify-num {
+          color: #909399;
+        }
 
-      .date-header {
-        font-weight: 600;
-        padding: 8px 12px;
-        background: #f5f7fa;
-        border-radius: 4px;
-        margin-bottom: 8px;
+        .classify-amount-expense {
+          font-weight: 600;
+          color: #f56c6c;
+        }
+
+        .classify-amount-income {
+          font-weight: 600;
+          color: #67c23a;
+        }
       }
     }
   }

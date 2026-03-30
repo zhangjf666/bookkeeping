@@ -2,8 +2,8 @@
 import { ref, watch, onMounted, onUnmounted } from "vue";
 import { useI18n } from "vue-i18n";
 import * as echarts from "echarts";
-import type { TrendData } from "@/types/dashboard";
-import { getTrendData } from "@/api/dashboard";
+import type { TrendData } from "@/types/bill";
+import { getTrendData } from "@/api/incomeExpense";
 import dayjs from "dayjs";
 import quarterOfYear from "dayjs/plugin/quarterOfYear";
 
@@ -188,7 +188,7 @@ watch(
 );
 
 onMounted(() => {
-  if (props.userId) {
+  if (props.userId && props.accountBookId) {
     fetchData(activeMode.value);
   }
   initChart();

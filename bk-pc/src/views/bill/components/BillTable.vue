@@ -91,6 +91,7 @@ const handleDelete = (row: IncomeExpense) => {
     :data="data"
     border
     stripe
+    style="width: 100%"
     @selection-change="emit('selection-change', $event)"
   >
     <el-table-column type="selection" width="50" />
@@ -100,7 +101,7 @@ const handleDelete = (row: IncomeExpense) => {
         {{ getAccountBookName(row.accountBookId) }}
       </template>
     </el-table-column>
-    <el-table-column :label="t('bill.pureAmount')" width="120" align="right">
+    <el-table-column :label="t('bill.pureAmount')" width="110" align="right">
       <template #default="{ row }">
         <span :style="{ color: isExpense(row.type) ? '#f56c6c' : '#67c23a' }">
           {{ formatAmount(row.amount, row.type) }}
@@ -126,7 +127,7 @@ const handleDelete = (row: IncomeExpense) => {
     </el-table-column>
     <el-table-column
       :label="t('bill.pureCreditCard')"
-      width="120"
+      width="95"
       align="center"
     >
       <template #default="{ row }">
@@ -145,7 +146,7 @@ const handleDelete = (row: IncomeExpense) => {
       :label="t('bill.pureRemark')"
       min-width="120"
     />
-    <el-table-column :label="t('bill.pureTag')" width="450">
+    <el-table-column :label="t('bill.pureTag')" min-width="250">
       <template #default="{ row }">
         <el-tag
           v-for="tag in getTagsByCodes(row.tagCodes)"

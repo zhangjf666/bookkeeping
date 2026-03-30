@@ -1,9 +1,14 @@
 import { defineStore } from "pinia";
 import { store } from "../utils";
-import type { AccountBook, IncomeExpenseQuery } from "@/types/dashboard";
-import type { IncomeExpense, IncomeExpenseForm, Tag } from "@/types/bill";
+import type { AccountBook } from "@/types/accountBook";
+import type {
+  IncomeExpense,
+  IncomeExpenseForm,
+  IncomeExpenseQuery,
+  Tag
+} from "@/types/bill";
 import type { Classify } from "@/types/classify";
-import { getAccountBooks } from "@/api/dashboard";
+import { getAccountBooks } from "@/api/accountBook";
 import { getClassifyList as getClassifyListNew } from "@/api/classify";
 import {
   getIncomeExpenseList,
@@ -102,7 +107,10 @@ export const useBillStore = defineStore("pure-bill", {
     resetQueryParams() {
       this.queryParams = { pageNo: 1, pageSize: 10, type: undefined };
     },
-    async loadClassifyAndTag(userId: number) {
+    async loadClassifyAndTag(userId: number, force = false) {
+      if (!force && this.classifyList.length > 0 && this.tagList.length > 0) {
+        return;
+      }
       try {
         const [classifyResult, tagResult, remarkResult] = await Promise.all([
           getClassifyListNew(userId),

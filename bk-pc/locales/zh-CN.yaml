@@ -94,6 +94,7 @@ menus:
   pureBill: 收支记录
   pureReport: 统计报表
   pureBillReport: 账单统计
+  pureClassifyReport: 分类统计
 
 login:
   pureUsername: 账号

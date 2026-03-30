@@ -224,7 +224,7 @@ const handleSubmit = async () => {
 
 const refreshAccountBookCache = async () => {
   if (userStore.id) {
-    const { getAccountBooks } = await import("@/api/dashboard");
+    const { getAccountBooks } = await import("@/api/accountBook");
     try {
       const result = await getAccountBooks();
       billStore.accountBooks = result || [];

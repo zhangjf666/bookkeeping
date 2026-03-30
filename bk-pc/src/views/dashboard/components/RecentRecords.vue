@@ -1,7 +1,7 @@
 <script setup lang="ts">
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
-import type { IncomeExpenseRecord } from "@/types/dashboard";
+import type { IncomeExpenseRecord } from "@/types/bill";
 import { useBillStoreHook } from "@/store/modules/bill";
 
 defineOptions({
@@ -80,7 +80,7 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
         <span>{{ t("dashboard.pureRecentRecords") }}</span>
       </div>
     </template>
-    <el-table v-loading="loading" :data="records" border stripe>
+    <el-table v-loading="loading" :data="records" border stripe style="width: 100%">
       <el-table-column prop="date" :label="t('bill.pureDate')" width="100" />
       <el-table-column :label="t('bill.pureAmount')" width="100" align="right">
         <template #default="{ row }">

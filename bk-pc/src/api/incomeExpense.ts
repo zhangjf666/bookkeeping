@@ -4,7 +4,12 @@ import type {
   IncomeExpenseQuery,
   IncomeExpenseForm,
   PageResult,
-  Classify
+  Classify,
+  TrendParams,
+  TrendData,
+  ClassifyReportData,
+  Summary,
+  SummaryParams
 } from "@/types/bill";
 
 export const getIncomeExpenseList = (
@@ -58,4 +63,18 @@ export const getRemarkList = (userId: number) => {
       params: { userId }
     }
   );
+};
+
+export const getTrendData = (params: TrendParams) => {
+  return http.request<TrendData>("get", "/incomeExpense/sumPeriod", { params });
+};
+
+export const getClassifyReportData = (params: TrendParams) => {
+  return http.request<ClassifyReportData>("get", "/incomeExpense/sumPeriod", {
+    params: { ...params, queryMode: "1" }
+  });
+};
+
+export const getSummary = (params: SummaryParams) => {
+  return http.request<Summary>("get", "/incomeExpense/summary", { params });
 };

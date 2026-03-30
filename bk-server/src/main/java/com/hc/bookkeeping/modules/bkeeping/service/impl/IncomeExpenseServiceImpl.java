@@ -253,7 +253,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             }
         } else if(SUM_MODE_REPORT.equals(billQueryDto.getQueryMode())) {
             //报表
-            List<Dict> datas = baseMapper.queryReportAmount(billQueryDto.getUserId(), beginDate, endDate, billQueryDto.getClassifyList());
+            List<Dict> datas = baseMapper.queryReportAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
             for(Dict data: datas) {
                 Dict ies = (Dict) incomeExpenseSum.get(data.getStr("classify"));
                 if(ies == null){

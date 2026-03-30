@@ -17,8 +17,15 @@ export default {
       name: "BillReport",
       component: () => import("@/views/report/bill-report/index.vue"),
       meta: {
-        title: $t("menus.pureBillReport"),
-        showParent: true
+        title: $t("menus.pureBillReport")
+      }
+    },
+    {
+      path: "/report/classify-report",
+      name: "ClassifyReport",
+      component: () => import("@/views/report/classify-report/index.vue"),
+      meta: {
+        title: $t("menus.pureClassifyReport")
       }
     }
   ]

@@ -18,7 +18,7 @@ const defaultConfig: AxiosRequestConfig = {
   // 请求超时时间
   timeout: 10000,
   // 设置基础路径
-  baseURL: "/api",
+  baseURL: import.meta.env.VITE_BASE_URL || "/api",
   headers: {
     Accept: "application/json, text/plain, */*",
     "Content-Type": "application/json",

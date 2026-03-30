@@ -82,6 +82,7 @@ menus:
   pureBill: Records
   pureReport: Report
   pureBillReport: Bill Report
+  pureClassifyReport: Classify Report
 status:
   pureLoad: Loading...
   pureMessage: Message
