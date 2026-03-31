@@ -16,4 +16,8 @@ public class SystemProperties {
     private Boolean enableCaptcha = true;
 
     private Boolean enableIpCheck = true;
+
+    private String uploadTempPath = "";
+
+    private String uploadPath = "";
 }

@@ -39,7 +39,7 @@ public class HttpLoggerFilter extends OncePerRequestFilter implements Ordered {
     private Environment env;
 
     static {
-        unFilterUrl = Arrays.asList("/doc.html", "/swagger-resources", "/webjars", "/v2", "/swagger-ui.html", "/favicon", "/druid");
+        unFilterUrl = Arrays.asList("/doc.html", "/swagger-resources", "/webjars", "/v2", "/swagger-ui.html", "/favicon", "/druid", "/uploads");
     }
 
     @Autowired

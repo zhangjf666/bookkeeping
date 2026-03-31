@@ -18,6 +18,11 @@ spring:
     #sentinel:
       #master: mymaster
       #nodes: 10.150.146.14:17002,10.150.146.15:17001,10.150.146.16:17000
+  servlet:
+    multipart:
+      enabled: true
+      max-file-size: 2MB
+      max-request-size: 2MB
   datasource:
     druid:
       # 通过connectProperties属性来打开mergeSql功能；慢SQL记录
@@ -133,3 +138,7 @@ system:
   enable-captcha: false
   #开启请求ip验证
   enable-ip-check: true
+  #上传文件临时路径
+  upload-temp-path: D:/upload/tmp/
+  #上传文件路径
+  upload-path: D:/upload/

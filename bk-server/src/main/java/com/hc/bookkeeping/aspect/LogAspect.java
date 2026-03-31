@@ -17,6 +17,8 @@ import org.aspectj.lang.annotation.Pointcut;
 import org.aspectj.lang.reflect.CodeSignature;
 import org.aspectj.lang.reflect.MethodSignature;
 import org.springframework.stereotype.Component;
+import org.springframework.web.multipart.MultipartFile;
+import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
 import java.lang.reflect.Method;
@@ -48,6 +50,8 @@ public class LogAspect {
         this.logService = logService;
         excluedParamClass = new HashSet<>();
         excluedParamClass.add(HttpServletRequest.class);
+        excluedParamClass.add(StandardMultipartHttpServletRequest.class);
+        excluedParamClass.add(MultipartFile.class);
     }
 
     @Pointcut("@annotation(com.hc.bookkeeping.common.annotation.Log)")
@@ -130,14 +134,11 @@ public class LogAspect {
         for (int i = 0; i < paramNames.length; i++) {
             String paramName = paramNames[i];
             Object paramValue = paramValues[i];
-            for (Class clazz: excluedParamClass) {
-                if(clazz.isInstance(paramValue)){
-                    continue;
-                }
-                params.put(paramName, paramValue);
+            if(excluedParamClass.stream().anyMatch(clazz -> clazz.isInstance(paramValue))){
+                continue;
             }
+            params.put(paramName, paramValue);
         }
-
         return params;
     }
 }

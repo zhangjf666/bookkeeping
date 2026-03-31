@@ -95,6 +95,8 @@ menus:
   pureReport: 统计报表
   pureBillReport: 账单统计
   pureClassifyReport: 分类统计
+  pureUser: 用户中心
+  pureUserProfile: 个人资料
 
 login:
   pureUsername: 账号
@@ -149,6 +151,49 @@ dashboard:
   pureYearlyExpenseLimit: 年支出限额
   pureMonthlyExpenseSurplus: 月剩余限额
   pureYearlyExpenseSurplus: 年剩余限额
+
+profile:
+  pureTitle: 个人资料
+  pureLoadUserInfoFailed: 加载用户信息失败
+  pureNicknameRequired: 昵称不能为空
+  pureUpdateSuccess: 保存成功
+  pureUpdateFailed: 保存失败
+  pureClickToChangeAvatar: 点击更换头像
+  pureInvalidImageType: 请选择图片文件
+  pureImageTooLarge: 图片大小不能超过2MB
+  pureAvatarUpdateSuccess: 头像更新成功
+  pureAvatarUpdateFailed: 头像更新失败
+  pureUsername: 用户名
+  purePassword: 密码
+  pureNickname: 昵称
+  pureNicknamePlaceholder: 请输入昵称
+  pureGender: 性别
+  pureMale: 男
+  pureFemale: 女
+  pureEmail: 邮箱
+  pureEmailPlaceholder: 请输入邮箱
+  purePhone: 手机号
+  purePhonePlaceholder: 请输入手机号
+  pureEdit: 编辑
+  pureCancel: 取消
+  pureSave: 保存
+  pureChangePassword: 修改密码
+  pureOldPassword: 当前密码
+  pureOldPasswordPlaceholder: 请输入当前密码
+  pureNewPassword: 新密码
+  pureNewPasswordPlaceholder: 请输入新密码
+  pureConfirmPassword: 确认新密码
+  pureConfirmPasswordPlaceholder: 请再次输入新密码
+  pureOldPasswordRequired: 请输入当前密码
+  pureNewPasswordRequired: 请输入新密码
+  pureConfirmPasswordRequired: 请再次输入新密码
+  purePasswordLength: 密码长度需在6-20个字符之间
+  purePasswordNotMatch: 两次输入的密码不一致
+  purePasswordChangeSuccess: 密码修改成功
+  purePasswordChangeFailed: 密码修改失败
+  pureNicknameLength: 昵称不能超过20个字符
+  pureEmailFormatError: 请输入正确的邮箱地址
+  purePhoneFormatError: 请输入正确的手机号
 
 bill:
   pureTitle: 收支记录

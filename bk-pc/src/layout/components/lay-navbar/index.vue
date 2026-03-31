@@ -12,6 +12,8 @@ import GlobalizationIcon from "@/assets/svg/globalization.svg?component";
 import LogoutCircleRLine from "~icons/ri/logout-circle-r-line";
 import Setting from "~icons/ri/settings-3-line";
 import Check from "~icons/ep/check";
+import User from "~icons/ep/user";
+import { useRouter } from "vue-router";
 
 const {
   layout,
@@ -28,6 +30,11 @@ const {
 } = useNav();
 
 const { t, locale, translationCh, translationEn } = useTranslationLang();
+const router = useRouter();
+
+const goToProfile = () => {
+  router.push("/user/profile");
+};
 </script>
 
 <template>
@@ -83,8 +90,6 @@ const { t, locale, translationCh, translationEn } = useTranslationLang();
       </el-dropdown>
       <!-- 全屏 -->
       <LaySidebarFullScreen id="full-screen" />
-      <!-- 消息通知 -->
-      <LayNotice id="header-notice" />
       <!-- 退出登录 -->
       <el-dropdown trigger="click">
         <span class="el-dropdown-link navbar-bg-hover select-none">
@@ -93,6 +98,13 @@ const { t, locale, translationCh, translationEn } = useTranslationLang();
         </span>
         <template #dropdown>
           <el-dropdown-menu class="logout">
+            <el-dropdown-item @click="goToProfile">
+              <IconifyIconOffline
+                :icon="User"
+                style="margin: 5px"
+              />
+              {{ t("menus.pureUserProfile") }}
+            </el-dropdown-item>
             <el-dropdown-item @click="logout">
               <IconifyIconOffline
                 :icon="LogoutCircleRLine"

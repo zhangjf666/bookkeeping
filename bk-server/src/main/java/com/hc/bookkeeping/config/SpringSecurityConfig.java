@@ -88,6 +88,7 @@ public class SpringSecurityConfig extends WebSecurityConfigurerAdapter {
                 // 文件
                 .antMatchers("/avatar/**").permitAll()
                 .antMatchers("/file/**").permitAll()
+                .antMatchers("/uploads/**").permitAll()
                 // 阿里巴巴 druid
                 .antMatchers("/druid/**").permitAll()
                 // 放行OPTIONS请求

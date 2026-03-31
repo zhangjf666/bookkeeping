@@ -46,5 +46,14 @@ public class Constants {
      */
     public static String DEFAULT_YEARLY_EXPENSE_LIMIT = "default_yearly_expense_limit";
 
+    /**
+     * 上传文件路径
+     */
+    public static String UPLOAD_PATH = "/uploads/";
+
+    /**
+     * 上传文件路径
+     */
+    public static String UPLOAD_TMP_PATH = "/uploads/tmp/";
 
 }

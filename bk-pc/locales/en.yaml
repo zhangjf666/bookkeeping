@@ -83,6 +83,8 @@ menus:
   pureReport: Report
   pureBillReport: Bill Report
   pureClassifyReport: Classify Report
+  pureUser: User Center
+  pureUserProfile: Profile
 status:
   pureLoad: Loading...
   pureMessage: Message
@@ -315,3 +317,46 @@ commonConfig:
   pureInvalidAmount: Please enter valid amount
   pureUpdateSuccess: Saved Successfully
   pureOperationFail: Operation Failed
+
+profile:
+  pureTitle: Profile
+  pureLoadUserInfoFailed: Failed to load user info
+  pureNicknameRequired: Nickname cannot be empty
+  pureUpdateSuccess: Saved Successfully
+  pureUpdateFailed: Failed to save
+  pureClickToChangeAvatar: Click to change avatar
+  pureInvalidImageType: Please select an image file
+  pureImageTooLarge: Image size cannot exceed 2MB
+  pureAvatarUpdateSuccess: Avatar updated successfully
+  pureAvatarUpdateFailed: Failed to update avatar
+  pureUsername: Username
+  purePassword: Password
+  pureNickname: Nickname
+  pureNicknamePlaceholder: Enter nickname
+  pureGender: Gender
+  pureMale: Male
+  pureFemale: Female
+  pureEmail: Email
+  pureEmailPlaceholder: Enter email
+  purePhone: Phone
+  purePhonePlaceholder: Enter phone number
+  pureEdit: Edit
+  pureCancel: Cancel
+  pureSave: Save
+  pureChangePassword: Change Password
+  pureOldPassword: Current Password
+  pureOldPasswordPlaceholder: Enter current password
+  pureNewPassword: New Password
+  pureNewPasswordPlaceholder: Enter new password
+  pureConfirmPassword: Confirm New Password
+  pureConfirmPasswordPlaceholder: Enter new password again
+  pureOldPasswordRequired: Please enter current password
+  pureNewPasswordRequired: Please enter new password
+  pureConfirmPasswordRequired: Please enter new password again
+  purePasswordLength: Password must be 6-20 characters
+  purePasswordNotMatch: Passwords do not match
+  purePasswordChangeSuccess: Password changed successfully
+  purePasswordChangeFailed: Failed to change password
+  pureNicknameLength: Nickname cannot exceed 20 characters
+  pureEmailFormatError: Please enter a valid email address
+  purePhoneFormatError: Please enter a valid phone number

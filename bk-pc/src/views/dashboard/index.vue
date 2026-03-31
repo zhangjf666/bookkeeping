@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
+import { getUserInfo } from "@/api/user";
 import { getUserConfigList, setAdditionalExpenseLimit } from "@/api/userConfig";
 import { getSummary } from "@/api/incomeExpense";
 import type { Summary } from "@/types/bill";
@@ -15,6 +16,8 @@ import AccountBookSelect from "./components/AccountBookSelect.vue";
 import BillForm from "@/views/bill/components/BillForm.vue";
 import Add from "~icons/ep/circle-plus-filled";
 import Edit from "~icons/ep/edit";
+
+const BASE_URL = import.meta.env.VITE_BASE_URL as string;
 
 defineOptions({
   name: "Dashboard"
@@ -53,14 +56,17 @@ const loadData = async () => {
 };
 
 const loadAll = async () => {
-  const userId = userStore.id;
-  if (!userId) {
-    ElMessage.error("用户信息加载失败");
-    return;
-  }
-
   loading.value = true;
   try {
+    const userResult = await getUserInfo();
+    const avatarUrl = userResult.avatar.startsWith("http")
+      ? userResult.avatar
+      : `${BASE_URL}${userResult.avatar}`;
+    userStore.SET_AVATAR(avatarUrl);
+    userStore.SET_NICKNAME(userResult.nickName);
+    userStore.SET_ID(userResult.id);
+
+    const userId = userResult.id;
     await Promise.all([
       billStore.loadAccountBooks(),
       billStore.loadClassifyAndTag(userId)

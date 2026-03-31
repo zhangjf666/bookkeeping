@@ -1,5 +1,28 @@
 import { http } from "@/utils/http";
 
+export interface BookkeepingUser {
+  id: number;
+  username: string;
+  nickName: string;
+  gender: "MALE" | "FEMALE" | "";
+  avatar: string;
+  email: string;
+  mobilePhone: string;
+  createTime: string;
+  updateTime: string;
+}
+
+export interface ChangePasswordForm {
+  oldPassword: string;
+  newPassword: string;
+  confirmNewPassword: string;
+}
+
+export interface AvatarUploadResult {
+  url: string;
+  fileName: string;
+}
+
 export type UserResult = {
   success: boolean;
   data: {
@@ -42,4 +65,27 @@ export const getLogin = (data?: object) => {
 /** 刷新`token` */
 export const refreshTokenApi = (data?: object) => {
   return http.request<RefreshTokenResult>("post", "/refresh-token", { data });
+};
+
+/** 获取当前用户信息 */
+export const getUserInfo = () => {
+  return http.request<BookkeepingUser>("get", "/bookkeepingUser");
+};
+
+/** 更新用户信息 */
+export const updateUserInfo = (data: Partial<BookkeepingUser>) => {
+  return http.request<BookkeepingUser>("put", "/bookkeepingUser", { data });
+};
+
+/** 修改密码 */
+export const changePassword = (data: ChangePasswordForm) => {
+  return http.request<void>("post", "/bookkeepingUser/changePwd", { data });
+};
+
+/** 上传头像 */
+export const uploadAvatar = (data: FormData) => {
+  return http.request<AvatarUploadResult>("post", "/bookkeepingUser/avatar", {
+    data,
+    headers: { "Content-Type": "multipart/form-data" }
+  });
 };

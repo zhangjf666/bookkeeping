@@ -17,6 +17,8 @@ import { usePermissionStoreHook } from "@/store/modules/permission";
 import ExitFullscreen from "~icons/ri/fullscreen-exit-fill";
 import Fullscreen from "~icons/ri/fullscreen-fill";
 
+const BASE_URL = import.meta.env.VITE_BASE_URL as string;
+
 const errorInfo =
   "The current routing configuration is incorrect, please check the configuration";
 
@@ -39,10 +41,16 @@ export function useNav() {
   });
 
   /** 头像（如果头像为空则使用 src/assets/user.jpg ） */
-  const userAvatar = computed(() => {
-    return isAllEmpty(useUserStoreHook()?.avatar)
-      ? Avatar
-      : useUserStoreHook()?.avatar;
+  const userAvatar = computed((): string => {
+    const store = useUserStoreHook();
+    let avatar = store.avatar;
+    if (!avatar) {
+      return Avatar;
+    }
+    if (avatar.startsWith("http")) {
+      return avatar;
+    }
+    return `${BASE_URL}${avatar}`;
   });
 
   /** 昵称（如果昵称为空则显示用户名） */
