@@ -1,8 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.model;
 
 import com.baomidou.mybatisplus.annotation.EnumValue;
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonValue;
 import com.hc.bookkeeping.common.base.IEnum;
 
 public enum BillType implements IEnum<String> {
@@ -39,7 +37,7 @@ public enum BillType implements IEnum<String> {
         return type;
     }
 
-    public static BillType findEmum(String id){
+    public static BillType findEnum(String id){
         for (BillType item : BillType.values()) {
             if (item.getValue().equals(id)) {
                 return item;
