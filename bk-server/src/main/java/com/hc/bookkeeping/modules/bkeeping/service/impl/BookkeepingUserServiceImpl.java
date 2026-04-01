@@ -13,6 +13,7 @@ import com.hc.bookkeeping.modules.admin.entity.UserRole;
 import com.hc.bookkeeping.modules.admin.mapper.UserRoleMapper;
 import com.hc.bookkeeping.modules.admin.service.RoleService;
 import com.hc.bookkeeping.modules.bkeeping.constants.Constants;
+import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
 import com.hc.bookkeeping.modules.bkeeping.dto.AvatarUploadResult;
 import com.hc.bookkeeping.modules.bkeeping.dto.BookkeepingUserDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.ChangePasswordDto;
@@ -57,9 +58,9 @@ import java.nio.file.StandardCopyOption;
 @RequiredArgsConstructor
 public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserMapstruct, BookkeepingUserDto, BookkeepingUserMapper, BookkeepingUser> implements BookkeepingUserService {
 
-    private PasswordEncoder passwordEncoder;
+    private final PasswordEncoder passwordEncoder;
 
-    private SystemProperties systemProperties;
+    private final SystemProperties systemProperties;
 
     private final UserRoleMapper userRoleMapper;
 
@@ -227,7 +228,7 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
         BookkeepingUser user = new BookkeepingUser();
         user.setUsername(dto.getUsername());
         user.setNickName(RandomUtil.randomString(12));
-        user.setPassword(new BCryptPasswordEncoder().encode(dto.getPassword()));
+        user.setPassword(passwordEncoder.encode(dto.getPassword()));
         baseMapper.insert(user);
         //用户角色
         UserRole userRole = new UserRole(user.getId(), normalRole.getId());
@@ -248,7 +249,7 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
     private void createAccountBook(BookkeepingUser user){
         AccountBook ab = new AccountBook();
         ab.setName("默认账本");
-        ab.setImage("red");
+        ab.setImage("book");
         ab.setUserId(user.getId());
         ab.setDescription("默认账本");
         ab.setIsDefault(BoolEnum.YES);
@@ -263,13 +264,13 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
         UserConfig uc = new UserConfig();
         uc.setUserId(user.getId());
         uc.setName("is_credit_card");
-        uc.setValue("0");
-        uc.setDescription("流水记录时默认不选中信用卡");
+        uc.setValue(BoolEnum.NO.getValue());
+        uc.setDescription("记录收支时默认选中信用卡");
         userConfigMapper.insert(uc);
         uc = new UserConfig();
         uc.setUserId(user.getId());
         uc.setName("show_expense_limit");
-        uc.setValue("1");
+        uc.setValue(ExpenseLimitShowType.NOT.getCode());
         uc.setDescription("支出限额显示模式(1:不显示,2:显示月限额,3:显示年限额)");
         uc = new UserConfig();
         uc.setUserId(user.getId());

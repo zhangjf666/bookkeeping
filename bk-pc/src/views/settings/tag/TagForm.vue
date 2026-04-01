@@ -161,7 +161,8 @@ const handleSubmit = async () => {
       ElMessage.success(t("tag.pureUpdateSuccess"));
       newTagId = submitData.id;
     } else {
-      newTagId = await createUserTag(submitData);
+      const result = await createUserTag(submitData);
+      newTagId = result?.id;
       ElMessage.success(t("tag.pureCreateSuccess"));
     }
     await refreshTagCache();

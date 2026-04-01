@@ -1,5 +1,5 @@
 import { http } from "@/utils/http";
-import type { UserTagForm, UserTagPageResult } from "@/types/userTag";
+import type { UserTag, UserTagForm, UserTagPageResult } from "@/types/userTag";
 
 export const getUserTagList = (
   userId: number,
@@ -11,7 +11,7 @@ export const getUserTagList = (
 };
 
 export const createUserTag = (data: UserTagForm) => {
-  return http.request<number>("post", "/userTag", { data });
+  return http.request<UserTag>("post", "/userTag", { data });
 };
 
 export const updateUserTag = (data: UserTagForm) => {

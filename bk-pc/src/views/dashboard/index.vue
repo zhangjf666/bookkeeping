@@ -88,6 +88,7 @@ const loadUserConfig = async () => {
   try {
     const result = await getUserConfigList(userId);
     const configList = result || [];
+    billStore.setUserConfigList(configList);
 
     const showLimitConfig = configList.find(
       c => c.name === "show_expense_limit"
@@ -186,6 +187,7 @@ const summaryParams = computed(() => ({
       :title="t('bill.pureAddRecord')"
       width="600px"
       :close-on-click-modal="false"
+      destroy-on-close
     >
       <BillForm
         :data="null"

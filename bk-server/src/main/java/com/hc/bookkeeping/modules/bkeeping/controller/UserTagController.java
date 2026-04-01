@@ -49,9 +49,8 @@ public class UserTagController {
     @Log("创建用户标签")
     @ApiOperation("创建用户标签")
     @PostMapping
-    public Response create(@Validated(Insert.class) @RequestBody UserTagDto dto){
-        userTagService.create(dto);
-        return Response.ok();
+    public Response<UserTagDto> create(@Validated(Insert.class) @RequestBody UserTagDto dto){
+        return Response.ok(userTagService.create(dto));
     }
 
     @Log("编辑用户标签")

@@ -6,8 +6,6 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import type { IncomeExpense, IncomeExpenseForm } from "@/types/bill";
 import { getClassifyIcon } from "@/utils/classifyIcons";
-import { getUserConfig } from "@/api/userConfig";
-import type { UserConfig } from "@/types/userConfig";
 import TagForm from "@/views/settings/tag/TagForm.vue";
 import dayjs from "dayjs";
 
@@ -109,25 +107,16 @@ const formData = ref<IncomeExpenseForm>({
   type: "EXPENSE",
   date: dayjs().format("YYYY-MM-DD"),
   remark: "",
-  mainClassify: 0,
+  mainClassify: undefined,
   subClassify: undefined,
   isCreditCard: "NO",
   isAddRemark: "NO",
   tagCodes: ""
 });
 
-const initCreditCardFromConfig = async () => {
-  if (!userId.value) return;
-  try {
-    const config = await getUserConfig(userId.value, "is_credit_card");
-    if (config && (config as any).value === "1") {
-      formData.value.isCreditCard = "YES";
-    } else {
-      formData.value.isCreditCard = "NO";
-    }
-  } catch {
-    formData.value.isCreditCard = "NO";
-  }
+const initCreditCardFromConfig = () => {
+  const config = billStore.userConfigList.find(c => c.name === "is_credit_card");
+  formData.value.isCreditCard = config?.value === "1" ? "YES" : "NO";
 };
 
 onMounted(() => {
@@ -250,6 +239,26 @@ const queryFormRemarks = (
   cb(results.map(item => ({ value: item.remark })));
 };
 
+const resetForm = () => {
+  formData.value = {
+    id: undefined,
+    accountBookId: billStore.currentAccountBook?.id || 0,
+    amount: 0,
+    type: "EXPENSE",
+    date: dayjs().format("YYYY-MM-DD"),
+    remark: "",
+    mainClassify: undefined,
+    subClassify: undefined,
+    isCreditCard: "NO",
+    isAddRemark: "NO",
+    tagCodes: ""
+  };
+  initCreditCardFromConfig();
+  selectedClassifyId.value = undefined;
+  selectedTags.value = [];
+  formRef.value?.resetFields();
+};
+
 watch(
   () => props.data,
   val => {
@@ -280,9 +289,7 @@ watch(
       }
       selectedTags.value = getTagIdsByCodes(val.tagCodes);
     } else {
-      initCreditCardFromConfig();
-      selectedClassifyId.value = undefined;
-      selectedTags.value = [];
+      resetForm();
     }
   },
   { immediate: true }
@@ -301,7 +308,7 @@ watch(selectedClassifyId, val => {
       }
     }
   } else {
-    formData.value.mainClassify = 0;
+    formData.value.mainClassify = undefined;
     formData.value.subClassify = undefined;
   }
 });
@@ -315,15 +322,16 @@ watch(
 );
 
 const handleTagCreated = (tagId: number) => {
-  if (tagId) {
-    const tag = billStore.tagList.find(t => t.id === tagId);
-    if (tag) {
-      selectedTags.value = [...selectedTags.value, tag.id];
-    }
+  if (tagId && !selectedTags.value.includes(tagId)) {
+    selectedTags.value = [...selectedTags.value, tagId];
   }
 };
 
 const handleSubmit = async () => {
+  if (!selectedClassifyId.value) {
+    message(t("bill.pureClassifyRequired"), { type: "warning" });
+    return;
+  }
   const valid = await formRef.value.validate().catch(() => false);
   if (!valid) return;
   if (!userId.value) return;

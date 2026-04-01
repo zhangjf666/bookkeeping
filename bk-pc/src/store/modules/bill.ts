@@ -34,9 +34,19 @@ export const useBillStore = defineStore("pure-bill", {
     classifyList: [] as Classify[],
     classifyTree: [] as Classify[],
     tagList: [] as Tag[],
-    remarkList: [] as { id: number; remark: string; classifyId: number }[]
+    remarkList: [] as { id: number; remark: string; classifyId: number }[],
+    userConfigList: [] as { name: string; value: string }[]
   }),
+  getters: {
+    isCreditCardEnabled(): boolean {
+      const config = this.userConfigList.find(c => c.name === "is_credit_card");
+      return config?.value === "1";
+    }
+  },
   actions: {
+    setUserConfigList(configs: { name: string; value: string }[]) {
+      this.userConfigList = configs;
+    },
     async loadAccountBooks() {
       try {
         const result = await getAccountBooks();
