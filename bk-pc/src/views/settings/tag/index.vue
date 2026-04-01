@@ -5,13 +5,9 @@ import { ElMessageBox, ElMessage } from "element-plus";
 import { Edit, Delete, Plus } from "@element-plus/icons-vue";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
-import {
-  getUserTagList,
-  createUserTag,
-  updateUserTag,
-  deleteUserTag
-} from "@/api/userTag";
-import type { UserTag, UserTagForm } from "@/types/userTag";
+import { getUserTagList, deleteUserTag } from "@/api/userTag";
+import type { UserTag } from "@/types/userTag";
+import TagForm from "./TagForm.vue";
 
 defineOptions({
   name: "TagSetting"
@@ -23,11 +19,9 @@ const billStore = useBillStoreHook();
 
 const loading = ref(false);
 const tableData = ref<UserTag[]>([]);
-const dialogVisible = ref(false);
-const dialogTitle = ref("");
-const formRef = ref();
-const saving = ref(false);
+const showTagDialog = ref(false);
 const selectedRows = ref<UserTag[]>([]);
+const editingTag = ref<UserTag | null>(null);
 
 const searchForm = ref({
   name: ""
@@ -38,73 +32,6 @@ const pagination = ref({
   pageSize: 10,
   total: 0
 });
-
-const formData = ref<UserTagForm>({
-  userId: 0,
-  name: "",
-  color: "#409EFF80",
-  sort: 0
-});
-
-const rules = {
-  name: [
-    { required: true, message: t("tag.pureTagNameRequired"), trigger: "blur" },
-    { max: 20, message: t("tag.pureTagNameLength"), trigger: "blur" }
-  ],
-  color: [
-    { required: true, message: t("tag.pureColorRequired"), trigger: "change" }
-  ]
-};
-
-const colorPresets = [
-  "#FF6B6B80",
-  "#FF8C6980",
-  "#FFA07A80",
-  "#FFB34780",
-  "#FFD70080",
-  "#FFEAA780",
-  "#F7DC6F80",
-  "#98D8C880",
-  "#96CEB480",
-  "#4ECDC480",
-  "#45B7D180",
-  "#87CEEB80",
-  "#6BB3F080",
-  "#DDA0DD80",
-  "#DA70D680",
-  "#FF69B480",
-  "#FF149380",
-  "#DC143C80",
-  "#B2222280",
-  "#2F4F4F80",
-  "#70809080",
-  "#77889980",
-  "#A9A9A980",
-  "#00000080",
-  "#FF000080",
-  "#00FF0080",
-  "#0000FF80",
-  "#FFFF0080",
-  "#00FFFF80",
-  "#FF00FF80"
-];
-
-const rgbToHex = (rgb: string): string => {
-  if (!rgb || !rgb.startsWith("rgb")) return rgb;
-  const rgba = rgb.match(/rgba?\((\d+),\s*(\d+),\s*(\d+)(?:,\s*([\d.]+))?\)/);
-  if (!rgba) return rgb;
-
-  const r = parseInt(rgba[1]).toString(16).padStart(2, "0");
-  const g = parseInt(rgba[2]).toString(16).padStart(2, "0");
-  const b = parseInt(rgba[3]).toString(16).padStart(2, "0");
-  const a = rgba[4]
-    ? Math.round(parseFloat(rgba[4]) * 255)
-        .toString(16)
-        .padStart(2, "0")
-    : "";
-
-  return `#${r}${g}${b}${a}`;
-};
 
 const refreshTagCache = async () => {
   if (userStore.id) {
@@ -165,26 +92,13 @@ const handleSizeChange = (size: number) => {
 };
 
 const handleAdd = () => {
-  dialogTitle.value = t("tag.pureAdd");
-  formData.value = {
-    userId: userStore.id,
-    name: "",
-    color: "#409EFF80",
-    sort: pagination.value.total + 1
-  };
-  dialogVisible.value = true;
+  editingTag.value = null;
+  showTagDialog.value = true;
 };
 
 const handleEdit = (row: UserTag) => {
-  dialogTitle.value = t("tag.pureEdit");
-  formData.value = {
-    id: row.id,
-    userId: row.userId,
-    name: row.name,
-    color: row.color,
-    sort: row.sort
-  };
-  dialogVisible.value = true;
+  editingTag.value = row;
+  showTagDialog.value = true;
 };
 
 const handleDelete = async (row: UserTag) => {
@@ -235,38 +149,6 @@ const handleBatchDelete = async () => {
   } catch {
     // cancelled
   }
-};
-
-const handleSubmit = async () => {
-  const valid = await formRef.value.validate().catch(() => false);
-  if (!valid) return;
-
-  const submitData = {
-    ...formData.value,
-    color: rgbToHex(formData.value.color)
-  };
-
-  saving.value = true;
-  try {
-    if (submitData.id) {
-      await updateUserTag(submitData);
-      ElMessage.success(t("tag.pureUpdateSuccess"));
-    } else {
-      await createUserTag(submitData);
-      ElMessage.success(t("tag.pureCreateSuccess"));
-    }
-    dialogVisible.value = false;
-    await refreshTagCache();
-    loadData();
-  } catch (error: any) {
-    ElMessage.error(error?.message || t("tag.pureOperationFail"));
-  } finally {
-    saving.value = false;
-  }
-};
-
-const handleColorChange = (color: string) => {
-  formData.value.color = color;
 };
 
 onMounted(() => {
@@ -382,53 +264,11 @@ onMounted(() => {
       @current-change="handlePageChange"
     />
 
-    <el-dialog
-      v-model="dialogVisible"
-      :title="dialogTitle"
-      width="500px"
-      :close-on-click-modal="false"
-    >
-      <el-form
-        ref="formRef"
-        :model="formData"
-        :rules="rules"
-        label-width="100px"
-      >
-        <el-form-item :label="t('tag.pureTagName')" prop="name">
-          <el-input
-            v-model="formData.name"
-            :placeholder="t('tag.pureTagNamePlaceholder')"
-            maxlength="20"
-            show-word-limit
-          />
-        </el-form-item>
-        <el-form-item :label="t('tag.pureColor')" prop="color">
-          <el-color-picker
-            v-model="formData.color"
-            show-alpha
-            :predefine="colorPresets"
-            @change="handleColorChange"
-          />
-          <span class="color-input-hint">{{ t("tag.pureColorHint") }}</span>
-        </el-form-item>
-        <el-form-item :label="t('tag.purePreview')">
-          <el-tag :color="formData.color" :style="{ color: '#fff' }">
-            {{ formData.name || t("tag.pureTagNamePlaceholder") }}
-          </el-tag>
-        </el-form-item>
-        <el-form-item :label="t('tag.pureSort')" prop="sort">
-          <el-input-number v-model="formData.sort" :min="0" :max="9999" />
-        </el-form-item>
-      </el-form>
-      <template #footer>
-        <el-button @click="dialogVisible = false">{{
-          t("tag.pureCancel")
-        }}</el-button>
-        <el-button type="primary" :loading="saving" @click="handleSubmit">
-          {{ t("tag.pureTagConfirm") }}
-        </el-button>
-      </template>
-    </el-dialog>
+    <TagForm
+      v-model:visible="showTagDialog"
+      :data="editingTag"
+      @success="loadData"
+    />
   </div>
 </template>
 

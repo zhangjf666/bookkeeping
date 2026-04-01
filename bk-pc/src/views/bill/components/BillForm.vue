@@ -8,6 +8,7 @@ import type { IncomeExpense, IncomeExpenseForm } from "@/types/bill";
 import { getClassifyIcon } from "@/utils/classifyIcons";
 import { getUserConfig } from "@/api/userConfig";
 import type { UserConfig } from "@/types/userConfig";
+import TagForm from "@/views/settings/tag/TagForm.vue";
 import dayjs from "dayjs";
 
 defineOptions({
@@ -33,6 +34,8 @@ const userId = computed(() => userStore.id);
 
 const formRef = ref();
 const loading = ref(false);
+const showTagDialog = ref(false);
+const selectedTags = ref<number[]>([]);
 
 const formData = ref<IncomeExpenseForm>({
   id: undefined,
@@ -120,8 +123,6 @@ const classifyTreeDataWithIcon = computed(() => {
 });
 
 const selectedClassifyId = ref<number | undefined>(undefined);
-
-const selectedTags = ref<number[]>([]);
 
 const getTagCodesByIds = (tagIds: number[]) => {
   return tagIds
@@ -253,6 +254,15 @@ watch(
   { deep: true }
 );
 
+const handleTagCreated = (tagId: number) => {
+  if (tagId) {
+    const tag = billStore.tagList.find(t => t.id === tagId);
+    if (tag) {
+      selectedTags.value = [...selectedTags.value, tag.id];
+    }
+  }
+};
+
 const handleSubmit = async () => {
   const valid = await formRef.value.validate().catch(() => false);
   if (!valid) return;
@@ -330,42 +340,54 @@ const handleSubmit = async () => {
       />
     </el-form-item>
     <el-form-item :label="t('bill.pureRemark')">
-      <el-autocomplete
-        v-model="formData.remark"
-        :fetch-suggestions="queryFormRemarks"
-        :placeholder="t('bill.pureRemarkPlaceholder')"
-        clearable
-        style="width: 100%"
-        @select="handleRemarkSelect"
-      >
-        <template #append>
-          <el-checkbox
-            v-model="formData.isAddRemark"
-            true-value="YES"
-            false-value="NO"
-          >
-            {{ t("bill.pureAddToCommon") }}
-          </el-checkbox>
-        </template>
-      </el-autocomplete>
+      <div class="remark-wrapper">
+        <el-autocomplete
+          v-model="formData.remark"
+          :fetch-suggestions="queryFormRemarks"
+          :placeholder="t('bill.pureRemarkPlaceholder')"
+          clearable
+          class="remark-input"
+          @select="handleRemarkSelect"
+        />
+        <el-checkbox
+          v-model="formData.isAddRemark"
+          true-value="YES"
+          false-value="NO"
+          class="add-remark-checkbox"
+        >
+          {{ t("bill.pureAddToCommon") }}
+        </el-checkbox>
+      </div>
     </el-form-item>
     <el-form-item :label="t('bill.pureTag')">
-      <el-select
-        v-model="selectedTags"
-        multiple
-        filterable
-        :placeholder="t('bill.pureSelectPlaceholder')"
-        style="width: 100%"
-      >
-        <el-option
-          v-for="tag in billStore.tagList"
-          :key="tag.id"
-          :label="tag.name"
-          :value="tag.id"
+      <div class="tag-select-wrapper">
+        <el-select
+          v-model="selectedTags"
+          multiple
+          filterable
+          :placeholder="t('bill.pureSelectPlaceholder')"
+          class="tag-select"
         >
-          <span :style="{ color: tag.color }">{{ tag.name }}</span>
-        </el-option>
-      </el-select>
+          <el-option
+            v-for="tag in billStore.tagList"
+            :key="tag.id"
+            :label="tag.name"
+            :value="tag.id"
+          >
+            <el-tag :color="tag.color" :style="{ color: '#fff' }" size="small">
+              {{ tag.name }}
+            </el-tag>
+          </el-option>
+        </el-select>
+        <el-button
+          type="primary"
+          size="default"
+          class="add-tag-btn"
+          @click="showTagDialog = true"
+        >
+          +
+        </el-button>
+      </div>
     </el-form-item>
     <el-form-item v-if="formData.type === 'EXPENSE'">
       <el-checkbox
@@ -383,4 +405,56 @@ const handleSubmit = async () => {
       </el-button>
     </el-form-item>
   </el-form>
+
+  <TagForm
+    v-model:visible="showTagDialog"
+    @success="handleTagCreated"
+  />
 </template>
+
+<style lang="scss" scoped>
+.remark-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 12px;
+
+  .remark-input {
+    flex: 1;
+  }
+
+  .add-remark-checkbox {
+    flex-shrink: 0;
+    white-space: nowrap;
+  }
+}
+
+.tag-select-wrapper {
+  display: flex;
+  align-items: center;
+  width: 100%;
+  gap: 8px;
+
+  .tag-select {
+    flex: 1;
+  }
+
+  .add-tag-btn {
+    flex-shrink: 0;
+    width: 31px;
+    height: 31px;
+    padding: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+}
+
+.tag-option {
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #fff;
+  display: inline-block;
+  margin: 2px;
+}
+</style>

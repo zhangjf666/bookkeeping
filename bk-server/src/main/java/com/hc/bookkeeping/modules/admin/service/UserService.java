@@ -77,10 +77,4 @@ public interface UserService extends BaseService<UserDto, User> {
      */
     boolean checkExist(String userName);
 
-    /**
-     * 注册用户
-     * @param dto
-     * @return
-     */
-    boolean registerUser(RegisterUserDto dto);
 }

@@ -14,6 +14,7 @@ import com.hc.bookkeeping.common.utils.SpringSecurityUtil;
 import com.hc.bookkeeping.config.properties.SystemProperties;
 import com.hc.bookkeeping.modules.admin.dto.UserDto;
 import com.hc.bookkeeping.modules.admin.service.UserService;
+import com.hc.bookkeeping.modules.bkeeping.service.BookkeepingUserService;
 import com.hc.bookkeeping.modules.security.config.JwtProperties;
 import com.hc.bookkeeping.modules.security.dto.CacheUser;
 import com.hc.bookkeeping.modules.security.dto.JwtUserDetails;
@@ -65,6 +66,7 @@ public class AuthenticationController {
     private final AuthenticationManagerBuilder authenticationManagerBuilder;
     private final SystemProperties systemProperties;
     private final UserService userService;
+    private final BookkeepingUserService bookkeepingUserService;
 
     @Log(value = "用户登录",type = LogType.USER)
     @ApiOperation("登录授权")
@@ -138,7 +140,7 @@ public class AuthenticationController {
         if(!dto.getPassword().equals(dto.getRepeatPassword())){
             throw new BusinessException("2次密码不相同");
         }
-        userService.registerUser(dto);
+        bookkeepingUserService.registerUser(dto);
         return Response.ok();
     }
 

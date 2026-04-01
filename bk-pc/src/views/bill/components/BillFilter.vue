@@ -293,7 +293,9 @@ const queryRemarks = (
                 :label="tag.name"
                 :value="tag.id"
               >
-                <span :style="{ color: tag.color }">{{ tag.name }}</span>
+                <el-tag :color="tag.color" :style="{ color: '#fff' }" size="small">
+                  {{ tag.name }}
+                </el-tag>
               </el-option>
             </el-select>
           </el-form-item>
@@ -325,5 +327,13 @@ const queryRemarks = (
 
 :deep(.el-select-dropdown__item .el-checkbox) {
   display: inline;
+}
+
+.tag-option {
+  padding: 2px 8px;
+  border-radius: 10px;
+  color: #fff;
+  display: inline-block;
+  margin: 2px;
 }
 </style>

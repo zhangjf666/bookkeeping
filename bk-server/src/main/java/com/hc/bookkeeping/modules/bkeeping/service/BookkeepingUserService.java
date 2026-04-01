@@ -5,6 +5,7 @@ import com.hc.bookkeeping.modules.bkeeping.dto.BookkeepingUserDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.ChangePasswordDto;
 import com.hc.bookkeeping.modules.bkeeping.entity.BookkeepingUser;
 import com.hc.bookkeeping.modules.bkeeping.dto.AvatarUploadResult;
+import com.hc.bookkeeping.modules.security.dto.RegisterUserDto;
 import org.springframework.web.multipart.MultipartFile;
 
 import java.io.IOException;
@@ -18,6 +19,13 @@ import java.io.IOException;
  * @since 2021-08-08
  */
 public interface BookkeepingUserService extends BaseService<BookkeepingUserDto, BookkeepingUser> {
+
+    /**
+     * 注册用户
+     * @param dto
+     * @return
+     */
+    boolean registerUser(RegisterUserDto dto);
 
     /**
      * 获取当前用户信息

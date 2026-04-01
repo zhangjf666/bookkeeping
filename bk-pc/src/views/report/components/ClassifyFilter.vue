@@ -1,6 +1,7 @@
 <script setup lang="ts">
 import { computed, ref } from "vue";
 import { useBillStoreHook } from "@/store/modules/bill";
+import { getClassifyIcon } from "@/utils/classifyIcons";
 
 interface Props {
   modelValue: (number | string)[];
@@ -73,24 +74,36 @@ const handleClassifyChange = (value: (string | number)[]) => {
       label="全部支出"
       value="-1"
       class="classify-all-option expense"
-    />
+    >
+      <span class="option-icon">📌</span>
+      <span>全部支出</span>
+    </el-option>
     <el-option
       v-for="item in expenseClassifyList"
       :key="item.id"
       :label="item.name"
       :value="item.id"
-    />
+    >
+      <span class="option-icon">{{ getClassifyIcon(item.image) }}</span>
+      <span>{{ item.name }}</span>
+    </el-option>
     <el-option
       label="全部收入"
       value="-2"
       class="classify-all-option income"
-    />
+    >
+      <span class="option-icon">📌</span>
+      <span>全部收入</span>
+    </el-option>
     <el-option
       v-for="item in incomeClassifyList"
       :key="item.id"
       :label="item.name"
       :value="item.id"
-    />
+    >
+      <span class="option-icon">{{ getClassifyIcon(item.image) }}</span>
+      <span>{{ item.name }}</span>
+    </el-option>
   </el-select>
 </template>
 
@@ -103,6 +116,16 @@ const handleClassifyChange = (value: (string | number)[]) => {
   &.income {
     color: #67c23a !important;
     font-weight: 600;
+  }
+}
+
+.el-select-dropdown__item {
+  display: flex;
+  align-items: center;
+  
+  .option-icon {
+    margin-right: 8px;
+    font-size: 16px;
   }
 }
 </style>

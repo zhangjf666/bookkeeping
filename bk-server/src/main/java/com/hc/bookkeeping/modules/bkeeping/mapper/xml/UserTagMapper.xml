@@ -9,7 +9,7 @@
         <result column="user_id" property="userId" />
         <result column="name" property="name" />
         <result column="color" property="color" />
-        <result column="pinned" property="pinned" />
+        <result column="sort" property="sort" />
         <result column="create_time" property="createTime" />
         <result column="update_time" property="updateTime" />
     </resultMap>
@@ -21,8 +21,8 @@
 
     <!-- 插入用户标签 -->
     <insert id="insert" parameterType="com.hc.bookkeeping.modules.bkeeping.entity.UserTag">
-        INSERT INTO user_tag (code, user_id, name, color, pinned, create_time, update_time)
-        SELECT IFNULL(MAX(code), 1000) + 1, #{userId}, #{name}, #{color}, #{pinned}, #{createTime}, #{updateTime} FROM user_tag WHERE user_id = #{userId};
+        INSERT INTO user_tag (code, user_id, name, color, sort, create_time, update_time)
+        SELECT IFNULL(MAX(code), 1000) + 1, #{userId}, #{name}, #{color}, #{sort}, #{createTime}, #{updateTime} FROM user_tag WHERE user_id = #{userId};
     </insert>
 
 </mapper>
