@@ -73,12 +73,12 @@ const dialogVisible = ref(props.visible);
 
 watch(
   () => props.visible,
-  (val) => {
+  val => {
     dialogVisible.value = val;
   }
 );
 
-watch(dialogVisible, (val) => {
+watch(dialogVisible, val => {
   emit("update:visible", val);
   if (!val) {
     form.value = {
@@ -123,16 +123,8 @@ const handleSubmit = async () => {
     :close-on-click-modal="false"
     @close="handleClose"
   >
-    <el-form
-      ref="formRef"
-      :model="form"
-      :rules="rules"
-      label-width="120px"
-    >
-      <el-form-item
-        :label="t('profile.pureOldPassword')"
-        prop="oldPassword"
-      >
+    <el-form ref="formRef" :model="form" :rules="rules" label-width="120px">
+      <el-form-item :label="t('profile.pureOldPassword')" prop="oldPassword">
         <el-input
           v-model="form.oldPassword"
           type="password"
@@ -140,10 +132,7 @@ const handleSubmit = async () => {
           :placeholder="t('profile.pureOldPasswordPlaceholder')"
         />
       </el-form-item>
-      <el-form-item
-        :label="t('profile.pureNewPassword')"
-        prop="newPassword"
-      >
+      <el-form-item :label="t('profile.pureNewPassword')" prop="newPassword">
         <el-input
           v-model="form.newPassword"
           type="password"
@@ -167,11 +156,7 @@ const handleSubmit = async () => {
       <el-button @click="handleClose">
         {{ t("buttons.pureClose") }}
       </el-button>
-      <el-button
-        type="primary"
-        :loading="loading"
-        @click="handleSubmit"
-      >
+      <el-button type="primary" :loading="loading" @click="handleSubmit">
         {{ t("buttons.pureConfirm") }}
       </el-button>
     </template>

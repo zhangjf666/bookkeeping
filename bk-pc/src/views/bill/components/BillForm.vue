@@ -36,6 +36,71 @@ const formRef = ref();
 const loading = ref(false);
 const showTagDialog = ref(false);
 const selectedTags = ref<number[]>([]);
+const tagSearchText = ref("");
+const remarkSearchText = ref("");
+
+const filteredTagList = computed(() => {
+  if (!tagSearchText.value) return billStore.tagList;
+  return billStore.tagList.filter(tag =>
+    tag.name.toLowerCase().includes(tagSearchText.value.toLowerCase())
+  );
+});
+
+const filteredRemarkList = computed(() => {
+  if (!remarkSearchText.value) return billStore.remarkList;
+  return billStore.remarkList.filter(remark =>
+    remark.remark.toLowerCase().includes(remarkSearchText.value.toLowerCase())
+  );
+});
+
+const getTagColor = (tagId: number) => {
+  const tag = billStore.tagList.find(t => t.id === tagId);
+  return tag ? tag.color : "";
+};
+
+const toggleTag = (tagId: number) => {
+  const index = selectedTags.value.indexOf(tagId);
+  if (index === -1) {
+    selectedTags.value = [...selectedTags.value, tagId];
+  } else {
+    selectedTags.value = selectedTags.value.filter(id => id !== tagId);
+  }
+};
+
+const removeTag = (tagId: number) => {
+  selectedTags.value = selectedTags.value.filter(id => id !== tagId);
+};
+
+const selectRemark = (remark: string) => {
+  formData.value.remark = remark;
+  handleRemarkAutoSelect(remark);
+};
+
+const handleRemarkAutoSelect = (remarkValue: string) => {
+  const remarkItem = billStore.remarkList.find(r => r.remark === remarkValue);
+  if (!remarkItem || !remarkItem.classifyId) return;
+
+  const classify = billStore.classifyList.find(
+    c => c.id === remarkItem.classifyId
+  );
+  if (!classify) return;
+
+  if (classify.type) {
+    formData.value.type = String(classify.type);
+  }
+
+  if (classify.pid === -1) {
+    selectedClassifyId.value = classify.id;
+  } else {
+    const parentClassify = billStore.classifyList.find(
+      c => c.id === classify.pid
+    );
+    if (parentClassify) {
+      selectedClassifyId.value = parentClassify.id;
+      formData.value.subClassify = classify.id;
+    }
+  }
+};
 
 const formData = ref<IncomeExpenseForm>({
   id: undefined,
@@ -140,11 +205,6 @@ const getTagIdsByCodes = (tagCodesStr: string) => {
   return billStore.tagList
     .filter(tag => codes.includes((tag as any).code))
     .map(tag => tag.id);
-};
-
-const getTagColor = (tagId: number) => {
-  const tag = billStore.tagList.find(t => t.id === tagId);
-  return tag ? tag.color : "";
 };
 
 const getTagName = (tagId: number) => {
@@ -341,14 +401,36 @@ const handleSubmit = async () => {
     </el-form-item>
     <el-form-item :label="t('bill.pureRemark')">
       <div class="remark-wrapper">
-        <el-autocomplete
-          v-model="formData.remark"
-          :fetch-suggestions="queryFormRemarks"
-          :placeholder="t('bill.pureRemarkPlaceholder')"
-          clearable
-          class="remark-input"
-          @select="handleRemarkSelect"
-        />
+        <el-popover placement="bottom-start" :width="400" trigger="click">
+          <template #reference>
+            <div class="remark-dropdown-trigger">
+              <span v-if="!formData.remark" class="placeholder">
+                {{ t("bill.pureRemarkPlaceholder") }}
+              </span>
+              <span v-else>{{ formData.remark }}</span>
+            </div>
+          </template>
+          <div class="remark-popover-content">
+            <el-input
+              v-model="remarkSearchText"
+              :placeholder="t('bill.pureQuery')"
+              clearable
+              class="remark-search-input"
+            />
+            <div class="remark-grid-container">
+              <div class="remark-grid">
+                <div
+                  v-for="remark in filteredRemarkList"
+                  :key="remark.id"
+                  class="remark-item"
+                  @click="selectRemark(remark.remark)"
+                >
+                  {{ remark.remark }}
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-popover>
         <el-checkbox
           v-model="formData.isAddRemark"
           true-value="YES"
@@ -361,24 +443,56 @@ const handleSubmit = async () => {
     </el-form-item>
     <el-form-item :label="t('bill.pureTag')">
       <div class="tag-select-wrapper">
-        <el-select
-          v-model="selectedTags"
-          multiple
-          filterable
-          :placeholder="t('bill.pureSelectPlaceholder')"
-          class="tag-select"
-        >
-          <el-option
-            v-for="tag in billStore.tagList"
-            :key="tag.id"
-            :label="tag.name"
-            :value="tag.id"
-          >
-            <el-tag :color="tag.color" :style="{ color: '#fff' }" size="small">
-              {{ tag.name }}
-            </el-tag>
-          </el-option>
-        </el-select>
+        <el-popover placement="bottom-start" :width="400" trigger="click">
+          <template #reference>
+            <div class="tag-dropdown-trigger">
+              <span v-if="selectedTags.length === 0" class="placeholder">
+                {{ t("bill.pureSelectPlaceholder") }}
+              </span>
+              <span v-else class="selected-tags">
+                <el-tag
+                  v-for="tagId in selectedTags"
+                  :key="tagId"
+                  :color="getTagColor(tagId)"
+                  :style="{ color: '#fff' }"
+                  size="small"
+                  class="selected-tag"
+                  closable
+                  @close="removeTag(tagId)"
+                >
+                  {{ getTagName(tagId) }}
+                </el-tag>
+              </span>
+            </div>
+          </template>
+          <div class="tag-popover-content">
+            <el-input
+              v-model="tagSearchText"
+              :placeholder="t('bill.pureQuery')"
+              clearable
+              class="tag-search-input"
+            />
+            <div class="tag-grid-container">
+              <div class="tag-grid">
+                <div
+                  v-for="tag in filteredTagList"
+                  :key="tag.id"
+                  class="tag-item"
+                  :class="{ active: selectedTags.includes(tag.id) }"
+                  @click="toggleTag(tag.id)"
+                >
+                  <el-tag
+                    :color="tag.color"
+                    :style="{ color: '#fff' }"
+                    size="small"
+                  >
+                    {{ tag.name }}
+                  </el-tag>
+                </div>
+              </div>
+            </div>
+          </div>
+        </el-popover>
         <el-button
           type="primary"
           size="default"
@@ -406,18 +520,15 @@ const handleSubmit = async () => {
     </el-form-item>
   </el-form>
 
-  <TagForm
-    v-model:visible="showTagDialog"
-    @success="handleTagCreated"
-  />
+  <TagForm v-model:visible="showTagDialog" @success="handleTagCreated" />
 </template>
 
 <style lang="scss" scoped>
 .remark-wrapper {
   display: flex;
+  gap: 12px;
   align-items: center;
   width: 100%;
-  gap: 12px;
 
   .remark-input {
     flex: 1;
@@ -431,30 +542,153 @@ const handleSubmit = async () => {
 
 .tag-select-wrapper {
   display: flex;
+  gap: 8px;
   align-items: center;
   width: 100%;
-  gap: 8px;
 
   .tag-select {
     flex: 1;
   }
 
   .add-tag-btn {
+    display: flex;
     flex-shrink: 0;
+    align-items: center;
+    justify-content: center;
     width: 31px;
     height: 31px;
     padding: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
   }
 }
 
 .tag-option {
-  padding: 2px 8px;
-  border-radius: 10px;
-  color: #fff;
   display: inline-block;
+  padding: 2px 8px;
   margin: 2px;
+  color: #fff;
+  border-radius: 10px;
+}
+
+.remark-dropdown-trigger,
+.tag-dropdown-trigger {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 8px;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+
+  .placeholder {
+    color: #999;
+  }
+
+  &:hover {
+    border-color: #409eff;
+  }
+}
+
+.tag-dropdown-trigger {
+  min-height: 32px;
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+.selected-tag {
+  margin: 0;
+
+  :deep(.el-tag__close) {
+    color: #fff;
+    background-color: rgb(0 0 0 / 30%);
+
+    &:hover {
+      background-color: rgb(0 0 0 / 60%);
+    }
+  }
+}
+
+.remark-popover-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .remark-search-input {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+  }
+
+  .remark-grid-container {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .remark-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+
+    .remark-item {
+      padding: 8px;
+      overflow: hidden;
+      text-overflow: ellipsis;
+      text-align: center;
+      white-space: nowrap;
+      cursor: pointer;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: #f5f7fa;
+      }
+    }
+  }
+}
+
+.tag-popover-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .tag-search-input {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+  }
+
+  .tag-grid-container {
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .tag-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+
+    .tag-item {
+      display: flex;
+      justify-content: center;
+      padding: 4px;
+      cursor: pointer;
+      border-radius: 4px;
+
+      &:hover {
+        background-color: #f5f7fa;
+      }
+
+      &.active {
+        background-color: #ecf5ff;
+      }
+    }
+  }
 }
 </style>

@@ -117,7 +117,7 @@ const dialogVisible = ref(false);
 
 watch(
   () => props.visible,
-  (val) => {
+  val => {
     dialogVisible.value = val;
     if (val) {
       if (props.data) {
@@ -140,7 +140,7 @@ watch(
   }
 );
 
-watch(dialogVisible, (val) => {
+watch(dialogVisible, val => {
   emit("update:visible", val);
 });
 
@@ -188,12 +188,7 @@ const handleClose = () => {
     :close-on-click-modal="false"
     @close="handleClose"
   >
-    <el-form
-      ref="formRef"
-      :model="formData"
-      :rules="rules"
-      label-width="100px"
-    >
+    <el-form ref="formRef" :model="formData" :rules="rules" label-width="100px">
       <el-form-item :label="t('tag.pureTagName')" prop="name">
         <el-input
           v-model="formData.name"

@@ -80,7 +80,13 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
         <span>{{ t("dashboard.pureRecentRecords") }}</span>
       </div>
     </template>
-    <el-table v-loading="loading" :data="records" border stripe style="width: 100%">
+    <el-table
+      v-loading="loading"
+      :data="records"
+      border
+      stripe
+      style="width: 100%"
+    >
       <el-table-column prop="date" :label="t('bill.pureDate')" width="100" />
       <el-table-column :label="t('bill.pureAmount')" width="100" align="right">
         <template #default="{ row }">

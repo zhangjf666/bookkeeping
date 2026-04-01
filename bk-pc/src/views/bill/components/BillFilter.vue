@@ -152,6 +152,44 @@ const getFilterTagName = (tagId: number) => {
   return tag ? tag.name : "";
 };
 
+const filterRemarkText = ref("");
+const filterTagText = ref("");
+
+const filteredRemarkList = computed(() => {
+  if (!filterRemarkText.value) return billStore.remarkList;
+  return billStore.remarkList.filter(remark =>
+    remark.remark.toLowerCase().includes(filterRemarkText.value.toLowerCase())
+  );
+});
+
+const filteredTagList = computed(() => {
+  if (!filterTagText.value) return billStore.tagList;
+  return billStore.tagList.filter(tag =>
+    tag.name.toLowerCase().includes(filterTagText.value.toLowerCase())
+  );
+});
+
+const toggleFilterTag = (tagId: number) => {
+  const index = filterForm.value.tagCodes.indexOf(tagId);
+  if (index === -1) {
+    filterForm.value.tagCodes = [...filterForm.value.tagCodes, tagId];
+  } else {
+    filterForm.value.tagCodes = filterForm.value.tagCodes.filter(
+      id => id !== tagId
+    );
+  }
+};
+
+const removeFilterTag = (tagId: number) => {
+  filterForm.value.tagCodes = filterForm.value.tagCodes.filter(
+    id => id !== tagId
+  );
+};
+
+const selectFilterRemark = (remark: string) => {
+  filterForm.value.remark = remark;
+};
+
 const queryRemarks = (
   queryString: string,
   cb: (results: { value: string }[]) => void
@@ -269,35 +307,88 @@ const queryRemarks = (
         </el-col>
         <el-col :span="6">
           <el-form-item :label="t('bill.pureRemark')">
-            <el-autocomplete
-              v-model="filterForm.remark"
-              :fetch-suggestions="queryRemarks"
-              :placeholder="t('bill.pureRemarkPlaceholder')"
-              clearable
-              style="width: 100%"
-            />
+            <el-popover placement="bottom-start" :width="400" trigger="click">
+              <template #reference>
+                <div class="filter-remark-trigger">
+                  <span v-if="!filterForm.remark" class="placeholder">
+                    {{ t("bill.pureRemarkPlaceholder") }}
+                  </span>
+                  <span v-else>{{ filterForm.remark }}</span>
+                </div>
+              </template>
+              <div class="filter-remark-content">
+                <el-input
+                  v-model="filterRemarkText"
+                  :placeholder="t('bill.pureQuery')"
+                  clearable
+                  class="filter-remark-search"
+                />
+                <div class="filter-remark-grid">
+                  <div
+                    v-for="remark in filteredRemarkList"
+                    :key="remark.id"
+                    class="filter-remark-item"
+                    @click="selectFilterRemark(remark.remark)"
+                  >
+                    {{ remark.remark }}
+                  </div>
+                </div>
+              </div>
+            </el-popover>
           </el-form-item>
         </el-col>
         <el-col :span="6">
           <el-form-item :label="t('bill.pureTag')">
-            <el-select
-              v-model="filterForm.tagCodes"
-              multiple
-              filterable
-              :placeholder="t('bill.pureSelectPlaceholder')"
-              style="width: 100%"
-            >
-              <el-option
-                v-for="tag in billStore.tagList"
-                :key="tag.id"
-                :label="tag.name"
-                :value="tag.id"
-              >
-                <el-tag :color="tag.color" :style="{ color: '#fff' }" size="small">
-                  {{ tag.name }}
-                </el-tag>
-              </el-option>
-            </el-select>
+            <el-popover placement="bottom-start" :width="400" trigger="click">
+              <template #reference>
+                <div class="filter-tag-trigger">
+                  <span
+                    v-if="filterForm.tagCodes.length === 0"
+                    class="placeholder"
+                  >
+                    {{ t("bill.pureSelectPlaceholder") }}
+                  </span>
+                  <span v-else class="selected-tags">
+                    <el-tag
+                      v-for="tagId in filterForm.tagCodes"
+                      :key="tagId"
+                      :color="getFilterTagColor(tagId)"
+                      :style="{ color: '#fff' }"
+                      size="small"
+                      closable
+                      @close="removeFilterTag(tagId)"
+                    >
+                      {{ getFilterTagName(tagId) }}
+                    </el-tag>
+                  </span>
+                </div>
+              </template>
+              <div class="filter-tag-content">
+                <el-input
+                  v-model="filterTagText"
+                  :placeholder="t('bill.pureQuery')"
+                  clearable
+                  class="filter-tag-search"
+                />
+                <div class="filter-tag-grid">
+                  <div
+                    v-for="tag in filteredTagList"
+                    :key="tag.id"
+                    class="filter-tag-item"
+                    :class="{ active: filterForm.tagCodes.includes(tag.id) }"
+                    @click="toggleFilterTag(tag.id)"
+                  >
+                    <el-tag
+                      :color="tag.color"
+                      :style="{ color: '#fff' }"
+                      size="small"
+                    >
+                      {{ tag.name }}
+                    </el-tag>
+                  </div>
+                </div>
+              </div>
+            </el-popover>
           </el-form-item>
         </el-col>
         <el-col :span="6">
@@ -330,10 +421,95 @@ const queryRemarks = (
 }
 
 .tag-option {
-  padding: 2px 8px;
-  border-radius: 10px;
-  color: #fff;
   display: inline-block;
+  padding: 2px 8px;
   margin: 2px;
+  color: #fff;
+  border-radius: 10px;
+}
+
+.filter-remark-trigger,
+.filter-tag-trigger {
+  display: flex;
+  flex: 1;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+  min-height: 32px;
+  padding: 0 8px;
+  cursor: pointer;
+  background: #fff;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+
+  .placeholder {
+    color: #999;
+  }
+
+  &:hover {
+    border-color: #409eff;
+  }
+}
+
+.selected-tags {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 4px;
+  align-items: center;
+}
+
+:deep(.el-tag) {
+  margin: 0;
+
+  .el-tag__close {
+    color: #fff;
+    background-color: rgb(0 0 0 / 30%);
+
+    &:hover {
+      background-color: rgb(0 0 0 / 60%);
+    }
+  }
+}
+
+.filter-remark-content,
+.filter-tag-content {
+  display: flex;
+  flex-direction: column;
+  width: 100%;
+
+  .filter-remark-search,
+  .filter-tag-search {
+    flex-shrink: 0;
+    margin-bottom: 12px;
+  }
+
+  .filter-remark-grid,
+  .filter-tag-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    width: 100%;
+    max-height: 240px;
+    overflow-y: auto;
+  }
+
+  .filter-remark-item,
+  .filter-tag-item {
+    padding: 8px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    text-align: center;
+    white-space: nowrap;
+    cursor: pointer;
+    border-radius: 4px;
+
+    &:hover {
+      background-color: #f5f7fa;
+    }
+  }
+
+  .filter-tag-item.active {
+    background-color: #ecf5ff;
+  }
 }
 </style>

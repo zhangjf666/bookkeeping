@@ -974,8 +974,8 @@ onMounted(async () => {
   .detail-card {
     .detail-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
     }
 
     .month-group {
@@ -985,10 +985,10 @@ onMounted(async () => {
         display: flex;
         align-items: center;
         padding: 8px 12px;
+        margin-bottom: 8px;
+        cursor: pointer;
         background: #f5f7fa;
         border-radius: 4px;
-        cursor: pointer;
-        margin-bottom: 8px;
 
         .expand-icon {
           margin-right: 8px;
@@ -996,21 +996,21 @@ onMounted(async () => {
         }
 
         .month-label {
-          font-weight: 600;
           font-size: 14px;
+          font-weight: 600;
         }
 
         .month-summary {
           margin-left: 30px;
 
           .income-text {
-            color: #67c23a;
             margin-right: 16px;
+            color: #67c23a;
           }
 
           .expense-text {
-            color: #f56c6c;
             margin-right: 16px;
+            color: #f56c6c;
           }
 
           .balance-positive {
@@ -1028,11 +1028,11 @@ onMounted(async () => {
       margin-bottom: 16px;
 
       .date-header {
-        font-weight: 600;
         padding: 8px 12px;
+        margin-bottom: 8px;
+        font-weight: 600;
         background: #f5f7fa;
         border-radius: 4px;
-        margin-bottom: 8px;
       }
     }
   }

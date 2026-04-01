@@ -43,7 +43,7 @@ export function useNav() {
   /** 头像（如果头像为空则使用 src/assets/user.jpg ） */
   const userAvatar = computed((): string => {
     const store = useUserStoreHook();
-    let avatar = store.avatar;
+    const avatar = store.avatar;
     if (!avatar) {
       return Avatar;
     }

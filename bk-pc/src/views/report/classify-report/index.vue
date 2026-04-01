@@ -764,21 +764,21 @@ onMounted(async () => {
   .detail-card {
     .detail-header {
       display: flex;
-      justify-content: space-between;
       align-items: center;
+      justify-content: space-between;
 
       .classify-info {
         display: flex;
-        align-items: center;
         gap: 12px;
+        align-items: center;
 
         .classify-icon {
           font-size: 20px;
         }
 
         .classify-name {
-          font-weight: 600;
           font-size: 14px;
+          font-weight: 600;
         }
 
         .classify-percent {

@@ -99,10 +99,7 @@ const goToProfile = () => {
         <template #dropdown>
           <el-dropdown-menu class="logout">
             <el-dropdown-item @click="goToProfile">
-              <IconifyIconOffline
-                :icon="User"
-                style="margin: 5px"
-              />
+              <IconifyIconOffline :icon="User" style="margin: 5px" />
               {{ t("menus.pureUserProfile") }}
             </el-dropdown-item>
             <el-dropdown-item @click="logout">

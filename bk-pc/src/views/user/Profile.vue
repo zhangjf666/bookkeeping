@@ -85,7 +85,11 @@ const validatePhone = (rule: any, value: string, callback: any) => {
 
 const formRules = {
   nickName: [
-    { required: true, message: t("profile.pureNicknameRequired"), trigger: "blur" },
+    {
+      required: true,
+      message: t("profile.pureNicknameRequired"),
+      trigger: "blur"
+    },
     { max: 20, message: t("profile.pureNicknameLength"), trigger: "blur" }
   ],
   email: [{ validator: validateEmail, trigger: "blur" }],
@@ -278,8 +282,12 @@ onMounted(() => {
 
           <el-form-item :label="t('profile.pureGender')">
             <el-radio-group v-if="isEditing" v-model="editForm.gender">
-              <el-radio-button value="MALE">{{ t("profile.pureMale") }}</el-radio-button>
-              <el-radio-button value="FEMALE">{{ t("profile.pureFemale") }}</el-radio-button>
+              <el-radio-button value="MALE">{{
+                t("profile.pureMale")
+              }}</el-radio-button>
+              <el-radio-button value="FEMALE">{{
+                t("profile.pureFemale")
+              }}</el-radio-button>
             </el-radio-group>
             <span v-else>
               {{
@@ -336,8 +344,8 @@ onMounted(() => {
 
 <style lang="scss" scoped>
 .profile-container {
-  padding: 16px;
   max-width: 700px;
+  padding: 16px;
   margin: 0 auto;
 }
 
@@ -365,24 +373,24 @@ onMounted(() => {
   .avatar {
     width: 100px;
     height: 100px;
-    border-radius: 50%;
     object-fit: cover;
     border: 2px solid #ebeef5;
+    border-radius: 50%;
   }
 
   .avatar-hover {
     position: absolute;
     top: 0;
     left: 0;
-    width: 100px;
-    height: 100px;
     display: flex;
     align-items: center;
     justify-content: center;
-    background: rgba(0, 0, 0, 0.5);
-    border-radius: 50%;
-    color: #fff;
+    width: 100px;
+    height: 100px;
     font-size: 24px;
+    color: #fff;
+    background: rgb(0 0 0 / 50%);
+    border-radius: 50%;
     opacity: 0;
     transition: opacity 0.3s;
   }
@@ -395,9 +403,9 @@ onMounted(() => {
 .avatar:not(.avatar-uploader .avatar) {
   width: 100px;
   height: 100px;
-  border-radius: 50%;
   object-fit: cover;
   border: 2px solid #ebeef5;
+  border-radius: 50%;
 }
 
 .avatar-tip {
@@ -427,9 +435,9 @@ onMounted(() => {
 }
 
 .form-actions {
-  margin-top: 32px;
   display: flex;
-  justify-content: flex-end;
   gap: 12px;
+  justify-content: flex-end;
+  margin-top: 32px;
 }
 </style>

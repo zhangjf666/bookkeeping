@@ -48,7 +48,11 @@ const handleClassifyChange = (value: (string | number)[]) => {
   }
 
   if (hasAllIncome && !prevHasAllIncome.value) {
-    result = [...result.filter(v => !incomeIds.includes(Number(v))), ...incomeIds, "-2"];
+    result = [
+      ...result.filter(v => !incomeIds.includes(Number(v))),
+      ...incomeIds,
+      "-2"
+    ];
   } else if (!hasAllIncome && prevHasAllIncome.value) {
     result = result.filter(v => !incomeIds.includes(Number(v)));
   }
@@ -70,11 +74,7 @@ const handleClassifyChange = (value: (string | number)[]) => {
     style="width: 200px"
     @update:model-value="handleClassifyChange"
   >
-    <el-option
-      label="全部支出"
-      value="-1"
-      class="classify-all-option expense"
-    >
+    <el-option label="全部支出" value="-1" class="classify-all-option expense">
       <span class="option-icon">📌</span>
       <span>全部支出</span>
     </el-option>
@@ -87,11 +87,7 @@ const handleClassifyChange = (value: (string | number)[]) => {
       <span class="option-icon">{{ getClassifyIcon(item.image) }}</span>
       <span>{{ item.name }}</span>
     </el-option>
-    <el-option
-      label="全部收入"
-      value="-2"
-      class="classify-all-option income"
-    >
+    <el-option label="全部收入" value="-2" class="classify-all-option income">
       <span class="option-icon">📌</span>
       <span>全部收入</span>
     </el-option>
@@ -110,19 +106,20 @@ const handleClassifyChange = (value: (string | number)[]) => {
 <style lang="scss">
 .classify-all-option {
   &.expense {
+    font-weight: 600;
     color: #f56c6c !important;
-    font-weight: 600;
   }
+
   &.income {
-    color: #67c23a !important;
     font-weight: 600;
+    color: #67c23a !important;
   }
 }
 
 .el-select-dropdown__item {
   display: flex;
   align-items: center;
-  
+
   .option-icon {
     margin-right: 8px;
     font-size: 16px;
