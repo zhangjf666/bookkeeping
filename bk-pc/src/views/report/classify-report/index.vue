@@ -33,6 +33,8 @@ interface FormData {
   year: string;
   dateRange: [string, string] | null;
   classifyList: number[];
+  remark: string;
+  tagCodes: number[];
 }
 
 const formData = ref<FormData>({
@@ -41,7 +43,9 @@ const formData = ref<FormData>({
   month: dayjs().format("YYYY-MM"),
   year: dayjs().format("YYYY"),
   dateRange: null,
-  classifyList: []
+  classifyList: [],
+  remark: "",
+  tagCodes: []
 });
 
 const reportData = ref<ClassifyReportData | null>(null);
@@ -114,6 +118,16 @@ const getQueryParams = () => {
     return result.length > 0 ? result : undefined;
   };
 
+  const getRemark = () => {
+    if (!formData.value.remark) return undefined;
+    return formData.value.remark;
+  };
+
+  const getTagCodes = () => {
+    if (formData.value.tagCodes.length === 0) return undefined;
+    return formData.value.tagCodes;
+  };
+
   return {
     userId,
     accountBookId: formData.value.accountBookId,
@@ -121,7 +135,9 @@ const getQueryParams = () => {
     queryMode: "1",
     beginDate,
     endDate,
-    classifyList: getClassifyList()
+    classifyList: getClassifyList(),
+    remark: getRemark(),
+    tagCodes: getTagCodes()
   };
 };
 
@@ -162,7 +178,9 @@ const handleReset = () => {
     month: dayjs().format("YYYY-MM"),
     year: dayjs().format("YYYY"),
     dateRange: null,
-    classifyList: []
+    classifyList: [],
+    remark: "",
+    tagCodes: []
   };
   fetchData();
 };
@@ -370,6 +388,8 @@ onMounted(async () => {
       v-model:year="formData.year"
       v-model:dateRange="formData.dateRange"
       v-model:classifyList="formData.classifyList"
+      v-model:remark="formData.remark"
+      v-model:tagCodes="formData.tagCodes"
       @query="fetchData"
       @reset="handleReset"
     />

@@ -46,4 +46,14 @@ public class BillQueryDto {
      * 查询的分类
      */
     private List<Long> classifyList = new ArrayList<>();
+
+    /**
+     * 备注（模糊查询）
+     */
+    private String remark;
+
+    /**
+     * 标签codes（多选，包含任意一个即可）
+     */
+    private List<Long> tagCodes = new ArrayList<>();
 }

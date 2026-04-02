@@ -24,9 +24,11 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
      * @param beginDate 开始日期
      * @param endDate 结束日期
      * @param classify 分类列表
+     * @param remark 备注（模糊查询）
+     * @param tagCodes 标签codes（多选，包含任意一个即可）
      * @return
      */
-    List<Dict> querySumAmount(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
+    List<Dict> querySumAmount(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify, String remark, List<Long> tagCodes);
 
     /**
      * 按月统计总收入支出
@@ -35,9 +37,11 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
      * @param beginDate 开始日期
      * @param endDate 结束日期
      * @param classify 分类列表
+     * @param remark 备注（模糊查询）
+     * @param tagCodes 标签codes（多选，包含任意一个即可）
      * @return
      */
-    List<Dict> querySumAmountMonthly(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
+    List<Dict> querySumAmountMonthly(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify, String remark, List<Long> tagCodes);
 
     /**
      * 按日统计总收入支出
@@ -46,9 +50,11 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
      * @param beginDate 开始日期
      * @param endDate 结束日期
      * @param classify 分类列表
+     * @param remark 备注（模糊查询）
+     * @param tagCodes 标签codes（多选，包含任意一个即可）
      * @return
      */
-    List<Dict> querySumAmountDaily(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
+    List<Dict> querySumAmountDaily(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify, String remark, List<Long> tagCodes);
 
     /**
      * 按分类统计总收入支出
@@ -57,7 +63,9 @@ public interface IncomeExpenseMapper extends BaseMapper<IncomeExpense> {
      * @param beginDate 开始日期
      * @param endDate 结束日期
      * @param classify 分类列表
+     * @param remark 备注（模糊查询）
+     * @param tagCodes 标签codes（多选，包含任意一个即可）
      * @return
      */
-    List<Dict> queryReportAmount(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify);
+    List<Dict> queryReportAmount(Long userId, Long accountBookId, Date beginDate, Date endDate, List<Long> classify, String remark, List<Long> tagCodes);
 }

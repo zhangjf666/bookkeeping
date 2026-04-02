@@ -131,6 +131,8 @@ export interface TrendParams {
   beginDate: string;
   endDate: string;
   classifyList?: number[];
+  remark?: string;
+  tagCodes?: number[];
 }
 
 export interface Summary {

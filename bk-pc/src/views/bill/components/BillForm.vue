@@ -423,17 +423,17 @@ const handleSubmit = async () => {
       <div class="remark-wrapper">
         <el-popover placement="bottom-start" :width="400" trigger="click">
           <template #reference>
-            <div class="remark-dropdown-trigger">
-              <span v-if="!formData.remark" class="placeholder">
-                {{ t("bill.pureRemarkPlaceholder") }}
-              </span>
-              <span v-else>{{ formData.remark }}</span>
-            </div>
+            <el-input
+              v-model="formData.remark"
+              :placeholder="t('bill.pureRemarkPlaceholder')"
+              class="remark-dropdown-trigger"
+              clearable
+            />
           </template>
           <div class="remark-popover-content">
             <el-input
               v-model="remarkSearchText"
-              :placeholder="t('bill.pureQuery')"
+              placeholder="搜索备注"
               clearable
               class="remark-search-input"
             />

@@ -37,6 +37,16 @@
                 #{id}
             </foreach>
         </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
+        </if>
         group by ie.type
     </select>
 
@@ -54,6 +64,16 @@
                      open="(" close=")" separator=",">
                 #{id}
             </foreach>
+        </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
         </if>
         group by period, ie.`type` order by period;
     </select>
@@ -74,6 +94,16 @@
                 #{id}
             </foreach>
         </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
+        </if>
         group by period, ie.`type` order by period;
     </select>
 
@@ -90,6 +120,16 @@
                      open="(" close=")" separator=",">
                 #{id}
             </foreach>
+        </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
         </if>
         group by ie.`type`, ie.main_classify;
     </select>

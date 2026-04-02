@@ -117,7 +117,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         Date beginDate = DateUtil.beginOfMonth(new Date());
         Date endDate = DateUtil.endOfMonth(new Date());
         //收入支出
-        List<Dict> sumAmount = baseMapper.querySumAmount(userId, accountBookId, beginDate, endDate, null);
+        List<Dict> sumAmount = baseMapper.querySumAmount(userId, accountBookId, beginDate, endDate, null, null, null);
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
@@ -163,7 +163,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             }
             expenseLimit = new BigDecimal(config.get().getValue());
             //统计年支出
-            List<Dict> sumYear = baseMapper.querySumAmount(userId, accountBookId, DateUtil.beginOfYear(new Date()), DateUtil.endOfYear(new Date()), null);
+            List<Dict> sumYear = baseMapper.querySumAmount(userId, accountBookId, DateUtil.beginOfYear(new Date()), DateUtil.endOfYear(new Date()), null, null, null);
             Dict expenseYear = sumYear.stream().filter(dict -> BillType.EXPENSE.getValue().equals(dict.getStr("type"))).findAny().orElse(null);
             expenseSurplus = expenseYear == null ? expenseLimit : expenseLimit.subtract(expenseYear.getBigDecimal("amount"));
         }
@@ -184,7 +184,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         Date endDate = DateUtil.date(billQueryDto.getEndDate());
 
         //查询收入支出统计
-        List<Dict> sumAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
+        List<Dict> sumAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList(), billQueryDto.getRemark(), billQueryDto.getTagCodes());
         BigDecimal expense = BigDecimal.ZERO;
         BigDecimal income = BigDecimal.ZERO;
         for (Dict dict: sumAmount) {
@@ -220,7 +220,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 }
                 expenseLimit = new BigDecimal(uc.getValue());
             }
-            List<Dict> sumExpenseAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, null);
+            List<Dict> sumExpenseAmount = baseMapper.querySumAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, null, null, null);
             Dict expenseSum = sumExpenseAmount.stream().filter(dict -> BillType.EXPENSE.getValue().equals(dict.getStr("type"))).findAny().orElse(null);
             expenseSurplus = expenseSum == null ? expenseLimit : expenseLimit.subtract(expenseSum.getBigDecimal("amount"));
         }
@@ -241,8 +241,8 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             //查询数据
             List<Dict> datas;
             datas = SUM_PERIOD_YEAR.equals(billQueryDto.getMode()) ?
-                    baseMapper.querySumAmountMonthly(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList()) :
-                    baseMapper.querySumAmountDaily(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
+                    baseMapper.querySumAmountMonthly(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList(), billQueryDto.getRemark(), billQueryDto.getTagCodes()) :
+                    baseMapper.querySumAmountDaily(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList(), billQueryDto.getRemark(), billQueryDto.getTagCodes());
             for (Dict data:datas) {
                 Dict ies = (Dict) incomeExpenseSum.get(data.getStr("period"));
                 if(BillType.INCOME.getValue().equals(data.getStr("type"))) {
@@ -253,7 +253,7 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             }
         } else if(SUM_MODE_REPORT.equals(billQueryDto.getQueryMode())) {
             //报表
-            List<Dict> datas = baseMapper.queryReportAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList());
+            List<Dict> datas = baseMapper.queryReportAmount(billQueryDto.getUserId(), billQueryDto.getAccountBookId(), beginDate, endDate, billQueryDto.getClassifyList(), billQueryDto.getRemark(), billQueryDto.getTagCodes());
             for(Dict data: datas) {
                 Dict ies = (Dict) incomeExpenseSum.get(data.getStr("classify"));
                 if(ies == null){
@@ -287,6 +287,9 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 .eq(billQueryDto.getAccountBookId() != null, IncomeExpense::getAccountBookId, billQueryDto.getAccountBookId())
                 .le(IncomeExpense::getDate, endDate)
                 .in(!billQueryDto.getClassifyList().isEmpty(), IncomeExpense::getMainClassify, billQueryDto.getClassifyList())
+                .like(billQueryDto.getRemark() != null && !billQueryDto.getRemark().isEmpty(), IncomeExpense::getRemark, billQueryDto.getRemark())
+                .apply(billQueryDto.getTagCodes() != null && !billQueryDto.getTagCodes().isEmpty(),
+                        "(" + buildTagCodesCondition(billQueryDto.getTagCodes()) + ")")
                 .orderByDesc(IncomeExpense::getDate,IncomeExpense::getCreateTime));
         fillClassify(list);
         billResultDto.setIncomeExpenseList(list);
@@ -336,5 +339,14 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             userRemarkService.create(ur);
         }
         return super.update(dto);
+    }
+
+    private String buildTagCodesCondition(List<Long> tagCodes) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < tagCodes.size(); i++) {
+            if (i > 0) sb.append(" OR ");
+            sb.append("FIND_IN_SET(").append(tagCodes.get(i)).append(", tag_codes) > 0");
+        }
+        return sb.toString();
     }
 }

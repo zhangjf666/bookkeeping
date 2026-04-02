@@ -312,21 +312,21 @@ const queryRemarks = (
           <el-form-item :label="t('bill.pureRemark')">
             <el-popover placement="bottom-start" :width="400" trigger="click">
               <template #reference>
-                <div class="filter-remark-trigger">
-                  <span v-if="!filterForm.remark" class="placeholder">
-                    {{ t("bill.pureRemarkPlaceholder") }}
-                  </span>
-                  <span v-else>{{ filterForm.remark }}</span>
-                </div>
+                <el-input
+                  v-model="filterForm.remark"
+                  :placeholder="t('bill.pureRemarkPlaceholder')"
+                  class="filter-remark-trigger"
+                  clearable
+                />
               </template>
               <div class="filter-remark-content">
-                <el-input
-                  v-model="filterRemarkText"
-                  :placeholder="t('bill.pureQuery')"
-                  clearable
-                  class="filter-remark-search"
-                />
-                <div class="filter-remark-grid">
+            <el-input
+              v-model="filterRemarkText"
+              placeholder="搜索备注"
+              clearable
+              class="filter-remark-search"
+            />
+            <div class="filter-remark-grid">
                   <div
                     v-for="remark in filteredRemarkList"
                     :key="remark.id"
@@ -438,7 +438,6 @@ const queryRemarks = (
   border-radius: 10px;
 }
 
-.filter-remark-trigger,
 .filter-tag-trigger {
   display: flex;
   flex: 1;
