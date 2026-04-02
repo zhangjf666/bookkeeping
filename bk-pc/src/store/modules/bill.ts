@@ -105,7 +105,7 @@ export const useBillStore = defineStore("pure-bill", {
       const newParams: any = {
         ...this.queryParams,
         ...rest,
-        page: 1
+        pageNo: 1
       };
       if (type !== undefined) {
         newParams.type = type;

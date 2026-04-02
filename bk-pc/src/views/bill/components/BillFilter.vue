@@ -66,6 +66,13 @@ const typeOptions = [
   { label: t("bill.pureIncome"), value: "INCOME" }
 ];
 
+const getSelectedAccountBookLabel = (val: number | undefined) => {
+  if (!val) return "";
+  const book = billStore.accountBooks.find((b: any) => b.id === val);
+  if (!book) return "";
+  return `${getAccountBookIcon(book.image)} ${book.name}`;
+};
+
 const handleQuery = () => {
   const selectedId = filterForm.value.mainClassify;
   let mainClassify: number | undefined = undefined;
@@ -218,19 +225,15 @@ const queryRemarks = (
               <el-option
                 v-for="book in billStore.accountBooks"
                 :key="book.id"
-                :label="book.name"
+                :label="`${getAccountBookIcon(book.image)} ${book.name}`"
                 :value="book.id"
               >
                 <div class="book-option">
-                  <span style="margin-right: 8px">{{
-                    getAccountBookIcon(book.image)
-                  }}</span>
-                  <span>{{ book.name }}</span>
+                  <span>{{ getAccountBookIcon(book.image) }} {{ book.name }}</span>
                   <el-tag
                     v-if="book.isDefault === 'YES'"
                     size="small"
                     type="success"
-                    style="margin-left: 28px"
                   >
                     {{ t("dashboard.pureDefault") }}
                   </el-tag>
@@ -409,6 +412,13 @@ const queryRemarks = (
 <style lang="scss" scoped>
 .bill-filter {
   margin-bottom: 16px;
+}
+
+.book-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
 }
 
 :deep(.el-select-dropdown__item) {

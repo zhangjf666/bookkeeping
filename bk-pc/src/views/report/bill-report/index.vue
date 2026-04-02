@@ -8,7 +8,7 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import { getTrendData } from "@/api/incomeExpense";
 import type { TrendData, IncomeExpenseRecord } from "@/types/bill";
-import ClassifyFilter from "../components/ClassifyFilter.vue";
+import ReportFilter from "../components/ReportFilter.vue";
 
 defineOptions({
   name: "BillReport"
@@ -23,7 +23,7 @@ const chartLoading = ref(false);
 
 interface FormData {
   accountBookId: number | undefined;
-  billType: string;
+  billType: "month" | "year" | "custom";
   month: string;
   year: string;
   dateRange: [string, string] | null;
@@ -50,12 +50,6 @@ const formData = ref<FormData>({
 });
 
 const trendData = ref<TrendData | null>(null);
-
-const billTypeOptions = [
-  { label: "月账单", value: "month" },
-  { label: "年账单", value: "year" },
-  { label: "自定义", value: "custom" }
-];
 
 const detailSortType = ref<"time" | "amount">("time");
 const expandedMonths = ref<Set<string>>(new Set());
@@ -441,6 +435,9 @@ watch(
 onMounted(async () => {
   formData.value.accountBookId = billStore.currentAccountBook?.id;
   if (userStore.id) {
+    if (billStore.accountBooks.length === 0) {
+      await billStore.loadAccountBooks(userStore.id);
+    }
     await billStore.loadClassifyAndTag(userStore.id);
   }
   initChart();
@@ -450,71 +447,16 @@ onMounted(async () => {
 
 <template>
   <div class="bill-report">
-    <el-card class="query-form-card" shadow="never">
-      <el-form :model="formData" inline>
-        <el-form-item :label="t('bill.pureAccountBook')">
-          <el-select
-            v-model="formData.accountBookId"
-            :placeholder="t('bill.pureSelectPlaceholder')"
-            style="width: 140px"
-          >
-            <el-option
-              v-for="book in billStore.accountBooks"
-              :key="book.id"
-              :label="book.name"
-              :value="book.id"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="账单类型">
-          <el-select v-model="formData.billType" style="width: 100px">
-            <el-option
-              v-for="item in billTypeOptions"
-              :key="item.value"
-              :label="item.label"
-              :value="item.value"
-            />
-          </el-select>
-        </el-form-item>
-        <el-form-item label="时间">
-          <el-date-picker
-            v-if="formData.billType === 'month'"
-            v-model="formData.month"
-            type="month"
-            value-format="YYYY-MM"
-            placeholder="选择月份"
-            style="width: 140px"
-          />
-          <el-date-picker
-            v-else-if="formData.billType === 'year'"
-            v-model="formData.year"
-            type="year"
-            value-format="YYYY"
-            placeholder="选择年份"
-            style="width: 100px"
-          />
-          <el-date-picker
-            v-else
-            v-model="formData.dateRange"
-            type="daterange"
-            range-separator="-"
-            start-placeholder="开始"
-            end-placeholder="结束"
-            value-format="YYYY-MM-DD"
-            style="width: 240px"
-          />
-        </el-form-item>
-        <el-form-item :label="t('bill.pureClassify')">
-          <ClassifyFilter v-model="formData.classifyList" />
-        </el-form-item>
-        <el-form-item>
-          <el-button type="primary" @click="fetchData">{{
-            t("bill.pureQuery")
-          }}</el-button>
-          <el-button @click="handleReset">{{ t("bill.pureReset") }}</el-button>
-        </el-form-item>
-      </el-form>
-    </el-card>
+    <ReportFilter
+      v-model:accountBookId="formData.accountBookId"
+      v-model:billType="formData.billType"
+      v-model:month="formData.month"
+      v-model:year="formData.year"
+      v-model:dateRange="formData.dateRange"
+      v-model:classifyList="formData.classifyList"
+      @query="fetchData"
+      @reset="handleReset"
+    />
 
     <el-card v-loading="chartLoading" class="chart-card" shadow="never">
       <template #header>

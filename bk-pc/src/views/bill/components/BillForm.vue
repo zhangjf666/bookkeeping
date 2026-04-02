@@ -5,6 +5,7 @@ import { message } from "@/utils/message";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import type { IncomeExpense, IncomeExpenseForm } from "@/types/bill";
+import { getAccountBookIcon } from "@/utils/accountBook";
 import { getClassifyIcon } from "@/utils/classifyIcons";
 import TagForm from "@/views/settings/tag/TagForm.vue";
 import dayjs from "dayjs";
@@ -380,9 +381,20 @@ const handleSubmit = async () => {
         <el-option
           v-for="book in billStore.accountBooks"
           :key="book.id"
-          :label="book.name"
+          :label="`${getAccountBookIcon(book.image)} ${book.name}`"
           :value="book.id"
-        />
+        >
+          <div class="book-option">
+            <span>{{ getAccountBookIcon(book.image) }} {{ book.name }}</span>
+            <el-tag
+              v-if="book.isDefault === 'YES'"
+              size="small"
+              type="success"
+            >
+              {{ t("dashboard.pureDefault") }}
+            </el-tag>
+          </div>
+        </el-option>
       </el-select>
     </el-form-item>
     <el-form-item :label="t('bill.pureClassify')" prop="mainClassify">
@@ -532,6 +544,13 @@ const handleSubmit = async () => {
 </template>
 
 <style lang="scss" scoped>
+.book-option {
+  display: flex;
+  gap: 8px;
+  align-items: center;
+  justify-content: space-between;
+}
+
 .remark-wrapper {
   display: flex;
   gap: 12px;
