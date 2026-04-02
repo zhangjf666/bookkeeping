@@ -103,8 +103,8 @@ const pageSize = computed({
 });
 
 onMounted(async () => {
-  if (billStore.accountBooks.length === 0) {
-    await billStore.loadAccountBooks();
+  if (billStore.accountBooks.length === 0 && userId.value) {
+    await billStore.loadAccountBooks(userId.value);
   }
   if (billStore.classifyList.length === 0 && userId.value) {
     await billStore.loadClassifyAndTag(userId.value);

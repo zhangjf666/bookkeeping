@@ -59,23 +59,35 @@ const loadAll = async () => {
   loading.value = true;
   try {
     const userResult = await getUserInfo();
-    const avatarUrl = userResult.avatar.startsWith("http")
-      ? userResult.avatar
-      : `${BASE_URL}${userResult.avatar}`;
-    userStore.SET_AVATAR(avatarUrl);
-    userStore.SET_NICKNAME(userResult.nickName);
-    userStore.SET_ID(userResult.id);
+    if (userResult) {
+      const avatarUrl = userResult.avatar?.startsWith("http")
+        ? userResult.avatar
+        : userResult.avatar
+          ? `${BASE_URL}${userResult.avatar}`
+          : "";
+      if (avatarUrl) {
+        userStore.SET_AVATAR(avatarUrl);
+      }
+      userStore.SET_NICKNAME(userResult.nickName || "");
+      userStore.SET_ID(userResult.id);
+    }
 
-    const userId = userResult.id;
+    const userId = userStore.id;
+    if (!userId) return;
+
     await Promise.all([
-      billStore.loadAccountBooks(),
+      billStore.loadAccountBooks(userId),
       billStore.loadClassifyAndTag(userId)
     ]);
     const accountBookId = billStore.currentAccountBook?.id;
+    if (!accountBookId) return;
+    
     const summary = await getSummary({ userId, accountBookId, days: 3 });
     summaryData.value = summary;
 
     await loadUserConfig();
+  } catch (error) {
+    console.error("loadAll error:", error);
   } finally {
     loading.value = false;
   }

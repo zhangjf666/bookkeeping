@@ -100,7 +100,7 @@ export const CLASSIFY_ICON_MAP: Record<string, string> = {
   fund: "💹",
   interest: "📉",
   dividend: "💵",
-  rental: "🏠",
+  rental: "🏢",
   freelance: "💻",
   partTime: "🕐",
   lottery: "🎰",

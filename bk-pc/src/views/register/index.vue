@@ -11,7 +11,8 @@ import type { FormInstance } from "element-plus";
 import { useLayout } from "@/layout/hooks/useLayout";
 import { useUserStoreHook } from "@/store/modules/user";
 import { getCaptcha, register } from "@/api/auth";
-import { initRouter, getTopMenu } from "@/router/utils";
+import { addPathMatch, getTopMenu } from "@/router/utils";
+import { usePermissionStoreHook } from "@/store/modules/permission";
 import { bg, illustration } from "@/views/login/utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
@@ -32,7 +33,7 @@ const { initStorage } = useLayout();
 initStorage();
 
 const { t } = useI18n();
-const registerRules = computed(() => createRegisterRules(t));
+const registerRules = computed(() => createRegisterRules(t, ruleFormRefRegister, ruleForm));
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
 
@@ -85,6 +86,7 @@ const onRegister = async (formEl: FormInstance | undefined) => {
 
     message(t("login.pureRegisterSuccess"), { type: "success" });
 
+    disabled.value = true;
     await useUserStoreHook().loginByUsername({
       username: ruleForm.username,
       password: ruleForm.password,
@@ -92,9 +94,9 @@ const onRegister = async (formEl: FormInstance | undefined) => {
       uuid: uuid.value
     });
 
-    disabled.value = true;
-    await initRouter();
-    await router.push(getTopMenu(true).path);
+    usePermissionStoreHook().handleWholeMenus([]);
+    addPathMatch();
+    router.push(getTopMenu(true).path);
   } catch (error: any) {
     const errMsg = error?.message || t("login.pureRegisterFail");
     message(errMsg, { type: "error" });

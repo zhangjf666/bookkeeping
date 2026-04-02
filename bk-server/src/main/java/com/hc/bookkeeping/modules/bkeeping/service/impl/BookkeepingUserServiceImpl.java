@@ -8,15 +8,14 @@ import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.utils.SpringSecurityUtil;
 import com.hc.bookkeeping.config.properties.SystemProperties;
 import com.hc.bookkeeping.modules.admin.entity.Role;
-import com.hc.bookkeeping.modules.admin.entity.User;
 import com.hc.bookkeeping.modules.admin.entity.UserRole;
 import com.hc.bookkeeping.modules.admin.mapper.UserRoleMapper;
 import com.hc.bookkeeping.modules.admin.service.RoleService;
 import com.hc.bookkeeping.modules.bkeeping.constants.Constants;
-import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
 import com.hc.bookkeeping.modules.bkeeping.dto.AvatarUploadResult;
 import com.hc.bookkeeping.modules.bkeeping.dto.BookkeepingUserDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.ChangePasswordDto;
+import com.hc.bookkeeping.modules.bkeeping.model.UserDefaultConfig;
 import com.hc.bookkeeping.modules.bkeeping.entity.AccountBook;
 import com.hc.bookkeeping.modules.bkeeping.entity.BookkeepingUser;
 import com.hc.bookkeeping.modules.bkeeping.entity.Classify;
@@ -31,15 +30,16 @@ import com.hc.bookkeeping.modules.bkeeping.service.BookkeepingUserService;
 import com.hc.bookkeeping.modules.security.dto.RegisterUserDto;
 import lombok.RequiredArgsConstructor;
 import lombok.extern.slf4j.Slf4j;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
 
+import com.fasterxml.jackson.databind.ObjectMapper;
+
 import java.io.File;
 import java.io.IOException;
+import java.io.InputStream;
 import java.nio.file.Files;
 import java.nio.file.Path;
 import java.nio.file.Paths;
@@ -242,18 +242,42 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
         return true;
     }
 
+    private static final String DEFAULT_CONFIG_FILE = "user_default_config.json";
+    private final ObjectMapper objectMapper = new ObjectMapper();
+
+    private UserDefaultConfig loadDefaultConfig() {
+        try (InputStream inputStream = getClass().getClassLoader().getResourceAsStream(DEFAULT_CONFIG_FILE)) {
+            if (inputStream == null) {
+                log.error("找不到默认配置文件: {}", DEFAULT_CONFIG_FILE);
+                return null;
+            }
+            return objectMapper.readValue(inputStream, UserDefaultConfig.class);
+        } catch (Exception e) {
+            log.error("读取默认配置文件失败", e);
+            return null;
+        }
+    }
+
     /**
      * 创建账本
-     * @param user
+     * @param user 用户
      */
     private void createAccountBook(BookkeepingUser user){
-        AccountBook ab = new AccountBook();
-        ab.setName("默认账本");
-        ab.setImage("book");
-        ab.setUserId(user.getId());
-        ab.setDescription("默认账本");
-        ab.setIsDefault(BoolEnum.YES);
-        accountBookMapper.insert(ab);
+        UserDefaultConfig config = loadDefaultConfig();
+        if (config == null || config.getAccountBook() == null) {
+            log.warn("默认配置文件为空，跳过账本创建");
+            return;
+        }
+
+        for (UserDefaultConfig.AccountBookConfig abConfig : config.getAccountBook()) {
+            AccountBook ab = new AccountBook();
+            ab.setName(abConfig.getName());
+            ab.setImage(abConfig.getImage());
+            ab.setUserId(user.getId());
+            ab.setDescription(abConfig.getDescription());
+            ab.setIsDefault(BoolEnum.valueOf(abConfig.getIsDefault()));
+            accountBookMapper.insert(ab);
+        }
     }
 
     /**
@@ -261,28 +285,21 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
      * @param user 用户
      */
     private void createUserConfig(BookkeepingUser user){
-        UserConfig uc = new UserConfig();
-        uc.setUserId(user.getId());
-        uc.setName("is_credit_card");
-        uc.setValue(BoolEnum.NO.getValue());
-        uc.setDescription("记录收支时默认选中信用卡");
-        userConfigMapper.insert(uc);
-        uc = new UserConfig();
-        uc.setUserId(user.getId());
-        uc.setName("show_expense_limit");
-        uc.setValue(ExpenseLimitShowType.NOT.getCode());
-        uc.setDescription("支出限额显示模式(1:不显示,2:显示月限额,3:显示年限额)");
-        uc = new UserConfig();
-        uc.setUserId(user.getId());
-        uc.setName("default_monthly_expense_limit");
-        uc.setValue("0");
-        uc.setDescription("默认每月支出限额");
-        uc = new UserConfig();
-        uc.setUserId(user.getId());
-        uc.setName("default_yearly_expense_limit");
-        uc.setValue("0");
-        uc.setDescription("默认每年支出限额");
-        userConfigMapper.insert(uc);
+        UserDefaultConfig config = loadDefaultConfig();
+        if (config == null || config.getUserConfig() == null) {
+            log.warn("默认配置文件为空，跳过用户配置创建");
+            return;
+        }
+
+        for (UserDefaultConfig.UserConfigItem ucConfig : config.getUserConfig()) {
+            UserConfig uc = new UserConfig();
+            uc.setUserId(user.getId());
+            uc.setName(ucConfig.getName());
+            uc.setValue(ucConfig.getValue());
+            uc.setDescription(ucConfig.getDescription());
+            uc.setEnable(BoolEnum.YES);
+            userConfigMapper.insert(uc);
+        }
     }
 
     /**
@@ -290,334 +307,40 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
      * @param user 用户
      */
     private void createDefaultClassify(BookkeepingUser user){
-        //大类,支出
-        //餐饮
+        UserDefaultConfig config = loadDefaultConfig();
+        if (config == null || config.getUserClassify() == null || config.getUserClassify().isEmpty()) {
+            log.warn("默认配置文件为空，跳过分类创建");
+            return;
+        }
+
+        // 递归插入分类树，逐个插入以获取正确的父子关系
+        for (UserDefaultConfig.ClassifyConfig classifyConfig : config.getUserClassify()) {
+            insertClassifyWithChildren(classifyConfig, -1L, user.getId());
+        }
+    }
+
+    /**
+     * 递归插入分类及其子分类
+     * @return 刚插入的分类ID
+     */
+    private Long insertClassifyWithChildren(UserDefaultConfig.ClassifyConfig config, Long parentId, Long userId) {
         Classify classify = new Classify();
-        classify.setName("餐饮");
-        classify.setSort(0);
-        classify.setImage("canyin");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //零食烟酒
-        classify = new Classify();
-        classify.setName("零食烟酒");
-        classify.setSort(1);
-        classify.setImage("lingshiyanjiu");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //零食烟酒--小类
-        Classify classify1 = new Classify();
-        classify1.setName("零食");
-        classify1.setSort(1);
-        classify1.setImage("lingshi");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("饮料");
-        classify1.setSort(1);
-        classify1.setImage("yinliao");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("水果");
-        classify1.setSort(1);
-        classify1.setImage("shuiguo");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        //购物
-        classify = new Classify();
-        classify.setName("购物");
-        classify.setSort(2);
-        classify.setImage("gouwu");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //购物-小类
-        classify1 = new Classify();
-        classify1.setName("数码");
-        classify1.setSort(2);
-        classify1.setImage("shuma");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("日用");
-        classify1.setSort(2);
-        classify1.setImage("riyong");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("玩具");
-        classify1.setSort(2);
-        classify1.setImage("wanju");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("电器");
-        classify1.setSort(2);
-        classify1.setImage("dianqi");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("美妆");
-        classify1.setSort(2);
-        classify1.setImage("meizhuang");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("运动");
-        classify1.setSort(2);
-        classify1.setImage("yundong");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("鞋服");
-        classify1.setSort(2);
-        classify1.setImage("xiefu");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("饰品");
-        classify1.setSort(2);
-        classify1.setImage("shipin");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        //住房
-        classify = new Classify();
-        classify.setName("住房");
-        classify.setSort(3);
-        classify.setImage("shouye");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //住房-小类
-        classify1 = new Classify();
-        classify1.setName("家纺");
-        classify1.setSort(3);
-        classify1.setImage("jiafang");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("家具");
-        classify1.setSort(3);
-        classify1.setImage("jiaju");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("物业水电");
-        classify1.setSort(3);
-        classify1.setImage("wuyeshuidian");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        //交通
-        classify = new Classify();
-        classify.setName("交通");
-        classify.setSort(4);
-        classify.setImage("jiaotong");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //交通-小类
-        classify1 = new Classify();
-        classify1.setName("公交出租");
-        classify1.setSort(4);
-        classify1.setImage("gongjiao");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("火车");
-        classify1.setSort(4);
-        classify1.setImage("huoche");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("机票");
-        classify1.setSort(4);
-        classify1.setImage("jipiao");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        //汽车
-        classify1 = new Classify();
-        classify1.setName("汽车");
-        classify1.setSort(5);
-        classify1.setImage("qiche");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classifyMapper.insert(classify1);
-        //娱乐
-        classify = new Classify();
-        classify.setName("娱乐");
-        classify.setSort(5);
-        classify.setImage("yule");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //娱乐-小类
-        classify1 = new Classify();
-        classify1.setName("游戏");
-        classify1.setSort(4);
-        classify1.setImage("youxi");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("电影");
-        classify1.setSort(4);
-        classify1.setImage("dianying");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("K歌");
-        classify1.setSort(4);
-        classify1.setImage("kge");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        //文教
-        classify = new Classify();
-        classify.setName("文教");
-        classify.setSort(6);
-        classify.setImage("wenjiao");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //通讯
-        classify = new Classify();
-        classify.setName("通讯");
-        classify.setSort(6);
-        classify.setImage("tongxun");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //育儿
-        classify = new Classify();
-        classify.setName("育儿");
-        classify.setSort(7);
-        classify.setImage("yuer");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //人情
-        classify = new Classify();
-        classify.setName("人情");
-        classify.setSort(8);
-        classify.setImage("renqing");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //人情-小类
-        classify1 = new Classify();
-        classify1.setName("礼品礼金");
-        classify1.setSort(8);
-        classify1.setImage("lipinlijin");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        classify1 = new Classify();
-        classify1.setName("请客");
-        classify1.setSort(8);
-        classify1.setImage("qingke");
-        classify1.setType(BillType.EXPENSE);
-        classify1.setUserId(user.getId());
-        classify1.setPid(classify.getId());
-        classifyMapper.insert(classify1);
-        //医疗
-        classify = new Classify();
-        classify.setName("医疗");
-        classify.setSort(9);
-        classify.setImage("yiliao");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //旅行
-        classify = new Classify();
-        classify.setName("旅行");
-        classify.setSort(10);
-        classify.setImage("lvxing");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //其他
-        classify = new Classify();
-        classify.setName("其他");
-        classify.setSort(11);
-        classify.setImage("qita");
-        classify.setType(BillType.EXPENSE);
-        classify.setUserId(user.getId());
+        classify.setName(config.getName());
+        classify.setImage(config.getImage());
+        classify.setSort(config.getSort());
+        classify.setType(BillType.valueOf(config.getType()));
+        classify.setEnable(BoolEnum.valueOf(config.getEnable()));
+        classify.setUserId(userId);
+        classify.setPid(parentId);
         classifyMapper.insert(classify);
 
-        //大类 收入
-        //薪资
-        classify = new Classify();
-        classify.setName("薪资");
-        classify.setSort(12);
-        classify.setImage("xinzi");
-        classify.setType(BillType.INCOME);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //奖金
-        classify = new Classify();
-        classify.setName("奖金");
-        classify.setSort(13);
-        classify.setImage("jiangjin");
-        classify.setType(BillType.INCOME);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //投资收益
-        classify = new Classify();
-        classify.setName("投资收益");
-        classify.setSort(14);
-        classify.setImage("touzishouyi");
-        classify.setType(BillType.INCOME);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
-        //其他收入
-        classify = new Classify();
-        classify.setName("其他收入");
-        classify.setSort(15);
-        classify.setImage("qitashouru");
-        classify.setType(BillType.INCOME);
-        classify.setUserId(user.getId());
-        classifyMapper.insert(classify);
+        // 递归处理子分类
+        if (config.getChildren() != null && !config.getChildren().isEmpty()) {
+            for (UserDefaultConfig.ClassifyConfig child : config.getChildren()) {
+                insertClassifyWithChildren(child, classify.getId(), userId);
+            }
+        }
+
+        return classify.getId();
     }
 }

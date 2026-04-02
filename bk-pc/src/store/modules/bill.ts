@@ -47,9 +47,9 @@ export const useBillStore = defineStore("pure-bill", {
     setUserConfigList(configs: { name: string; value: string }[]) {
       this.userConfigList = configs;
     },
-    async loadAccountBooks() {
+    async loadAccountBooks(userId: number) {
       try {
-        const result = await getAccountBooks();
+        const result = await getAccountBooks(userId);
         this.accountBooks = result;
         if (result.length > 0 && !this.currentAccountBook) {
           const defaultBook = result.find(

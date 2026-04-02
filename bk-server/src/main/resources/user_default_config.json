@@ -1,0 +1,199 @@
+{
+  "accountBook": [
+    {
+      "name": "默认账本",
+      "image": "book",
+      "description": "默认账本",
+      "isDefault": "YES"
+    }
+  ],
+  "userConfig": [
+    {
+      "name": "is_credit_card",
+      "value": "0",
+      "description": "记录收支时默认选中信用卡"
+    },
+    {
+      "name": "show_expense_limit",
+      "value": "1",
+      "description": "支出限额显示模式(1:不显示,2:显示月限额,3:显示年限额)"
+    },
+    {
+      "name": "default_monthly_expense_limit",
+      "value": "0",
+      "description": "默认每月支出限额"
+    },
+    {
+      "name": "default_yearly_expense_limit",
+      "value": "0",
+      "description": "默认每年支出限额"
+    }
+  ],
+  "userClassify": [
+    {
+      "name": "餐饮",
+      "image": "food",
+      "sort": 1,
+      "type": "EXPENSE",
+      "enable": "YES",
+      "children": [
+        { "name": "午餐", "image": "dinner", "sort": 3, "type": "EXPENSE", "enable": "YES" },
+        { "name": "早餐", "image": "breakfast", "sort": 2, "type": "EXPENSE", "enable": "YES" },
+        { "name": "晚餐", "image": "takeaway", "sort": 4, "type": "EXPENSE", "enable": "YES" },
+        { "name": "饮料", "image": "drink", "sort": 5, "type": "EXPENSE", "enable": "YES" }
+      ]
+    },
+    {
+      "name": "零食烟酒",
+      "image": "restaurant",
+      "sort": 6,
+      "type": "EXPENSE",
+      "enable": "YES",
+      "children": [
+        { "name": "零食", "image": "snack", "sort": 7, "type": "EXPENSE", "enable": "YES" },
+        { "name": "水果", "image": "fruit", "sort": 8, "type": "EXPENSE", "enable": "YES" }
+      ]
+    },
+    {
+      "name": "购物",
+      "image": "grocery",
+      "sort": 9,
+      "type": "EXPENSE",
+      "enable": "YES",
+      "children": [
+        { "name": "数码", "image": "freelance", "sort": 13, "type": "EXPENSE", "enable": "YES" },
+        { "name": "日用", "image": "cleaning", "sort": 16, "type": "EXPENSE", "enable": "YES" },
+        { "name": "玩具", "image": "internet", "sort": 17, "type": "EXPENSE", "enable": "YES" },
+        { "name": "电器", "image": "tv", "sort": 15, "type": "EXPENSE", "enable": "YES" },
+        { "name": "美妆", "image": "makeup", "sort": 10, "type": "EXPENSE", "enable": "YES" },
+        { "name": "运动", "image": "gym", "sort": 18, "type": "EXPENSE", "enable": "YES" },
+        { "name": "鞋服", "image": "shoes", "sort": 14, "type": "EXPENSE", "enable": "YES" },
+        { "name": "饰品", "image": "jewelry", "sort": 11, "type": "EXPENSE", "enable": "YES" }
+      ]
+    },
+    {
+      "name": "住房",
+      "image": "housing",
+      "sort": 19,
+      "type": "EXPENSE",
+      "enable": "YES",
+      "children": [
+        { "name": "房贷", "image": "dividend", "sort": 22, "type": "EXPENSE", "enable": "YES" },
+        { "name": "家具", "image": "furniture", "sort": 21, "type": "EXPENSE", "enable": "YES" },
+        { "name": "物业水电", "image": "water", "sort": 20, "type": "EXPENSE", "enable": "YES" }
+      ]
+    },
+    {
+      "name": "交通",
+      "image": "subway",
+      "sort": 23,
+      "type": "EXPENSE",
+      "enable": "YES",
+      "children": [
+        { "name": "公交出租", "image": "taxi", "sort": 26, "type": "EXPENSE", "enable": "YES" },
+        { "name": "火车", "image": "train", "sort": 25, "type": "EXPENSE", "enable": "YES" },
+        { "name": "机票", "image": "plane", "sort": 24, "type": "EXPENSE", "enable": "YES" }
+      ]
+    },
+    {
+      "name": "汽车",
+      "image": "car",
+      "sort": 30,
+      "type": "EXPENSE",
+      "enable": "YES"
+    },
+    {
+      "name": "娱乐",
+      "image": "karaoke",
+      "sort": 27,
+      "type": "EXPENSE",
+      "enable": "YES",
+      "children": [
+        { "name": "游戏", "image": "gaming", "sort": 29, "type": "EXPENSE", "enable": "YES" },
+        { "name": "电影", "image": "movie", "sort": 29, "type": "EXPENSE", "enable": "YES" },
+        { "name": "K歌", "image": "concert", "sort": 28, "type": "EXPENSE", "enable": "YES" }
+      ]
+    },
+    {
+      "name": "文教",
+      "image": "education",
+      "sort": 32,
+      "type": "EXPENSE",
+      "enable": "YES"
+    },
+    {
+      "name": "通讯",
+      "image": "phone",
+      "sort": 31,
+      "type": "EXPENSE",
+      "enable": "YES"
+    },
+    {
+      "name": "育儿",
+      "image": "baby",
+      "sort": 36,
+      "type": "EXPENSE",
+      "enable": "YES"
+    },
+    {
+      "name": "人情",
+      "image": "dating",
+      "sort": 33,
+      "type": "EXPENSE",
+      "enable": "YES",
+      "children": [
+        { "name": "礼品礼金", "image": "appliance", "sort": 34, "type": "EXPENSE", "enable": "YES" },
+        { "name": "请客", "image": "bar", "sort": 35, "type": "EXPENSE", "enable": "YES" }
+      ]
+    },
+    {
+      "name": "医疗",
+      "image": "medicine",
+      "sort": 37,
+      "type": "EXPENSE",
+      "enable": "YES"
+    },
+    {
+      "name": "旅行",
+      "image": "luggage",
+      "sort": 38,
+      "type": "EXPENSE",
+      "enable": "YES"
+    },
+    {
+      "name": "其他",
+      "image": "ticket",
+      "sort": 39,
+      "type": "EXPENSE",
+      "enable": "YES"
+    },
+    {
+      "name": "薪资",
+      "image": "dividend",
+      "sort": 40,
+      "type": "INCOME",
+      "enable": "YES"
+    },
+    {
+      "name": "奖金",
+      "image": "tuition",
+      "sort": 41,
+      "type": "INCOME",
+      "enable": "YES"
+    },
+    {
+      "name": "投资收益",
+      "image": "fund",
+      "sort": 42,
+      "type": "INCOME",
+      "enable": "YES"
+    },
+    {
+      "name": "其他收入",
+      "image": "salary",
+      "sort": 43,
+      "type": "INCOME",
+      "enable": "YES"
+    }
+  ]
+}

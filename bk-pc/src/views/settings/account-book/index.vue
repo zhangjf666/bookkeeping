@@ -226,7 +226,7 @@ const refreshAccountBookCache = async () => {
   if (userStore.id) {
     const { getAccountBooks } = await import("@/api/accountBook");
     try {
-      const result = await getAccountBooks();
+      const result = await getAccountBooks(userStore.id);
       billStore.accountBooks = result || [];
     } catch {
       billStore.accountBooks = [];

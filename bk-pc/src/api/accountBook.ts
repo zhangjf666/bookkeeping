@@ -5,8 +5,10 @@ import type {
   AccountBookPageResult
 } from "@/types/accountBook";
 
-export const getAccountBooks = () => {
-  return http.request<AccountBook[]>("get", "/accountBook");
+export const getAccountBooks = (userId: number) => {
+  return http.request<AccountBook[]>("get", "/accountBook", {
+    params: { userId }
+  });
 };
 
 export const getAccountBookList = (

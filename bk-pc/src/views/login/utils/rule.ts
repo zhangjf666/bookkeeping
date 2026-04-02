@@ -32,7 +32,11 @@ export function createLoginRules(t: (key: string) => string): FormRules {
   };
 }
 
-export function createRegisterRules(t: (key: string) => string): FormRules {
+export function createRegisterRules(
+  t: (key: string) => string,
+  formRef?: any,
+  formData?: any
+): FormRules {
   return {
     username: [
       {
@@ -68,8 +72,8 @@ export function createRegisterRules(t: (key: string) => string): FormRules {
       },
       {
         validator: (rule, value, callback) => {
-          const form = ruleFormRef?.value?.model || {};
-          if (value !== form.password) {
+          const password = formData?.password || "";
+          if (value !== password) {
             callback(new Error(t("login.purePasswordNotMatch")));
           } else {
             callback();
