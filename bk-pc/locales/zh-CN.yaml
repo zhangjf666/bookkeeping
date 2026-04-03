@@ -243,6 +243,19 @@ bill:
   pureDateRangeRequired: 请选择日期范围
   pureYes: 是
   pureNo: 否
+  pureSearchRemark: 搜索备注
+  pureBillType: 账单类型
+  pureTimeSelect: 时间
+  pureByTime: 按时间
+  pureByAmount: 按金额
+  purePercent: 占比
+  pureRecordCount: 记录笔数
+  pureMonthBill: 月账单
+  pureYearBill: 年账单
+  pureCustom: 自定义
+  pureSelectedClassify: 已选择 {count} 个分类
+  pureAllExpense: 全部支出
+  pureAllIncome: 全部收入
 
 tag:
   pureAddTag: 新增标签
