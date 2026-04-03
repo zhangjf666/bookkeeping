@@ -320,12 +320,12 @@ const queryRemarks = (
                 />
               </template>
               <div class="filter-remark-content">
-            <el-input
-              v-model="filterRemarkText"
-              placeholder="搜索备注"
-              clearable
-              class="filter-remark-search"
-            />
+              <el-input
+                v-model="filterRemarkText"
+                :placeholder="t('bill.pureSearchRemark')"
+                clearable
+                class="filter-remark-search"
+              />
             <div class="filter-remark-grid">
                   <div
                     v-for="remark in filteredRemarkList"

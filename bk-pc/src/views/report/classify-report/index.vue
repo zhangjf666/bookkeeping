@@ -32,7 +32,7 @@ interface FormData {
   month: string;
   year: string;
   dateRange: [string, string] | null;
-  classifyList: number[];
+  classifyList: { mainClassifyId: number; subClassifyId: number | null }[];
   remark: string;
   tagCodes: number[];
 }
@@ -112,10 +112,8 @@ const getQueryParams = () => {
 
   const getClassifyList = () => {
     const list = formData.value.classifyList;
-    if (list.length === 0) return undefined;
-
-    const result = list.filter((id: number) => id > 0);
-    return result.length > 0 ? result : undefined;
+    if (!list || list.length === 0) return undefined;
+    return list;
   };
 
   const getRemark = () => {
@@ -209,7 +207,9 @@ const initChart = () => {
       trigger: "item",
       formatter: (params: any) => {
         const data = params.data;
-        return `${data.classifyImage ? "" : ""}${data.name}<br/>占比: ${data.percent}%<br/>笔数: ${data.num}笔<br/>金额: ¥${data.value.toFixed(2)}`;
+        const recordCountLabel = t('bill.pureRecordCount');
+        const recordCountText = recordCountLabel.includes('笔') || recordCountLabel === 'Records' ? recordCountLabel : `${recordCountLabel}`;
+        return `${data.classifyImage ? "" : ""}${data.name}<br/>${t('bill.purePercent')}: ${data.percent}%<br/>${recordCountText}: ${data.num}${recordCountLabel.includes('笔') ? '' : '笔'}<br/>${t('bill.pureAmount')}: ¥${data.value.toFixed(2)}`;
       }
     },
     legend: {
@@ -425,10 +425,10 @@ onMounted(async () => {
               selectedClassifyData.classifyName
             }}</span>
             <span class="classify-percent"
-              >占比：{{ selectedClassifyData.percent }}%</span
+              >{{ t('bill.purePercent') }}：{{ selectedClassifyData.percent }}%</span
             >
             <span class="classify-num"
-              >记录笔数：{{ selectedClassifyData.num }}笔</span
+              >{{ t('bill.pureRecordCount') }}：{{ selectedClassifyData.num }}笔</span
             >
             <span
               :class="
@@ -438,7 +438,7 @@ onMounted(async () => {
               "
               class="classify-amount"
             >
-              {{ isIncomeClassify() ? "收入" : "支出" }}：¥{{
+              {{ isIncomeClassify() ? t('bill.pureIncome') : t('bill.pureExpense') }}：¥{{
                 (
                   selectedClassifyData.expense ||
                   selectedClassifyData.income ||
@@ -448,8 +448,8 @@ onMounted(async () => {
             </span>
           </span>
           <el-radio-group v-model="detailSortType" size="small">
-            <el-radio-button value="time">按时间</el-radio-button>
-            <el-radio-button value="amount">按金额</el-radio-button>
+            <el-radio-button value="time">{{ t('bill.pureByTime') }}</el-radio-button>
+            <el-radio-button value="amount">{{ t('bill.pureByAmount') }}</el-radio-button>
           </el-radio-group>
         </div>
       </template>

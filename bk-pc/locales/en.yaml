@@ -137,10 +137,16 @@ dashboard:
   pureNoRecords: No records
   pureCurrentBook: Current Book
   pureDefault: Default
+  pureTotalExpense: Total Expense
+  pureTotalIncome: Total Income
   pureMonthlyExpenseLimit: Monthly Budget
   pureYearlyExpenseLimit: Yearly Budget
   pureMonthlyExpenseSurplus: Monthly Remaining
   pureYearlyExpenseSurplus: Yearly Remaining
+  pureMonth: Month
+  pureQuarter: Quarter
+  pureHalfYear: Half Year
+  pureYear: Year
 bill:
   pureTitle: Records
   pureAddRecord: Add Record
@@ -181,12 +187,22 @@ bill:
   pureTypeRequired: Please select type
   pureClassifyRequired: Please select classify
   pureDateRequired: Please select date
-  pureAccountBookRequired: Please select book
-  pureWarning: Warning
-  pureDeleteConfirm: Are you sure to delete this record?
-  pureBatchDeleteConfirm: Are you sure to delete the selected {count} records?
+  pureDateRangeRequired: Please select date range
   pureYes: Yes
   pureNo: No
+  pureSearchRemark: Search Remark
+  pureBillType: Bill Type
+  pureTimeSelect: Time
+  pureByTime: By Time
+  pureByAmount: By Amount
+  purePercent: Percent
+  pureRecordCount: Records
+  pureMonthBill: Monthly Bill
+  pureYearBill: Yearly Bill
+  pureCustom: Custom
+  pureSelectedClassify: Selected {count} classifies
+  pureAllExpense: All Expense
+  pureAllIncome: All Income
 
 tag:
   pureAddTag: Add Tag

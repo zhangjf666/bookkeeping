@@ -2,6 +2,7 @@ package com.hc.bookkeeping.modules.bkeeping.dto;
 
 import lombok.Data;
 
+import java.io.Serializable;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
@@ -10,7 +11,9 @@ import java.util.List;
  * 账单跟报表查询实体
  */
 @Data
-public class BillQueryDto {
+public class BillQueryDto implements Serializable {
+
+    private static final long serialVersionUID = 1L;
 
     /**
      * 用户id
@@ -45,7 +48,7 @@ public class BillQueryDto {
     /**
      * 查询的分类
      */
-    private List<Long> classifyList = new ArrayList<>();
+    private List<ClassifyQueryItem> classifyList = new ArrayList<>();
 
     /**
      * 备注（模糊查询）

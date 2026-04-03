@@ -286,7 +286,8 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
                 .eq(IncomeExpense::getUserId, billQueryDto.getUserId())
                 .eq(billQueryDto.getAccountBookId() != null, IncomeExpense::getAccountBookId, billQueryDto.getAccountBookId())
                 .le(IncomeExpense::getDate, endDate)
-                .in(!billQueryDto.getClassifyList().isEmpty(), IncomeExpense::getMainClassify, billQueryDto.getClassifyList())
+                .apply(billQueryDto.getClassifyList() != null && !billQueryDto.getClassifyList().isEmpty(),
+                        "(" + buildClassifyCondition(billQueryDto.getClassifyList()) + ")")
                 .like(billQueryDto.getRemark() != null && !billQueryDto.getRemark().isEmpty(), IncomeExpense::getRemark, billQueryDto.getRemark())
                 .apply(billQueryDto.getTagCodes() != null && !billQueryDto.getTagCodes().isEmpty(),
                         "(" + buildTagCodesCondition(billQueryDto.getTagCodes()) + ")")
@@ -346,6 +347,21 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         for (int i = 0; i < tagCodes.size(); i++) {
             if (i > 0) sb.append(" OR ");
             sb.append("FIND_IN_SET(").append(tagCodes.get(i)).append(", tag_codes) > 0");
+        }
+        return sb.toString();
+    }
+
+    private String buildClassifyCondition(List<ClassifyQueryItem> classifyList) {
+        StringBuilder sb = new StringBuilder();
+        for (int i = 0; i < classifyList.size(); i++) {
+            if (i > 0) sb.append(" OR ");
+            ClassifyQueryItem item = classifyList.get(i);
+            if (item.getSubClassifyId() == null) {
+                sb.append("main_classify = ").append(item.getMainClassifyId());
+            } else {
+                sb.append("main_classify = ").append(item.getMainClassifyId())
+                        .append(" AND sub_classify = ").append(item.getSubClassifyId());
+            }
         }
         return sb.toString();
     }

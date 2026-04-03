@@ -433,7 +433,7 @@ const handleSubmit = async () => {
           <div class="remark-popover-content">
             <el-input
               v-model="remarkSearchText"
-              placeholder="搜索备注"
+              :placeholder="t('bill.pureSearchRemark')"
               clearable
               class="remark-search-input"
             />
@@ -596,13 +596,34 @@ const handleSubmit = async () => {
   border-radius: 10px;
 }
 
-.remark-dropdown-trigger,
+.remark-dropdown-trigger {
+  width: 100%;
+  min-height: 32px;
+
+  :deep(.el-input__wrapper) {
+    width: 100%;
+    box-shadow: 0 0 0 1px #dcdfe6 inset;
+    
+    &:hover {
+      box-shadow: 0 0 0 1px #409eff inset;
+    }
+    
+    &.is-focus {
+      box-shadow: 0 0 0 1px #409eff inset;
+    }
+  }
+
+  :deep(.el-input__inner) {
+    width: 100%;
+  }
+}
+
 .tag-dropdown-trigger {
   display: flex;
-  flex: 1;
   flex-wrap: wrap;
   gap: 4px;
   align-items: center;
+  width: 100%;
   min-height: 32px;
   padding: 0 8px;
   cursor: pointer;
@@ -617,10 +638,6 @@ const handleSubmit = async () => {
   &:hover {
     border-color: #409eff;
   }
-}
-
-.tag-dropdown-trigger {
-  min-height: 32px;
 }
 
 .selected-tags {

@@ -66,12 +66,12 @@ export const getRemarkList = (userId: number) => {
 };
 
 export const getTrendData = (params: TrendParams) => {
-  return http.request<TrendData>("get", "/incomeExpense/sumPeriod", { params });
+  return http.request<TrendData>("post", "/incomeExpense/sumPeriod", { data: params });
 };
 
 export const getClassifyReportData = (params: TrendParams) => {
-  return http.request<ClassifyReportData>("get", "/incomeExpense/sumPeriod", {
-    params: { ...params, queryMode: "1" }
+  return http.request<ClassifyReportData>("post", "/incomeExpense/sumPeriod", {
+    data: { ...params, queryMode: "1" }
   });
 };
 

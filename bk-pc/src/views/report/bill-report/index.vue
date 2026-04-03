@@ -27,7 +27,7 @@ interface FormData {
   month: string;
   year: string;
   dateRange: [string, string] | null;
-  classifyList: number[];
+  classifyList: { mainClassifyId: number; subClassifyId: number | null }[];
   remark: string;
   tagCodes: number[];
 }
@@ -111,7 +111,7 @@ const getQueryParams = () => {
         beginDate = formData.value.dateRange[0];
         endDate = formData.value.dateRange[1];
       } else {
-        ElMessage.warning("请选择日期范围");
+        ElMessage.warning(t("bill.pureDateRangeRequired"));
         return null;
       }
       break;
@@ -119,10 +119,8 @@ const getQueryParams = () => {
 
   const getClassifyList = () => {
     const list = formData.value.classifyList;
-    if (list.length === 0) return undefined;
-
-    const result = list.filter((id: number) => id > 0);
-    return result.length > 0 ? result : undefined;
+    if (!list || list.length === 0) return undefined;
+    return list;
   };
 
   const getRemark = () => {
@@ -504,8 +502,8 @@ onMounted(async () => {
         <div class="detail-header">
           <span>{{ t("bill.pureTitle") }}</span>
           <el-radio-group v-model="detailSortType" size="small">
-            <el-radio-button value="time">按时间</el-radio-button>
-            <el-radio-button value="amount">按金额</el-radio-button>
+            <el-radio-button value="time">{{ t('bill.pureByTime') }}</el-radio-button>
+            <el-radio-button value="amount">{{ t('bill.pureByAmount') }}</el-radio-button>
           </el-radio-group>
         </div>
       </template>
@@ -523,12 +521,12 @@ onMounted(async () => {
               <span class="month-label">{{ group.month }}</span>
               <span class="month-summary">
                 <span class="income-text"
-                  >收入: ¥{{
+                  >{{ t('bill.pureIncome') }}: ¥{{
                     getMonthSummary(group.month).income.toFixed(2)
                   }}</span
                 >
                 <span class="expense-text"
-                  >支出: ¥{{
+                  >{{ t('bill.pureExpense') }}: ¥{{
                     getMonthSummary(group.month).expense.toFixed(2)
                   }}</span
                 >

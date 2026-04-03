@@ -130,9 +130,14 @@ export interface TrendParams {
   queryMode?: string;
   beginDate: string;
   endDate: string;
-  classifyList?: number[];
+  classifyList?: ClassifyQueryItem[];
   remark?: string;
   tagCodes?: number[];
+}
+
+export interface ClassifyQueryItem {
+  mainClassifyId: number;
+  subClassifyId?: number | null;
 }
 
 export interface Summary {

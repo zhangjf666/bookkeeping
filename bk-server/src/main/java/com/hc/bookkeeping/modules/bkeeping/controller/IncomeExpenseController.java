@@ -93,8 +93,8 @@ public class IncomeExpenseController {
 
     @Log("查询账单报表信息")
     @ApiOperation("查询账单报表信息")
-    @GetMapping("/sumPeriod")
-    public Response<BillResultDto> getSumAmountPeriod(BillQueryDto billQueryDto) {
+    @PostMapping("/sumPeriod")
+    public Response<BillResultDto> getSumAmountPeriod(@RequestBody BillQueryDto billQueryDto) {
         return Response.ok(incomeExpenseService.querySumAmountPeriod(billQueryDto));
     }
 }

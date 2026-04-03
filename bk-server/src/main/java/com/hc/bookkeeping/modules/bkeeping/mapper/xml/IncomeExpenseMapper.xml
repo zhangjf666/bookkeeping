@@ -30,12 +30,12 @@
             and ie.account_book_id = #{accountBookId}
         </if>
         and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
         </if>
         <if test="remark != null and remark != ''">
             and ie.remark like concat('%', #{remark}, '%')
@@ -58,12 +58,12 @@
             and ie.account_book_id = #{accountBookId}
         </if>
         and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
         </if>
         <if test="remark != null and remark != ''">
             and ie.remark like concat('%', #{remark}, '%')
@@ -87,12 +87,12 @@
             and ie.account_book_id = #{accountBookId}
         </if>
         and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
         </if>
         <if test="remark != null and remark != ''">
             and ie.remark like concat('%', #{remark}, '%')
@@ -114,12 +114,12 @@
         <if test="accountBookId != null">
             and ie.account_book_id = #{accountBookId}
         </if>
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
         </if>
         <if test="remark != null and remark != ''">
             and ie.remark like concat('%', #{remark}, '%')

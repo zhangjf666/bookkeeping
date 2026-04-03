@@ -142,6 +142,10 @@ dashboard:
   pureAmount: 金额
   pureType: 类型
   pureNoRecords: 暂无记账记录
+  pureMonth: 月
+  pureQuarter: 季度
+  pureHalfYear: 近半年
+  pureYear: 年
   pureCurrentBook: 当前账本
   pureDefault: 默认
   pureTotalExpense: 总支出
@@ -236,10 +240,7 @@ bill:
   pureTypeRequired: 请选择收支类型
   pureClassifyRequired: 请选择分类
   pureDateRequired: 请选择日期
-  pureAccountBookRequired: 请选择账本
-  pureWarning: 提示
-  pureDeleteConfirm: 确定要删除该记录吗？
-  pureBatchDeleteConfirm: 确定要删除选中的 {count} 条记录吗？
+  pureDateRangeRequired: 请选择日期范围
   pureYes: 是
   pureNo: 否
 

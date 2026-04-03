@@ -324,7 +324,7 @@ onMounted(() => {
           <span>{{ row.name }}</span>
           <el-tag
             v-if="row.isDefault === 'YES'"
-            type="warning"
+            type="success"
             size="small"
             style="margin-left: 8px"
           >
