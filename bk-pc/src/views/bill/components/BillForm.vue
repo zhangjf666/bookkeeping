@@ -328,6 +328,12 @@ const handleTagCreated = (tagId: number) => {
   }
 };
 
+const handleTypeChange = () => {
+  selectedClassifyId.value = null;
+  formData.value.mainClassify = undefined;
+  formData.value.subClassify = undefined;
+};
+
 const handleSubmit = async () => {
   if (!selectedClassifyId.value) {
     message(t("bill.pureClassifyRequired"), { type: "warning" });
@@ -336,6 +342,10 @@ const handleSubmit = async () => {
   const valid = await formRef.value.validate().catch(() => false);
   if (!valid) return;
   if (!userId.value) return;
+
+  if (formData.value.type === "INCOME") {
+    formData.value.isCreditCard = "NO";
+  }
 
   loading.value = true;
   try {
@@ -367,7 +377,7 @@ const handleSubmit = async () => {
       />
     </el-form-item>
     <el-form-item :label="t('bill.pureType')" prop="type">
-      <el-radio-group v-model="formData.type">
+      <el-radio-group v-model="formData.type" @change="handleTypeChange">
         <el-radio value="EXPENSE">{{ t("bill.pureExpense") }}</el-radio>
         <el-radio value="INCOME">{{ t("bill.pureIncome") }}</el-radio>
       </el-radio-group>

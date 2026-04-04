@@ -21,14 +21,22 @@ const classifyTreeData = computed(() => billStore.classifyTree);
 const currentAccountBookId = computed(() => billStore.currentAccountBook?.id);
 
 const classifyTreeDataWithIcon = computed(() => {
-  const transformNode = (node: any): any => {
-    return {
-      ...node,
-      name: `${getClassifyIcon(node.image)} ${node.name}`,
-      children: node.children?.map(transformNode)
-    };
+  const filterAndTransform = (nodes: any[]): any[] => {
+    if (!nodes || nodes.length === 0) return [];
+    
+    return nodes
+      .filter(node => {
+        if (!filterForm.value.type) return true;
+        return node.type === filterForm.value.type;
+      })
+      .map(node => ({
+        ...node,
+        name: `${getClassifyIcon(node.image)} ${node.name}`,
+        children: filterAndTransform(node.children || [])
+      }));
   };
-  return classifyTreeData.value.map(transformNode);
+
+  return filterAndTransform(classifyTreeData.value);
 });
 
 const filterForm = ref({
@@ -56,6 +64,16 @@ watch(
   () => filterForm.value.mainClassify,
   (newVal, oldVal) => {
     if (!newVal && oldVal) {
+      filterForm.value.subClassify = undefined;
+    }
+  }
+);
+
+watch(
+  () => filterForm.value.type,
+  (newVal, oldVal) => {
+    if (newVal !== oldVal) {
+      filterForm.value.mainClassify = undefined;
       filterForm.value.subClassify = undefined;
     }
   }

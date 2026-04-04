@@ -90,11 +90,9 @@ export const useBillStore = defineStore("pure-bill", {
     },
     async create(userId: number, data: IncomeExpenseForm) {
       await createIncomeExpense(userId, data);
-      await this.loadList(userId, data.accountBookId);
     },
     async update(userId: number, data: IncomeExpenseForm) {
       await updateIncomeExpense(userId, data);
-      await this.loadList(userId, data.accountBookId);
     },
     async remove(userId: number, ids: number[]) {
       await deleteIncomeExpense(ids);
