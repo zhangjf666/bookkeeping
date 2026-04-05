@@ -88,17 +88,7 @@ const handleRemarkAutoSelect = (remarkValue: string) => {
     formData.value.type = String(classify.type);
   }
 
-  if (classify.pid === -1) {
-    selectedClassifyId.value = classify.id;
-  } else {
-    const parentClassify = billStore.classifyList.find(
-      c => c.id === classify.pid
-    );
-    if (parentClassify) {
-      selectedClassifyId.value = parentClassify.id;
-      formData.value.subClassify = classify.id;
-    }
-  }
+  selectedClassifyId.value = classify.id;
 };
 
 const formData = ref<IncomeExpenseForm>({
