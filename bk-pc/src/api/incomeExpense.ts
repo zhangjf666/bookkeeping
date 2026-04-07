@@ -78,3 +78,21 @@ export const getClassifyReportData = (params: TrendParams) => {
 export const getSummary = (params: SummaryParams) => {
   return http.request<Summary>("get", "/incomeExpense/summary", { params });
 };
+
+export const exportData = (data: {
+  userId: number;
+  date?: string[];
+  accountBookId?: number;
+  type?: 0 | 1;
+  amount?: number[];
+  mainClassify?: number;
+  subClassify?: number;
+  remark?: string[];
+  tagCodes?: string[];
+  isCreditCard?: number;
+}) => {
+  return http.request<Blob>("post", "/incomeExpense/exportRecord", {
+    data,
+    responseType: "blob"
+  });
+};

@@ -56,7 +56,7 @@ const cards = computed(() => {
       value: formatAmount(props.data?.expenseAmount),
       color: "#f56c6c",
       icon: ShoppingCart,
-      showEdit: shouldShowLimit.value
+      showEdit: false
     },
     {
       title: t("dashboard.pureIncome"),

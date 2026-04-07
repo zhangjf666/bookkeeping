@@ -98,6 +98,11 @@ class PureHttp {
     instance.interceptors.response.use(
       (response: PureHttpResponse) => {
         const $config = response.config;
+        
+        if ($config.responseType === "blob") {
+          return response.data;
+        }
+        
         if (typeof $config.beforeResponseCallback === "function") {
           $config.beforeResponseCallback(response);
           return response.data;

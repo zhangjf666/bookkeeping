@@ -1,6 +1,7 @@
 package com.hc.bookkeeping.util;
 
 import com.hc.bookkeeping.common.utils.JsonUtil;
+import lombok.extern.slf4j.Slf4j;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.core.env.Environment;
@@ -11,6 +12,7 @@ import java.util.List;
 import java.util.Map;
 
 
+@Slf4j
 @Component
 @SuppressWarnings(value={"unchecked", "rawtypes"})
 public class LogUtil {
@@ -22,8 +24,13 @@ public class LogUtil {
     	if(StringUtils.isBlank(json)) {
 			return json;
 		}
-    	Map<String, Object> result = JsonUtil.toMap(json);
-    	return mapFilter(result);
+        Map<String, Object> result = null;
+        try {
+            result = JsonUtil.toMap(json);
+        } catch (Exception e) {
+            log.error("json to map error:{}", e.getMessage());
+        }
+        return mapFilter(result);
     }
     
     public String mapFilter(Object object){

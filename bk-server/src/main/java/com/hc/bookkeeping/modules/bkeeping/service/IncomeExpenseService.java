@@ -6,6 +6,7 @@ import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
 import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
 
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 
 /**
@@ -47,4 +48,11 @@ public interface IncomeExpenseService extends BaseService<IncomeExpenseDto, Inco
      * @return
      */
     BillResultDto querySumAmountPeriod(BillQueryDto billQueryDto);
+
+    /**
+     * 导出收支记录
+     * @param queryDto 查询条件
+     * @param response HttpServletResponse
+     */
+    void exportRecord(IncomeExpenseQueryDto queryDto, HttpServletResponse response);
 }

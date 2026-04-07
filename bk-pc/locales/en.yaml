@@ -204,6 +204,12 @@ bill:
   pureAllExpense: All Expense
   pureAllIncome: All Income
 
+exportDateRequired: Please select export date range
+exportDateLimit: Export date range cannot exceed 1 year
+exportSuccess: Export successful
+exportFailed: Export failed
+pureExport: Export
+
 tag:
   pureAddTag: Add Tag
   pureTagName: Tag Name
@@ -376,3 +382,5 @@ profile:
   pureNicknameLength: Nickname cannot exceed 20 characters
   pureEmailFormatError: Please enter a valid email address
   purePhoneFormatError: Please enter a valid phone number
+
+

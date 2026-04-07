@@ -12,31 +12,39 @@ import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.StringUtils;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hc.bookkeeping.common.base.BaseServiceImpl;
+import com.hc.bookkeeping.common.dto.ExcelExportDto;
 import com.hc.bookkeeping.common.exception.BusinessException;
 import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.model.Page;
+import com.hc.bookkeeping.common.utils.ExcelExportUtils;
 import com.hc.bookkeeping.common.utils.QueryUtil;
+import com.hc.bookkeeping.modules.bkeeping.dto.AccountBookDto;
 import com.hc.bookkeeping.modules.bkeeping.constants.ExpenseLimitShowType;
 import com.hc.bookkeeping.modules.bkeeping.dto.*;
-import com.hc.bookkeeping.modules.bkeeping.entity.IncomeExpense;
-import com.hc.bookkeeping.modules.bkeeping.entity.UserConfig;
-import com.hc.bookkeeping.modules.bkeeping.entity.UserSearch;
+import com.hc.bookkeeping.modules.bkeeping.entity.*;
 import com.hc.bookkeeping.modules.bkeeping.mapper.IncomeExpenseMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapper.UserSearchMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapstruct.IncomeExpenseMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
-import com.hc.bookkeeping.modules.bkeeping.service.ClassifyService;
-import com.hc.bookkeeping.modules.bkeeping.service.IncomeExpenseService;
-import com.hc.bookkeeping.modules.bkeeping.service.UserConfigService;
-import com.hc.bookkeeping.modules.bkeeping.service.UserRemarkService;
+import com.hc.bookkeeping.modules.bkeeping.service.*;
+import lombok.Data;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
 import java.math.BigDecimal;
+import java.text.DecimalFormat;
+import java.time.format.DateTimeFormatter;
+import java.util.ArrayList;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.stream.Collectors;
+import java.util.stream.Stream;
+
+import javax.servlet.http.HttpServletResponse;
 
 import static com.hc.bookkeeping.modules.bkeeping.constants.Constants.*;
 
@@ -51,6 +59,9 @@ import static com.hc.bookkeeping.modules.bkeeping.constants.Constants.*;
 @Slf4j
 @Service
 public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapstruct, IncomeExpenseDto, IncomeExpenseMapper, IncomeExpense> implements IncomeExpenseService {
+
+    @Autowired
+    private AccountBookService accountBookService;
     @Autowired
     private ClassifyService classifyService;
     @Autowired
@@ -59,6 +70,8 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
     private UserConfigService userConfigService;
     @Autowired
     private UserRemarkService userRemarkService;
+    @Autowired
+    private UserTagService userTagService;
 
     @Override
     public List<IncomeExpenseDto> queryList(IncomeExpenseQueryDto queryDto) {
@@ -364,5 +377,146 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
             }
         }
         return sb.toString();
+    }
+
+    @Override
+    public void exportRecord(IncomeExpenseQueryDto queryDto, HttpServletResponse response) {
+        Long userId = queryDto.getUserId();
+        
+        List<IncomeExpenseDto> list = queryList(QueryUtil.bulid(queryDto));
+        
+        Map<Long, AccountBook> accountBookMap = new HashMap<>();
+        List<AccountBook> accountBooks = accountBookService.list(
+                Wrappers.<AccountBook>lambdaQuery().eq(AccountBook::getUserId, userId)
+        );
+        accountBooks.forEach(ab -> accountBookMap.put(ab.getId(), ab));
+        
+        Map<Long, Classify> classifyMap = new HashMap<>();
+        List<Classify> classifies = classifyService.list(
+            Wrappers.<Classify>lambdaQuery().eq(Classify::getUserId, userId)
+        );
+        classifies.forEach(classify -> classifyMap.put(classify.getId(), classify));
+        
+        Map<String, UserTag> tagMap = new HashMap<>();
+        if (list.stream().anyMatch(item -> item.getTagCodes() != null && !item.getTagCodes().isEmpty())) {
+            List<UserTag> tagList = userTagService.list(
+                Wrappers.<UserTag>lambdaQuery().eq(UserTag::getUserId, userId)
+            );
+            tagList.forEach(t -> tagMap.put(t.getCode().toString(), t));
+        }
+        
+        List<ExportData> exportList = list.stream().map(item -> {
+            ExportData data = new ExportData();
+            data.setId(item.getId());
+            data.setDate(item.getDate() != null ? item.getDate().format(DateTimeFormatter.ofPattern("yyyy-MM-dd")) : "");
+            
+            if (item.getAccountBookId() != null) {
+                AccountBook accountBook = accountBookMap.get(item.getAccountBookId());
+                data.setAccountBookName(accountBook != null ? accountBook.getName() : "");
+            }
+            
+            data.setAmount(item.getAmount());
+            data.setType(item.getType() != null ? item.getType().getName() : "");
+            
+            String classifyName = "";
+            if (item.getMainClassify() != null) {
+                Classify mainClassify = classifyMap.get(item.getMainClassify());
+                if (mainClassify != null) {
+                    if (item.getSubClassify() != null) {
+                        Classify subClassify = classifyMap.get(item.getSubClassify());
+                        classifyName = mainClassify.getName() + "/" + (subClassify != null ? subClassify.getName() : "");
+                    } else {
+                        classifyName = mainClassify.getName();
+                    }
+                }
+            }
+            data.setClassifyName(classifyName);
+            
+            data.setRemark(item.getRemark() != null ? item.getRemark() : "");
+            data.setIsCreditCard(item.getIsCreditCard() != null ? item.getIsCreditCard().name() : "否");
+            
+            if (item.getTagCodes() != null && !item.getTagCodes().isEmpty()) {
+                List<String> tagNames = Stream.of(item.getTagCodes().split(","))
+                    .map(tagCode -> {
+                        UserTag tag = tagMap.get(tagCode);
+                        return tag != null ? tag.getName() : "";
+                    })
+                    .filter(name -> !name.isEmpty())
+                    .collect(Collectors.toList());
+                data.setTagNames(String.join(",", tagNames));
+            }
+            
+            return data;
+        }).collect(Collectors.toList());
+
+        ExcelExportDto dto = new ExcelExportDto();
+        dto.setSheetName("账单");
+
+        List<ExcelExportDto.ColumnConfig<?>> columns = new ArrayList<>();
+
+        ExcelExportDto.ColumnConfig<String> dateCol = new ExcelExportDto.ColumnConfig<>();
+        dateCol.setHeader("日期");
+        dateCol.setField("date");
+        columns.add(dateCol);
+
+        ExcelExportDto.ColumnConfig<String> accountBookCol = new ExcelExportDto.ColumnConfig<>();
+        accountBookCol.setHeader("账本");
+        accountBookCol.setField("accountBookName");
+        columns.add(accountBookCol);
+
+        ExcelExportDto.ColumnConfig<BigDecimal> amountCol = new ExcelExportDto.ColumnConfig<>();
+        amountCol.setHeader("金额");
+        amountCol.setField("amount");
+        amountCol.setConverter(value -> value != null ? new DecimalFormat("0.00").format(value) : "0.00");
+        columns.add(amountCol);
+
+        ExcelExportDto.ColumnConfig<String> typeCol = new ExcelExportDto.ColumnConfig<>();
+        typeCol.setHeader("类型");
+        typeCol.setField("type");
+        columns.add(typeCol);
+
+        ExcelExportDto.ColumnConfig<String> classifyCol = new ExcelExportDto.ColumnConfig<>();
+        classifyCol.setHeader("分类");
+        classifyCol.setField("classifyName");
+        columns.add(classifyCol);
+
+        ExcelExportDto.ColumnConfig<String> remarkCol = new ExcelExportDto.ColumnConfig<>();
+        remarkCol.setHeader("备注");
+        remarkCol.setField("remark");
+        columns.add(remarkCol);
+
+        ExcelExportDto.ColumnConfig<String> creditCardCol = new ExcelExportDto.ColumnConfig<>();
+        creditCardCol.setHeader("信用卡消费");
+        creditCardCol.setField("isCreditCard");
+        creditCardCol.setConverter(value -> "YES".equals(value) ? "是" : "否");
+        columns.add(creditCardCol);
+
+        ExcelExportDto.ColumnConfig<String> tagCol = new ExcelExportDto.ColumnConfig<>();
+        tagCol.setHeader("标签");
+        tagCol.setField("tagNames");
+        tagCol.setConverter(value -> value == null ? "" : value);
+        columns.add(tagCol);
+
+        dto.setColumns(columns);
+        dto.setData(exportList);
+
+        try {
+            ExcelExportUtils.export(response, dto);
+        } catch (Exception e) {
+            throw new BusinessException("导出失败: " + e.getMessage());
+        }
+    }
+
+    @Data
+    private static class ExportData {
+        private Long id;
+        private String date;
+        private String accountBookName;
+        private BigDecimal amount;
+        private String type;
+        private String classifyName;
+        private String remark;
+        private String isCreditCard;
+        private String tagNames;
     }
 }

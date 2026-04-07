@@ -21,6 +21,7 @@ import org.springframework.web.multipart.MultipartFile;
 import org.springframework.web.multipart.support.StandardMultipartHttpServletRequest;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.lang.reflect.Method;
 import java.time.Duration;
 import java.time.LocalDateTime;
@@ -50,6 +51,7 @@ public class LogAspect {
         this.logService = logService;
         excluedParamClass = new HashSet<>();
         excluedParamClass.add(HttpServletRequest.class);
+        excluedParamClass.add(HttpServletResponse.class);
         excluedParamClass.add(StandardMultipartHttpServletRequest.class);
         excluedParamClass.add(MultipartFile.class);
     }

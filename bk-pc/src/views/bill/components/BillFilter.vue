@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { ElMessage } from "element-plus";
 import { useBillStoreHook } from "@/store/modules/bill";
 import { getAccountBookIcon } from "@/utils/accountBook";
 import { getClassifyIcon } from "@/utils/classifyIcons";
+import { exportData } from "@/api/incomeExpense";
+import { useUserStoreHook } from "@/store/modules/user";
 
 defineOptions({
   name: "BillFilter"
@@ -16,6 +19,7 @@ const emit = defineEmits<{
 
 const { t } = useI18n();
 const billStore = useBillStoreHook();
+const userStore = useUserStoreHook();
 
 const classifyTreeData = computed(() => billStore.classifyTree);
 const currentAccountBookId = computed(() => billStore.currentAccountBook?.id);
@@ -165,6 +169,89 @@ const handleReset = () => {
     tagCodes: []
   };
   emit("reset");
+};
+
+const handleExport = async () => {
+  if (!filterForm.value.date || filterForm.value.date.length !== 2) {
+    ElMessage.warning(t("exportDateRequired"));
+    return;
+  }
+
+  const beginDate = new Date(filterForm.value.date[0]);
+  const endDate = new Date(filterForm.value.date[1]);
+  const diffDays = Math.ceil(
+    (endDate.getTime() - beginDate.getTime()) / (1000 * 60 * 60 * 24)
+  );
+
+  if (diffDays > 365) {
+    ElMessage.warning(t("exportDateLimit"));
+    return;
+  }
+
+  const selectedId = filterForm.value.mainClassify;
+  let mainClassify: number | undefined = undefined;
+  let subClassify: number | undefined = undefined;
+
+  if (selectedId) {
+    const classify = billStore.classifyList.find(c => c.id === selectedId);
+    if (classify) {
+      if (classify.pid === -1) {
+        mainClassify = selectedId;
+      } else {
+        mainClassify = classify.pid;
+        subClassify = selectedId;
+      }
+    }
+  }
+
+  const selectedTagCodes = filterForm.value.tagCodes
+    .map(tagId => {
+      const tag = billStore.tagList.find(t => t.id === tagId);
+      return tag ? (tag as any).code : null;
+    })
+    .filter(code => code !== null) as number[];
+
+  const exportParams: any = {
+    userId: userStore.id,
+    date: filterForm.value.date
+  };
+
+  if (filterForm.value.accountBookId !== undefined) {
+    exportParams.accountBookId = filterForm.value.accountBookId;
+  }
+  if (filterForm.value.type !== undefined) {
+    exportParams.type = filterForm.value.type === "EXPENSE" ? 0 : 1;
+  }
+  if (filterForm.value.amount && filterForm.value.amount.length === 2) {
+    exportParams.amount = filterForm.value.amount;
+  }
+  if (mainClassify) {
+    exportParams.mainClassify = mainClassify;
+    if (subClassify) {
+      exportParams.subClassify = subClassify;
+    }
+  }
+  if (filterForm.value.remark) {
+    exportParams.remark = [filterForm.value.remark];
+  }
+  if (selectedTagCodes.length > 0) {
+    exportParams.tagCodes = selectedTagCodes;
+  }
+
+  try {
+    const blob = await exportData(exportParams);
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = `账单导出_${filterForm.value.date[0]}_${filterForm.value.date[1]}.xlsx`;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    window.URL.revokeObjectURL(url);
+    ElMessage.success(t("exportSuccess"));
+  } catch {
+    ElMessage.error(t("exportFailed"));
+  }
 };
 
 const getFilterTagColor = (tagId: number) => {
@@ -420,6 +507,9 @@ const queryRemarks = (
             <el-button @click="handleReset">{{
               t("bill.pureReset")
             }}</el-button>
+            <el-button type="success" @click="handleExport">
+              {{ t("pureExport") }}
+            </el-button>
           </el-form-item>
         </el-col>
       </el-row>

@@ -17,6 +17,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.*;
 
 import javax.servlet.http.HttpServletRequest;
+import javax.servlet.http.HttpServletResponse;
 import java.util.List;
 import java.util.Set;
 
@@ -96,5 +97,12 @@ public class IncomeExpenseController {
     @PostMapping("/sumPeriod")
     public Response<BillResultDto> getSumAmountPeriod(@RequestBody BillQueryDto billQueryDto) {
         return Response.ok(incomeExpenseService.querySumAmountPeriod(billQueryDto));
+    }
+
+    @Log("导出收入支出记录")
+    @ApiOperation("导出收入支出记录")
+    @PostMapping("/exportRecord")
+    public void exportRecord(@RequestBody IncomeExpenseQueryDto queryDto, HttpServletResponse response) {
+        incomeExpenseService.exportRecord(queryDto, response);
     }
 }

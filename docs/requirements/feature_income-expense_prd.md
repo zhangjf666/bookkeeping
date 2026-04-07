@@ -14,6 +14,7 @@
 - 删除收支记录（支持批量删除）
 - 多条件筛选查询
 - 分类名称/图标展示
+- 导出 Excel 功能
 
 ---
 
@@ -47,6 +48,7 @@
 │     - 编辑记录 → 弹窗表单 → 提交 → 刷新列表                  │
 │     - 删除记录 → 确认 → 删除 → 刷新列表                      │
 │     - 批量删除 → 确认 → 删除 → 刷新列表                      │
+│     - 导出记录 → 校验日期 → 生成Excel → 下载                 │
 └─────────────────────────────────────────────────────────────┘
 ```
 
@@ -284,6 +286,28 @@ Content-Type: application/json
 }
 ```
 
+### 3.5 导出收支记录
+
+**请求**
+
+```
+POST /incomeExpense/export
+Content-Type: application/json
+```
+
+**请求体**
+
+同 `3.1 查询收支记录列表` 的请求体
+
+**响应**
+
+- Content-Type: application/vnd.openxmlformats-officedocument.spreadsheetml.sheet
+- Content-Disposition: attachment; filename=账单_2026-04-07.xlsx
+
+**说明**
+- 导出时日期范围为必填项，且开始日期与结束日期相差不能超过1年
+- 使用流式响应，直接将 Excel 写入 HTTP 响应流，不生成服务器临时文件
+
 ---
 
 ## 四、前端页面设计
@@ -299,7 +323,7 @@ Content-Type: application/json
 │  账本: [全部 ▼]  类型: [全部 ▼]  日期: [日期范围]                   │
 │  金额: [Min]-[Max]   分类: [选择]                                    │
 │  备注: [___________]  标签: [选择标签 ▼]                            │
-│  [重置] [查询]                                                     │
+│  [重置] [查询] [导出]                                                │
 ├────────────────────────────────────────────────────────────────────┤
 │  [新增] [批量删除]                                                  │
 ├────────────────────────────────────────────────────────────────────┤
@@ -500,8 +524,26 @@ interface IncomeExpenseForm {
 | 文件路径 | 修改内容 |
 |----------|----------|
 | `bk-pc/src/router/index.ts` | 引入账单路由模块 |
-| `bk-pc/src/api/incomeExpense.ts` | 补充 getSummary 接口（如需） |
+| `bk-pc/src/api/incomeExpense.ts` | 补充 getSummary 接口（如需）、新增 exportBillList 接口 |
 | `bk-pc/src/types/incomeExpense.ts` | 补充类型定义 |
+| `bk-pc/src/views/bill/components/BillFilter.vue` | 新增导出按钮，添加日期校验逻辑 |
+
+### 7.3 后端新增文件（公共模块）
+
+| 文件路径 | 职责描述 |
+|----------|----------|
+| `bk-server/common/utils/ExcelExportUtils.java` | 通用 Excel 导出工具类，支持自定义列配置、值转换器 |
+| `bk-server/common/dto/ExcelExportDto.java` | 导出配置 DTO（sheet名、列配置、数据） |
+
+### 7.4 后端修改文件
+
+| 文件路径 | 修改内容 |
+|----------|----------|
+| `bk-server/.../IncomeExpenseController.java` | 新增 `/export` 导出接口 |
+| `bk-server/.../IncomeExpenseService.java` | 新增 exportData 方法声明 |
+| `bk-server/.../IncomeExpenseServiceImpl.java` | 实现 exportData 方法，调用公共导出工具 |
+| `bk-server/.../IncomeExpenseMapper.java` | 新增 queryListForExport 查询方法（返回完整数据） |
+| `bk-server/.../IncomeExpenseMapper.xml` | 新增 queryListForExport SQL 配置 |
 
 ---
 
@@ -533,7 +575,20 @@ interface IncomeExpenseForm {
 - [ ] 操作成功/失败有提示信息
 - [ ] 加载中有 loading 状态
 
-### 8.3 性能验收
+### 8.3 导出功能验收
+
+- [ ] 导出按钮显示在筛选区域的重置按钮之后
+- [ ] 未选择日期范围时，导出按钮禁用或有提示
+- [ ] 开始日期与结束日期相差超过1年时，导出按钮禁用或有提示
+- [ ] 点击导出后弹出下载提示
+- [ ] 导出的 Excel 内容与列表数据一致
+- [ ] 列转义正确：
+  - 收支类型：INCOME → 收入，EXPENSE → 支出
+  - 信用卡消费：YES → 是，NO → 否
+  - 分类：显示为主分类/子分类格式
+- [ ] 导出文件命名格式：账单_{YYYY-MM-DD}.xlsx
+
+### 8.4 性能验收
 
 - [ ] 列表加载 < 1s
 - [ ] 表单提交响应 < 1s
