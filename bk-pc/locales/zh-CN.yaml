@@ -256,6 +256,11 @@ bill:
   pureSelectedClassify: 已选择 {count} 个分类
   pureAllExpense: 全部支出
   pureAllIncome: 全部收入
+  exportDateRequired: 请选择导出日期范围
+  exportDateLimit: 导出时间范围不能超过1年
+  exportSuccess: 导出成功
+  exportFailed: 导出失败
+  pureExport: 导出
 
 tag:
   pureAddTag: 新增标签
@@ -387,17 +392,6 @@ commonConfig:
   pureInvalidAmount: 请输入有效的金额
   pureUpdateSuccess: 保存成功
   pureOperationFail: 操作失败
-
-pureSetMonthlyLimit: 设置当月支出限额
-pureSetYearlyLimit: 设置当年支出限额
-pureMonthlyExpenseLimit: 月支出限额
-pureYearlyExpenseLimit: 年支出限额
-pureMonthlyExpenseSurplus: 月剩余限额
-pureYearlyExpenseSurplus: 年剩余限额
-
-exportDateRequired: 请选择导出日期范围
-exportDateLimit: 导出时间范围不能超过1年
-exportSuccess: 导出成功
-exportFailed: 导出失败
-pureExport: 导出
+  pureSetMonthlyLimit: 设置当月支出限额
+  pureSetYearlyLimit: 设置当年支出限额
 

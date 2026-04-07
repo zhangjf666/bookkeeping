@@ -173,7 +173,7 @@ const handleReset = () => {
 
 const handleExport = async () => {
   if (!filterForm.value.date || filterForm.value.date.length !== 2) {
-    ElMessage.warning(t("exportDateRequired"));
+    ElMessage.warning(t("bill.exportDateRequired"));
     return;
   }
 
@@ -184,7 +184,7 @@ const handleExport = async () => {
   );
 
   if (diffDays > 365) {
-    ElMessage.warning(t("exportDateLimit"));
+    ElMessage.warning(t("bill.exportDateLimit"));
     return;
   }
 
@@ -248,9 +248,9 @@ const handleExport = async () => {
     link.click();
     document.body.removeChild(link);
     window.URL.revokeObjectURL(url);
-    ElMessage.success(t("exportSuccess"));
+    ElMessage.success(t("bill.exportSuccess"));
   } catch {
-    ElMessage.error(t("exportFailed"));
+    ElMessage.error(t("bill.exportFailed"));
   }
 };
 
@@ -508,7 +508,7 @@ const queryRemarks = (
               t("bill.pureReset")
             }}</el-button>
             <el-button type="success" @click="handleExport">
-              {{ t("pureExport") }}
+              {{ t("bill.pureExport") }}
             </el-button>
           </el-form-item>
         </el-col>

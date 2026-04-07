@@ -203,12 +203,11 @@ bill:
   pureSelectedClassify: Selected {count} classifies
   pureAllExpense: All Expense
   pureAllIncome: All Income
-
-exportDateRequired: Please select export date range
-exportDateLimit: Export date range cannot exceed 1 year
-exportSuccess: Export successful
-exportFailed: Export failed
-pureExport: Export
+  exportDateRequired: Please select export date range
+  exportDateLimit: Export date range cannot exceed 1 year
+  exportSuccess: Export successful
+  exportFailed: Export failed
+  pureExport: Export
 
 tag:
   pureAddTag: Add Tag
@@ -339,6 +338,8 @@ commonConfig:
   pureInvalidAmount: Please enter valid amount
   pureUpdateSuccess: Saved Successfully
   pureOperationFail: Operation Failed
+  pureSetMonthlyLimit: Set Monthly Expense Limit
+  pureSetYearlyLimit: Set Yearly Expense Limit
 
 profile:
   pureTitle: Profile
