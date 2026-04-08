@@ -30,6 +30,9 @@ public @interface Query {
     //匹配类型,默认相等
     Matching match() default Matching.EQUAL;
 
+    //自定义处理器
+    Class<? extends QueryHandler> customHandler() default QueryHandler.class;
+
     enum Matching {
         //相等
         EQUAL
@@ -68,7 +71,9 @@ public @interface Query {
         //匹配
         MATCHING,
         //使用原始sql
-        SQL
+        SQL,
+        //自定义处理器
+        CUSTOM
     }
 
     //联接方式

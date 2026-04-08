@@ -27,8 +27,7 @@ export const useBillStore = defineStore("pure-bill", {
     total: 0,
     queryParams: {
       pageNo: 1,
-      pageSize: 10,
-      type: undefined as string | undefined
+      pageSize: 10
     },
     listLoading: false,
     classifyList: [] as Classify[],
@@ -67,11 +66,18 @@ export const useBillStore = defineStore("pure-bill", {
     async loadList(userId: number, accountBookId?: number) {
       this.listLoading = true;
       try {
-        const { type, ...restParams } = this.queryParams;
+        const filteredParams: Record<string, any> = {};
+        Object.entries(this.queryParams).forEach(([key, value]) => {
+          if (value !== undefined && value !== null && value !== "") {
+            if (Array.isArray(value) && value.length === 0) {
+              return;
+            }
+            filteredParams[key] = value;
+          }
+        });
         const params = {
-          ...restParams,
-          ...(accountBookId && { accountBookId }),
-          ...(type !== undefined && { type })
+          ...filteredParams,
+          ...(accountBookId && { accountBookId })
         };
         const result = await getIncomeExpenseList(userId, params);
         if (Array.isArray(result)) {
@@ -99,21 +105,31 @@ export const useBillStore = defineStore("pure-bill", {
       await this.loadList(userId, this.currentAccountBook?.id);
     },
     setQueryParams(params: Partial<IncomeExpenseQuery>) {
-      const { type, ...rest } = params;
       const newParams: any = {
-        ...this.queryParams,
-        ...rest,
-        pageNo: 1
+        pageNo: 1,
+        pageSize: 10
       };
-      if (type !== undefined) {
-        newParams.type = type;
-      } else {
-        delete newParams.type;
-      }
+      Object.entries(params).forEach(([key, value]) => {
+        if (value !== undefined && value !== null && value !== "") {
+          if (Array.isArray(value) && value.length === 0) {
+            return;
+          }
+          newParams[key] = value;
+        }
+      });
       this.queryParams = newParams;
     },
     resetQueryParams() {
-      this.queryParams = { pageNo: 1, pageSize: 10, type: undefined };
+      this.queryParams = {
+        pageNo: 1,
+        pageSize: 10,
+        accountBookId: undefined,
+        date: undefined,
+        amount: undefined,
+        classifyList: [],
+        remark: undefined,
+        tagCodes: undefined
+      };
     },
     async loadClassifyAndTag(userId: number, force = false) {
       if (!force && this.classifyList.length > 0 && this.tagList.length > 0) {

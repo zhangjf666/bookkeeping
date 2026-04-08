@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import com.hc.bookkeeping.common.annotation.Query;
+import com.hc.bookkeeping.common.annotation.QueryHandler;
 import com.hc.bookkeeping.common.annotation.Sort;
 import com.hc.bookkeeping.common.constants.Constants;
 import com.hc.bookkeeping.common.exception.BusinessException;
@@ -84,6 +85,17 @@ public class QueryUtil {
                             Query.Matching match = q.match();
                             setMatching(column,match,wrapper,linkType,val);
                             break;
+                        case CUSTOM:
+                            try {
+                                QueryHandler handler = SpringContextUtil.getBean(q.customHandler());
+                                if(handler == null){
+                                    handler = q.customHandler().getDeclaredConstructor().newInstance();
+                                }
+                                handler.apply(wrapper, val);
+                            } catch (Exception e) {
+                                log.warn("自定义查询处理器 {} 初始化失败: {}", q.customHandler().getName(), e.getMessage());
+                            }
+                            break;
                         default:
                             break;
                     }
@@ -146,12 +158,32 @@ public class QueryUtil {
                 }
                 break;
             case BETWEEN:
-                if(isArray(val) && ((List)val).size() == 2){
+                if(isArray(val) && !((List<Object>) val).isEmpty()){
                     List<Object> between = new ArrayList<>((List<Object>)val);
-                    wrapper.between(column,between.get(0),between.get(1));
+                    if(between.size() == 1 && between.get(0) != null){
+                        setWrapperValue(column, Query.Matching.GREATER_EQ,wrapper,between.get(0));
+                    } else if(between.get(0) != null && between.get(1) == null){
+                        setWrapperValue(column, Query.Matching.GREATER_EQ,wrapper,between.get(0));
+                    } else if(between.get(0) != null && between.get(1) != null){
+                        wrapper.between(column,between.get(0),between.get(1));
+                    } else if(between.get(0) == null && between.get(1) != null){
+                        setWrapperValue(column, Query.Matching.LESS_EQ,wrapper,between.get(1));
+                    }
                 }
                 break;
             case NOT_BETWEEN:
+                if(isArray(val) && !((List<Object>) val).isEmpty()){
+                    List<Object> nbetween = new ArrayList<>((List<Object>)val);
+                    if(nbetween.size() == 1 && nbetween.get(0) != null){
+                        setWrapperValue(column, Query.Matching.LESS_THAN,wrapper,nbetween.get(0));
+                    } else if(nbetween.get(0) != null && nbetween.get(1) == null){
+                        setWrapperValue(column, Query.Matching.LESS_THAN,wrapper,nbetween.get(0));
+                    } else if(nbetween.get(0) != null && nbetween.get(1) != null){
+                        wrapper.notBetween(column,nbetween.get(0),nbetween.get(1));
+                    } else if(nbetween.get(0) == null && nbetween.get(1) != null){
+                        setWrapperValue(column, Query.Matching.GREATER_THAN,wrapper,nbetween.get(1));
+                    }
+                }
                 if(isArray(val) && ((List)val).size() == 2) {
                     List<Object> nbetween = new ArrayList<>((List<Object>) val);
                     wrapper.notBetween(column, nbetween.get(0), nbetween.get(1));

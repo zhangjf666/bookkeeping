@@ -31,13 +31,11 @@ export interface IncomeExpenseQuery {
   pageNo?: number;
   pageSize?: number;
   accountBookId?: number;
-  type?: string;
   date?: string[];
   amount?: number[];
-  mainClassify?: number;
-  subClassify?: number;
+  classifyList?: { mainClassifyId: number; subClassifyId: number | null }[];
   remark?: string;
-  tagCodes?: number[];
+  tagCodes?: string[];
 }
 
 export interface IncomeExpenseForm {

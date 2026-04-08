@@ -16,9 +16,13 @@ export const getIncomeExpenseList = (
   userId: number,
   params: IncomeExpenseQuery
 ) => {
-  return http.request<PageResult<IncomeExpense>>("get", "/incomeExpense/page", {
-    params: { userId, ...params }
-  });
+  return http.request<PageResult<IncomeExpense>>(
+    "post",
+    "/incomeExpense/page",
+    {
+      data: { userId, ...params }
+    }
+  );
 };
 
 export const createIncomeExpense = (
@@ -66,7 +70,9 @@ export const getRemarkList = (userId: number) => {
 };
 
 export const getTrendData = (params: TrendParams) => {
-  return http.request<TrendData>("post", "/incomeExpense/sumPeriod", { data: params });
+  return http.request<TrendData>("post", "/incomeExpense/sumPeriod", {
+    data: params
+  });
 };
 
 export const getClassifyReportData = (params: TrendParams) => {
@@ -83,10 +89,8 @@ export const exportData = (data: {
   userId: number;
   date?: string[];
   accountBookId?: number;
-  type?: 0 | 1;
   amount?: number[];
-  mainClassify?: number;
-  subClassify?: number;
+  classifyList?: { mainClassifyId: number; subClassifyId: number | null }[];
   remark?: string[];
   tagCodes?: string[];
   isCreditCard?: number;

@@ -21,35 +21,16 @@ const { t } = useI18n();
 const billStore = useBillStoreHook();
 const userStore = useUserStoreHook();
 
-const classifyTreeData = computed(() => billStore.classifyTree);
 const currentAccountBookId = computed(() => billStore.currentAccountBook?.id);
-
-const classifyTreeDataWithIcon = computed(() => {
-  const filterAndTransform = (nodes: any[]): any[] => {
-    if (!nodes || nodes.length === 0) return [];
-    
-    return nodes
-      .filter(node => {
-        if (!filterForm.value.type) return true;
-        return node.type === filterForm.value.type;
-      })
-      .map(node => ({
-        ...node,
-        name: `${getClassifyIcon(node.image)} ${node.name}`,
-        children: filterAndTransform(node.children || [])
-      }));
-  };
-
-  return filterAndTransform(classifyTreeData.value);
-});
 
 const filterForm = ref({
   accountBookId: undefined as number | undefined,
-  type: undefined as "EXPENSE" | "INCOME" | undefined,
   date: [] as string[],
   amount: [] as number[],
-  mainClassify: undefined as number | undefined,
-  subClassify: undefined as number | undefined,
+  classifyList: [] as {
+    mainClassifyId: number;
+    subClassifyId: number | null;
+  }[],
   remark: "",
   tagCodes: [] as number[]
 });
@@ -64,30 +45,6 @@ watch(
   { immediate: true }
 );
 
-watch(
-  () => filterForm.value.mainClassify,
-  (newVal, oldVal) => {
-    if (!newVal && oldVal) {
-      filterForm.value.subClassify = undefined;
-    }
-  }
-);
-
-watch(
-  () => filterForm.value.type,
-  (newVal, oldVal) => {
-    if (newVal !== oldVal) {
-      filterForm.value.mainClassify = undefined;
-      filterForm.value.subClassify = undefined;
-    }
-  }
-);
-
-const typeOptions = [
-  { label: t("bill.pureExpense"), value: "EXPENSE" },
-  { label: t("bill.pureIncome"), value: "INCOME" }
-];
-
 const getSelectedAccountBookLabel = (val: number | undefined) => {
   if (!val) return "";
   const book = billStore.accountBooks.find((b: any) => b.id === val);
@@ -95,29 +52,212 @@ const getSelectedAccountBookLabel = (val: number | undefined) => {
   return `${getAccountBookIcon(book.image)} ${book.name}`;
 };
 
-const handleQuery = () => {
-  const selectedId = filterForm.value.mainClassify;
-  let mainClassify: number | undefined = undefined;
-  let subClassify: number | undefined = undefined;
+const classifyTreeRef = ref();
+const selectAllExpense = ref(false);
+const selectAllIncome = ref(false);
+const isIndeterminateExpense = ref(false);
+const isIndeterminateIncome = ref(false);
 
-  if (selectedId) {
-    const classify = billStore.classifyList.find(c => c.id === selectedId);
-    if (classify) {
-      if (classify.pid === -1) {
-        mainClassify = selectedId;
-      } else {
-        mainClassify = classify.pid;
-        subClassify = selectedId;
+const classifyTreeData = computed(() => {
+  const expenseParents = billStore.classifyList.filter(
+    (c: any) => c.pid === -1 && c.type === "EXPENSE"
+  );
+  const incomeParents = billStore.classifyList.filter(
+    (c: any) => c.pid === -1 && c.type === "INCOME"
+  );
+
+  const buildTree = (parents: any[]) => {
+    return parents.map(parent => {
+      const children = billStore.classifyList.filter(
+        (c: any) => c.pid === parent.id
+      );
+      const node: any = {
+        id: parent.id,
+        name: parent.name,
+        image: parent.image,
+        type: parent.type,
+        isParent: true
+      };
+      if (children.length > 0) {
+        node.children = children.map(child => ({
+          id: child.id,
+          name: child.name,
+          image: child.image,
+          type: child.type,
+          pid: child.pid,
+          isParent: false
+        }));
       }
-    }
-  }
+      return node;
+    });
+  };
 
+  return [
+    {
+      id: "expense-all",
+      name: t("bill.pureAllExpense"),
+      type: "EXPENSE",
+      isAll: true,
+      children: buildTree(expenseParents)
+    },
+    {
+      id: "income-all",
+      name: t("bill.pureAllIncome"),
+      type: "INCOME",
+      isAll: true,
+      children: buildTree(incomeParents)
+    }
+  ];
+});
+
+const handleClassifyTreeChange = () => {
+  const checkedNodes = classifyTreeRef.value?.getCheckedNodes(false) || [];
+  const result: { mainClassifyId: number; subClassifyId: number | null }[] = [];
+
+  const expenseParentIds = billStore.classifyList
+    .filter((c: any) => c.pid === -1 && c.type === "EXPENSE")
+    .map((c: any) => c.id);
+
+  const incomeParentIds = billStore.classifyList
+    .filter((c: any) => c.pid === -1 && c.type === "INCOME")
+    .map((c: any) => c.id);
+
+  checkedNodes.forEach((node: any) => {
+    if (node.isAll) return;
+
+    if (
+      expenseParentIds.includes(node.id) ||
+      incomeParentIds.includes(node.id)
+    ) {
+      result.push({ mainClassifyId: node.id, subClassifyId: null as any });
+    } else {
+      result.push({ mainClassifyId: node.pid, subClassifyId: node.id });
+    }
+  });
+
+  filterForm.value.classifyList = result;
+  updateCheckboxState();
+};
+
+const updateCheckboxState = () => {
+  const checkedKeys = classifyTreeRef.value?.getCheckedKeys() || [];
+
+  const expenseParentIds = billStore.classifyList
+    .filter((c: any) => c.pid === -1 && c.type === "EXPENSE")
+    .map((c: any) => c.id);
+
+  const incomeParentIds = billStore.classifyList
+    .filter((c: any) => c.pid === -1 && c.type === "INCOME")
+    .map((c: any) => c.id);
+
+  const allExpenseChildren = billStore.classifyList
+    .filter((c: any) => c.pid === -1 && c.type === "EXPENSE")
+    .flatMap((p: any) => [
+      p.id,
+      ...billStore.classifyList
+        .filter((c: any) => c.pid === p.id)
+        .map((c: any) => c.id)
+    ]);
+
+  const allIncomeChildren = billStore.classifyList
+    .filter((c: any) => c.pid === -1 && c.type === "INCOME")
+    .flatMap((p: any) => [
+      p.id,
+      ...billStore.classifyList
+        .filter((c: any) => c.pid === p.id)
+        .map((c: any) => c.id)
+    ]);
+
+  const checkedExpenseKeys = checkedKeys.filter((id: any) =>
+    allExpenseChildren.includes(id)
+  );
+  const checkedIncomeKeys = checkedKeys.filter((id: any) =>
+    allIncomeChildren.includes(id)
+  );
+
+  selectAllExpense.value =
+    allExpenseChildren.length > 0 &&
+    checkedExpenseKeys.length === allExpenseChildren.length;
+  isIndeterminateExpense.value =
+    checkedExpenseKeys.length > 0 &&
+    checkedExpenseKeys.length < allExpenseChildren.length;
+
+  selectAllIncome.value =
+    allIncomeChildren.length > 0 &&
+    checkedIncomeKeys.length === allIncomeChildren.length;
+  isIndeterminateIncome.value =
+    checkedIncomeKeys.length > 0 &&
+    checkedIncomeKeys.length < allIncomeChildren.length;
+};
+
+const handleSelectAllExpense = (checked: boolean) => {
+  const expenseNodes = classifyTreeRef.value?.getNode("expense-all");
+  if (expenseNodes) {
+    if (checked) {
+      const allKeys = expenseNodes.childNodes.flatMap((node: any) => {
+        const keys = [node.data.id];
+        if (node.childNodes) {
+          keys.push(...node.childNodes.map((child: any) => child.data.id));
+        }
+        return keys;
+      });
+      classifyTreeRef.value?.setCheckedKeys(allKeys);
+    } else {
+      const currentKeys = classifyTreeRef.value?.getCheckedKeys() || [];
+      const expenseKeys = billStore.classifyList
+        .filter((c: any) => c.pid === -1 && c.type === "EXPENSE")
+        .flatMap((p: any) => [
+          p.id,
+          ...billStore.classifyList
+            .filter((c: any) => c.pid === p.id)
+            .map((c: any) => c.id)
+        ]);
+      classifyTreeRef.value?.setCheckedKeys(
+        currentKeys.filter((k: any) => !expenseKeys.includes(k))
+      );
+    }
+    handleClassifyTreeChange();
+  }
+};
+
+const handleSelectAllIncome = (checked: boolean) => {
+  const incomeNodes = classifyTreeRef.value?.getNode("income-all");
+  if (incomeNodes) {
+    if (checked) {
+      const allKeys = incomeNodes.childNodes.flatMap((node: any) => {
+        const keys = [node.data.id];
+        if (node.childNodes) {
+          keys.push(...node.childNodes.map((child: any) => child.data.id));
+        }
+        return keys;
+      });
+      const currentKeys = classifyTreeRef.value?.getCheckedKeys() || [];
+      classifyTreeRef.value?.setCheckedKeys([...currentKeys, ...allKeys]);
+    } else {
+      const currentKeys = classifyTreeRef.value?.getCheckedKeys() || [];
+      const incomeKeys = billStore.classifyList
+        .filter((c: any) => c.pid === -1 && c.type === "INCOME")
+        .flatMap((p: any) => [
+          p.id,
+          ...billStore.classifyList
+            .filter((c: any) => c.pid === p.id)
+            .map((c: any) => c.id)
+        ]);
+      classifyTreeRef.value?.setCheckedKeys(
+        currentKeys.filter((k: any) => !incomeKeys.includes(k))
+      );
+    }
+    handleClassifyTreeChange();
+  }
+};
+
+const handleQuery = () => {
   const selectedTagCodes = filterForm.value.tagCodes
     .map(tagId => {
       const tag = billStore.tagList.find(t => t.id === tagId);
-      return tag ? (tag as any).code : null;
+      return tag ? String((tag as any).code) : null;
     })
-    .filter(code => code !== null) as number[];
+    .filter(code => code !== null) as string[];
 
   const queryParams: any = {};
 
@@ -127,47 +267,43 @@ const handleQuery = () => {
   if (filterForm.value.date && filterForm.value.date.length === 2) {
     queryParams.date = filterForm.value.date;
   }
-  if (filterForm.value.amount && filterForm.value.amount.length === 2) {
+  if (
+    filterForm.value.amount[0] !== null ||
+    filterForm.value.amount[1] !== null
+  ) {
     queryParams.amount = filterForm.value.amount;
   }
-  if (mainClassify) {
-    queryParams.mainClassify = mainClassify;
-  }
-  if (subClassify) {
-    queryParams.subClassify = subClassify;
+  if (
+    filterForm.value.classifyList &&
+    filterForm.value.classifyList.length > 0
+  ) {
+    queryParams.classifyList = filterForm.value.classifyList;
   }
   if (filterForm.value.remark) {
     queryParams.remark = filterForm.value.remark;
   }
-  if (selectedTagCodes.length > 0) {
+  if (selectedTagCodes && selectedTagCodes.length > 0) {
     queryParams.tagCodes = selectedTagCodes;
   }
 
-  if (filterForm.value.type !== undefined) {
-    queryParams.type = filterForm.value.type;
-  }
-
   billStore.setQueryParams(queryParams);
-
-  if (!selectedId && billStore.queryParams) {
-    delete (billStore.queryParams as any).mainClassify;
-    delete (billStore.queryParams as any).subClassify;
-  }
-
   emit("query", filterForm.value.accountBookId);
 };
 
 const handleReset = () => {
   filterForm.value = {
     accountBookId: undefined,
-    type: undefined,
     date: [],
     amount: [],
-    mainClassify: undefined,
-    subClassify: undefined,
+    classifyList: [],
     remark: "",
     tagCodes: []
   };
+  selectAllExpense.value = false;
+  selectAllIncome.value = false;
+  isIndeterminateExpense.value = false;
+  isIndeterminateIncome.value = false;
+  classifyTreeRef.value?.setCheckedKeys([]);
   emit("reset");
 };
 
@@ -188,28 +324,12 @@ const handleExport = async () => {
     return;
   }
 
-  const selectedId = filterForm.value.mainClassify;
-  let mainClassify: number | undefined = undefined;
-  let subClassify: number | undefined = undefined;
-
-  if (selectedId) {
-    const classify = billStore.classifyList.find(c => c.id === selectedId);
-    if (classify) {
-      if (classify.pid === -1) {
-        mainClassify = selectedId;
-      } else {
-        mainClassify = classify.pid;
-        subClassify = selectedId;
-      }
-    }
-  }
-
   const selectedTagCodes = filterForm.value.tagCodes
     .map(tagId => {
       const tag = billStore.tagList.find(t => t.id === tagId);
-      return tag ? (tag as any).code : null;
+      return tag ? String((tag as any).code) : null;
     })
-    .filter(code => code !== null) as number[];
+    .filter(code => code !== null) as string[];
 
   const exportParams: any = {
     userId: userStore.id,
@@ -219,22 +339,22 @@ const handleExport = async () => {
   if (filterForm.value.accountBookId !== undefined) {
     exportParams.accountBookId = filterForm.value.accountBookId;
   }
-  if (filterForm.value.type !== undefined) {
-    exportParams.type = filterForm.value.type === "EXPENSE" ? 0 : 1;
-  }
-  if (filterForm.value.amount && filterForm.value.amount.length === 2) {
+  if (
+    filterForm.value.amount[0] !== null ||
+    filterForm.value.amount[1] !== null
+  ) {
     exportParams.amount = filterForm.value.amount;
   }
-  if (mainClassify) {
-    exportParams.mainClassify = mainClassify;
-    if (subClassify) {
-      exportParams.subClassify = subClassify;
-    }
+  if (
+    filterForm.value.classifyList &&
+    filterForm.value.classifyList.length > 0
+  ) {
+    exportParams.classifyList = filterForm.value.classifyList;
   }
   if (filterForm.value.remark) {
     exportParams.remark = [filterForm.value.remark];
   }
-  if (selectedTagCodes.length > 0) {
+  if (selectedTagCodes && selectedTagCodes.length > 0) {
     exportParams.tagCodes = selectedTagCodes;
   }
 
@@ -313,6 +433,11 @@ const queryRemarks = (
     : billStore.remarkList;
   cb(results.map(item => ({ value: item.remark })));
 };
+
+const treeProps = {
+  children: "children",
+  label: "name"
+};
 </script>
 
 <template>
@@ -334,7 +459,9 @@ const queryRemarks = (
                 :value="book.id"
               >
                 <div class="book-option">
-                  <span>{{ getAccountBookIcon(book.image) }} {{ book.name }}</span>
+                  <span
+                    >{{ getAccountBookIcon(book.image) }} {{ book.name }}</span
+                  >
                   <el-tag
                     v-if="book.isDefault === 'YES'"
                     size="small"
@@ -344,23 +471,6 @@ const queryRemarks = (
                   </el-tag>
                 </div>
               </el-option>
-            </el-select>
-          </el-form-item>
-        </el-col>
-        <el-col :span="6">
-          <el-form-item :label="t('bill.pureType')">
-            <el-select
-              v-model="filterForm.type"
-              :placeholder="t('bill.pureSelectPlaceholder')"
-              clearable
-              style="width: 100%"
-            >
-              <el-option
-                v-for="item in typeOptions"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
             </el-select>
           </el-form-item>
         </el-col>
@@ -396,23 +506,57 @@ const queryRemarks = (
             />
           </el-form-item>
         </el-col>
-      </el-row>
-      <el-row :gutter="16">
         <el-col :span="6">
           <el-form-item :label="t('bill.pureClassify')">
-            <el-tree-select
-              v-model="filterForm.mainClassify"
-              :data="classifyTreeDataWithIcon"
-              :props="{ label: 'name', value: 'id', children: 'children' }"
-              :placeholder="t('bill.pureSelectPlaceholder')"
-              check-strictly
-              clearable
-              filterable
-              :render-after-expand="false"
-              style="width: 100%"
-            />
+            <div class="filter-classify-wrapper">
+              <el-popover placement="bottom-start" :width="320" trigger="click">
+                <template #reference>
+                  <div class="classify-trigger">
+                    <span
+                      v-if="
+                        !filterForm.classifyList ||
+                        filterForm.classifyList.length === 0
+                      "
+                      class="placeholder"
+                    >
+                      {{ t("bill.pureSelectPlaceholder") }}
+                    </span>
+                    <span v-else>{{
+                      t("bill.pureSelectedClassify", {
+                        count: filterForm.classifyList.length
+                      })
+                    }}</span>
+                  </div>
+                </template>
+                <div class="classify-popover">
+                  <el-tree
+                    ref="classifyTreeRef"
+                    :data="classifyTreeData"
+                    :props="treeProps"
+                    show-checkbox
+                    node-key="id"
+                    :default-expand-all="false"
+                    @check="handleClassifyTreeChange"
+                  >
+                    <template #default="{ node, data }">
+                      <span class="custom-tree-node">
+                        <span v-if="data.isAll"
+                          >{{ getClassifyIcon("other") }} {{ node.label }}</span
+                        >
+                        <span v-else
+                          >{{ getClassifyIcon(data.image) }}
+                          {{ node.label }}</span
+                        >
+                      </span>
+                    </template>
+                  </el-tree>
+                </div>
+              </el-popover>
+            </div>
           </el-form-item>
         </el-col>
+      </el-row>
+      <el-row :gutter="16">
         <el-col :span="6">
           <el-form-item :label="t('bill.pureRemark')">
             <el-popover placement="bottom-start" :width="400" trigger="click">
@@ -425,13 +569,13 @@ const queryRemarks = (
                 />
               </template>
               <div class="filter-remark-content">
-              <el-input
-                v-model="filterRemarkText"
-                :placeholder="t('bill.pureSearchRemark')"
-                clearable
-                class="filter-remark-search"
-              />
-            <div class="filter-remark-grid">
+                <el-input
+                  v-model="filterRemarkText"
+                  :placeholder="t('bill.pureSearchRemark')"
+                  clearable
+                  class="filter-remark-search"
+                />
+                <div class="filter-remark-grid">
                   <div
                     v-for="remark in filteredRemarkList"
                     :key="remark.id"
@@ -628,5 +772,47 @@ const queryRemarks = (
   .filter-tag-item.active {
     background-color: #ecf5ff;
   }
+}
+
+.filter-remark-trigger {
+  flex: 1;
+}
+
+.filter-classify-wrapper {
+  display: flex;
+  flex: 1;
+}
+
+.classify-trigger {
+  box-sizing: border-box;
+  display: flex;
+  align-items: center;
+  width: 100%;
+  min-width: 200px;
+  height: 32px;
+  padding: 0 8px;
+  cursor: pointer;
+  border: 1px solid #dcdfe6;
+  border-radius: 4px;
+
+  .placeholder {
+    color: #999;
+  }
+
+  &:hover {
+    border-color: #409eff;
+  }
+}
+
+.classify-popover {
+  width: 100%;
+  max-height: 300px;
+  overflow-y: auto;
+}
+
+.custom-tree-node {
+  display: flex;
+  gap: 4px;
+  align-items: center;
 }
 </style>

@@ -32,16 +32,22 @@ public class IncomeExpenseController {
 
     @Log("分页查询收入支出")
     @ApiOperation("分页查询收入支出")
-    @GetMapping("/page")
-    public Response<Page<IncomeExpenseDto>> getPage(@Validated IncomeExpenseQueryDto queryDto, Page page) {
+    @PostMapping("/page")
+    public Response<Page<IncomeExpenseDto>> getPage(@RequestBody IncomeExpenseQueryDto queryDto, Page page) {
+        if (queryDto.getPageNo() != null) {
+            page.setPageNo(queryDto.getPageNo());
+        }
+        if (queryDto.getPageSize() != null) {
+            page.setPageSize(queryDto.getPageSize());
+        }
         Page<IncomeExpenseDto> result = incomeExpenseService.queryPage(page, queryDto);
         return Response.ok(result);
     }
 
     @Log("查询收入支出")
     @ApiOperation("查询收入支出")
-    @GetMapping
-    public Response get(@Validated IncomeExpenseQueryDto queryDto){
+    @PostMapping("/list")
+    public Response get(@RequestBody IncomeExpenseQueryDto queryDto){
         List<IncomeExpenseDto> list = incomeExpenseService.queryList(queryDto);
         return Response.ok(list);
     }
