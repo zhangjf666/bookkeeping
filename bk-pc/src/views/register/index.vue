@@ -33,7 +33,9 @@ const { initStorage } = useLayout();
 initStorage();
 
 const { t } = useI18n();
-const registerRules = computed(() => createRegisterRules(t, ruleFormRefRegister, ruleForm));
+const registerRules = computed(() =>
+  createRegisterRules(t, ruleFormRefRegister, ruleForm)
+);
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
 

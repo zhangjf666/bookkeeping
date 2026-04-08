@@ -30,12 +30,12 @@ const handleChange = (value: number) => {
       style="width: 200px"
       @change="handleChange"
     >
-        <el-option
-          v-for="book in billStore.accountBooks"
-          :key="book.id"
-          :label="`${getAccountBookIcon(book.image)} ${book.name}`"
-          :value="book.id"
-        >
+      <el-option
+        v-for="book in billStore.accountBooks"
+        :key="book.id"
+        :label="`${getAccountBookIcon(book.image)} ${book.name}`"
+        :value="book.id"
+      >
         <div class="book-option">
           <span>{{ getAccountBookIcon(book.image) }} {{ book.name }}</span>
           <el-tag v-if="book.isDefault === 'YES'" size="small" type="success">

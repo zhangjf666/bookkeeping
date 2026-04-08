@@ -81,7 +81,7 @@ const loadAll = async () => {
     ]);
     const accountBookId = billStore.currentAccountBook?.id;
     if (!accountBookId) return;
-    
+
     const summary = await getSummary({ userId, accountBookId, days: 3 });
     summaryData.value = summary;
 

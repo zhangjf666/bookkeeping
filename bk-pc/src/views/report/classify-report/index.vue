@@ -207,9 +207,12 @@ const initChart = () => {
       trigger: "item",
       formatter: (params: any) => {
         const data = params.data;
-        const recordCountLabel = t('bill.pureRecordCount');
-        const recordCountText = recordCountLabel.includes('笔') || recordCountLabel === 'Records' ? recordCountLabel : `${recordCountLabel}`;
-        return `${data.classifyImage ? "" : ""}${data.name}<br/>${t('bill.purePercent')}: ${data.percent}%<br/>${recordCountText}: ${data.num}${recordCountLabel.includes('笔') ? '' : '笔'}<br/>${t('bill.pureAmount')}: ¥${data.value.toFixed(2)}`;
+        const recordCountLabel = t("bill.pureRecordCount");
+        const recordCountText =
+          recordCountLabel.includes("笔") || recordCountLabel === "Records"
+            ? recordCountLabel
+            : `${recordCountLabel}`;
+        return `${data.classifyImage ? "" : ""}${data.name}<br/>${t("bill.purePercent")}: ${data.percent}%<br/>${recordCountText}: ${data.num}${recordCountLabel.includes("笔") ? "" : "笔"}<br/>${t("bill.pureAmount")}: ¥${data.value.toFixed(2)}`;
       }
     },
     legend: {
@@ -425,10 +428,14 @@ onMounted(async () => {
               selectedClassifyData.classifyName
             }}</span>
             <span class="classify-percent"
-              >{{ t('bill.purePercent') }}：{{ selectedClassifyData.percent }}%</span
+              >{{ t("bill.purePercent") }}：{{
+                selectedClassifyData.percent
+              }}%</span
             >
             <span class="classify-num"
-              >{{ t('bill.pureRecordCount') }}：{{ selectedClassifyData.num }}笔</span
+              >{{ t("bill.pureRecordCount") }}：{{
+                selectedClassifyData.num
+              }}笔</span
             >
             <span
               :class="
@@ -438,7 +445,11 @@ onMounted(async () => {
               "
               class="classify-amount"
             >
-              {{ isIncomeClassify() ? t('bill.pureIncome') : t('bill.pureExpense') }}：¥{{
+              {{
+                isIncomeClassify()
+                  ? t("bill.pureIncome")
+                  : t("bill.pureExpense")
+              }}：¥{{
                 (
                   selectedClassifyData.expense ||
                   selectedClassifyData.income ||
@@ -448,8 +459,12 @@ onMounted(async () => {
             </span>
           </span>
           <el-radio-group v-model="detailSortType" size="small">
-            <el-radio-button value="time">{{ t('bill.pureByTime') }}</el-radio-button>
-            <el-radio-button value="amount">{{ t('bill.pureByAmount') }}</el-radio-button>
+            <el-radio-button value="time">{{
+              t("bill.pureByTime")
+            }}</el-radio-button>
+            <el-radio-button value="amount">{{
+              t("bill.pureByAmount")
+            }}</el-radio-button>
           </el-radio-group>
         </div>
       </template>

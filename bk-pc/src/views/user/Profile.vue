@@ -166,11 +166,12 @@ const handleSave = async () => {
     }
     const result = await updateUserInfo(updateData);
     userInfo.value = result;
-    const avatarUrl = result.avatar && result.avatar.startsWith("http")
-      ? result.avatar
-      : result.avatar
-        ? `${BASE_URL}${result.avatar}`
-        : "";
+    const avatarUrl =
+      result.avatar && result.avatar.startsWith("http")
+        ? result.avatar
+        : result.avatar
+          ? `${BASE_URL}${result.avatar}`
+          : "";
     userStore.SET_NICKNAME(result.nickName);
     userStore.SET_AVATAR(avatarUrl);
     pendingAvatar.value = "";

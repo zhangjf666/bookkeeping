@@ -226,10 +226,18 @@ onUnmounted(() => {
             size="small"
             @change="handleModeChange"
           >
-            <el-radio-button value="month">{{ t('dashboard.pureMonth') }}</el-radio-button>
-            <el-radio-button value="quarter">{{ t('dashboard.pureQuarter') }}</el-radio-button>
-            <el-radio-button value="halfYear">{{ t('dashboard.pureHalfYear') }}</el-radio-button>
-            <el-radio-button value="year">{{ t('dashboard.pureYear') }}</el-radio-button>
+            <el-radio-button value="month">{{
+              t("dashboard.pureMonth")
+            }}</el-radio-button>
+            <el-radio-button value="quarter">{{
+              t("dashboard.pureQuarter")
+            }}</el-radio-button>
+            <el-radio-button value="halfYear">{{
+              t("dashboard.pureHalfYear")
+            }}</el-radio-button>
+            <el-radio-button value="year">{{
+              t("dashboard.pureYear")
+            }}</el-radio-button>
           </el-radio-group>
         </div>
       </div>

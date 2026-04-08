@@ -502,8 +502,12 @@ onMounted(async () => {
         <div class="detail-header">
           <span>{{ t("bill.pureTitle") }}</span>
           <el-radio-group v-model="detailSortType" size="small">
-            <el-radio-button value="time">{{ t('bill.pureByTime') }}</el-radio-button>
-            <el-radio-button value="amount">{{ t('bill.pureByAmount') }}</el-radio-button>
+            <el-radio-button value="time">{{
+              t("bill.pureByTime")
+            }}</el-radio-button>
+            <el-radio-button value="amount">{{
+              t("bill.pureByAmount")
+            }}</el-radio-button>
           </el-radio-group>
         </div>
       </template>
@@ -521,12 +525,12 @@ onMounted(async () => {
               <span class="month-label">{{ group.month }}</span>
               <span class="month-summary">
                 <span class="income-text"
-                  >{{ t('bill.pureIncome') }}: ¥{{
+                  >{{ t("bill.pureIncome") }}: ¥{{
                     getMonthSummary(group.month).income.toFixed(2)
                   }}</span
                 >
                 <span class="expense-text"
-                  >{{ t('bill.pureExpense') }}: ¥{{
+                  >{{ t("bill.pureExpense") }}: ¥{{
                     getMonthSummary(group.month).expense.toFixed(2)
                   }}</span
                 >

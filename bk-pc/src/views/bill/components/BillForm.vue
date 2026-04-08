@@ -106,7 +106,9 @@ const formData = ref<IncomeExpenseForm>({
 });
 
 const initCreditCardFromConfig = () => {
-  const config = billStore.userConfigList.find(c => c.name === "is_credit_card");
+  const config = billStore.userConfigList.find(
+    c => c.name === "is_credit_card"
+  );
   formData.value.isCreditCard = config?.value === "1" ? "YES" : "NO";
 };
 
@@ -386,11 +388,7 @@ const handleSubmit = async () => {
         >
           <div class="book-option">
             <span>{{ getAccountBookIcon(book.image) }} {{ book.name }}</span>
-            <el-tag
-              v-if="book.isDefault === 'YES'"
-              size="small"
-              type="success"
-            >
+            <el-tag v-if="book.isDefault === 'YES'" size="small" type="success">
               {{ t("dashboard.pureDefault") }}
             </el-tag>
           </div>
@@ -603,11 +601,11 @@ const handleSubmit = async () => {
   :deep(.el-input__wrapper) {
     width: 100%;
     box-shadow: 0 0 0 1px #dcdfe6 inset;
-    
+
     &:hover {
       box-shadow: 0 0 0 1px #409eff inset;
     }
-    
+
     &.is-focus {
       box-shadow: 0 0 0 1px #409eff inset;
     }
