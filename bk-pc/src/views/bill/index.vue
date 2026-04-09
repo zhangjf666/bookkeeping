@@ -24,7 +24,6 @@ const formData = ref<IncomeExpense | null>(null);
 const selectedIds = ref<number[]>([]);
 
 const userId = computed(() => userStore.id);
-const accountBookId = computed(() => billStore.currentAccountBook?.id);
 
 const handleAdd = () => {
   formData.value = null;
@@ -68,13 +67,13 @@ const handleBatchDelete = async () => {
   selectedIds.value = [];
 };
 
-const handleQuery = (accountBookId?: number) => {
-  billStore.loadList(userId.value, accountBookId);
+const handleQuery = () => {
+  billStore.loadList(userId.value);
 };
 
-const handleReset = (accountBookId?: number) => {
+const handleReset = () => {
   billStore.resetQueryParams();
-  billStore.loadList(userId.value, accountBookId);
+  billStore.loadList(userId.value);
 };
 
 const handleSelectionChange = (selection: IncomeExpense[]) => {
@@ -83,14 +82,14 @@ const handleSelectionChange = (selection: IncomeExpense[]) => {
 
 const handleFormSuccess = () => {
   showForm.value = false;
-  billStore.loadList(userId.value, accountBookId.value);
+  billStore.loadList(userId.value);
 };
 
 const currentPage = computed({
   get: () => billStore.queryParams.pageNo || 1,
   set: (val: number) => {
     billStore.setQueryParams({ pageNo: val });
-    billStore.loadList(userId.value, accountBookId.value);
+    billStore.loadList(userId.value);
   }
 });
 
@@ -98,7 +97,7 @@ const pageSize = computed({
   get: () => billStore.queryParams.pageSize || 10,
   set: (val: number) => {
     billStore.setQueryParams({ pageSize: val, pageNo: 1 });
-    billStore.loadList(userId.value, accountBookId.value);
+    billStore.loadList(userId.value);
   }
 });
 
@@ -110,7 +109,7 @@ onMounted(async () => {
     await billStore.loadClassifyAndTag(userId.value);
   }
   if (userId.value) {
-    billStore.loadList(userId.value, accountBookId.value);
+    billStore.loadList(userId.value);
   }
 });
 </script>

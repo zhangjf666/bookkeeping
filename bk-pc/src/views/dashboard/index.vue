@@ -28,7 +28,6 @@ const userStore = useUserStoreHook();
 const billStore = useBillStoreHook();
 
 const loading = ref(false);
-const isManualSwitch = ref(false);
 const showExpenseLimitMode = ref<"1" | "2" | "3">("1");
 const showBillForm = ref(false);
 const showLimitDialog = ref(false);
@@ -119,11 +118,8 @@ onMounted(() => {
 
 watch(
   () => billStore.currentAccountBook,
-  (newVal, oldVal) => {
-    if (oldVal && isManualSwitch.value) {
-      loadData();
-    }
-    isManualSwitch.value = true;
+  () => {
+    loadData();
   }
 );
 

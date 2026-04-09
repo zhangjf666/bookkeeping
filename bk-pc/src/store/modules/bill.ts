@@ -63,22 +63,21 @@ export const useBillStore = defineStore("pure-bill", {
     setCurrentAccountBook(accountBook: AccountBook) {
       this.currentAccountBook = accountBook;
     },
-    async loadList(userId: number, accountBookId?: number) {
+    async loadList(userId: number) {
       this.listLoading = true;
       try {
-        const filteredParams: Record<string, any> = {};
+        const params: Record<string, any> = {};
         Object.entries(this.queryParams).forEach(([key, value]) => {
           if (value !== undefined && value !== null && value !== "") {
             if (Array.isArray(value) && value.length === 0) {
               return;
             }
-            filteredParams[key] = value;
+            params[key] = value;
           }
         });
-        const params = {
-          ...filteredParams,
-          ...(accountBookId && { accountBookId })
-        };
+        if (params.accountBookId === undefined && this.currentAccountBook) {
+          params.accountBookId = this.currentAccountBook.id;
+        }
         const result = await getIncomeExpenseList(userId, params);
         if (Array.isArray(result)) {
           this.list = result;
@@ -102,7 +101,7 @@ export const useBillStore = defineStore("pure-bill", {
     },
     async remove(userId: number, ids: number[]) {
       await deleteIncomeExpense(ids);
-      await this.loadList(userId, this.currentAccountBook?.id);
+      await this.loadList(userId);
     },
     setQueryParams(params: Partial<IncomeExpenseQuery>) {
       const newParams: any = {
@@ -123,7 +122,7 @@ export const useBillStore = defineStore("pure-bill", {
       this.queryParams = {
         pageNo: 1,
         pageSize: 10,
-        accountBookId: undefined,
+        accountBookId: this.queryParams.accountBookId,
         date: undefined,
         amount: undefined,
         classifyList: [],

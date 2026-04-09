@@ -13,8 +13,8 @@ defineOptions({
 });
 
 const emit = defineEmits<{
-  query: [accountBookId: number | undefined];
-  reset: [accountBookId: number | undefined];
+  query: [];
+  reset: [];
 }>();
 
 const { t } = useI18n();
@@ -287,7 +287,7 @@ const handleQuery = () => {
   }
 
   billStore.setQueryParams(queryParams);
-  emit("query", filterForm.value.accountBookId);
+  emit("query");
 };
 
 const handleReset = () => {
@@ -304,7 +304,7 @@ const handleReset = () => {
   isIndeterminateExpense.value = false;
   isIndeterminateIncome.value = false;
   classifyTreeRef.value?.setCheckedKeys([]);
-  emit("reset", filterForm.value.accountBookId);
+  emit("reset");
 };
 
 const handleExport = async () => {
