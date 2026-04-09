@@ -13,12 +13,30 @@ export default {
   },
   children: [
     {
+      path: "/settings/common",
+      name: "CommonConfigSetting",
+      component: () => import("@/views/settings/common/index.vue"),
+      meta: {
+        icon: "ep:setting",
+        title: $t("menus.pureCommonSetting")
+      }
+    },
+    {
       path: "/settings/account-book",
       name: "AccountBookSetting",
       component: () => import("@/views/settings/account-book/index.vue"),
       meta: {
         icon: "ep:wallet",
         title: $t("menus.pureAccountBookSetting")
+      }
+    },
+    {
+      path: "/settings/classify",
+      name: "ClassifySetting",
+      component: () => import("@/views/settings/classify/index.vue"),
+      meta: {
+        icon: "ep:folder",
+        title: $t("menus.pureClassifySetting")
       }
     },
     {
@@ -37,24 +55,6 @@ export default {
       meta: {
         icon: "ep:document",
         title: $t("menus.pureRemarkSetting")
-      }
-    },
-    {
-      path: "/settings/classify",
-      name: "ClassifySetting",
-      component: () => import("@/views/settings/classify/index.vue"),
-      meta: {
-        icon: "ep:folder",
-        title: $t("menus.pureClassifySetting")
-      }
-    },
-    {
-      path: "/settings/common",
-      name: "CommonConfigSetting",
-      component: () => import("@/views/settings/common/index.vue"),
-      meta: {
-        icon: "ep:setting",
-        title: $t("menus.pureCommonSetting")
       }
     }
   ]

@@ -414,7 +414,7 @@ const handleReset = () => {
           <el-select
             v-model="localAccountBookId"
             :placeholder="t('bill.pureSelectPlaceholder')"
-            clearable
+            :clearable="false"
             style="width: 200px"
           >
             <el-option

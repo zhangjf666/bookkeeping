@@ -14,7 +14,7 @@ defineOptions({
 
 const emit = defineEmits<{
   query: [accountBookId: number | undefined];
-  reset: [];
+  reset: [accountBookId: number | undefined];
 }>();
 
 const { t } = useI18n();
@@ -292,7 +292,7 @@ const handleQuery = () => {
 
 const handleReset = () => {
   filterForm.value = {
-    accountBookId: undefined,
+    accountBookId: filterForm.value.accountBookId,
     date: [],
     amount: [],
     classifyList: [],
@@ -304,7 +304,7 @@ const handleReset = () => {
   isIndeterminateExpense.value = false;
   isIndeterminateIncome.value = false;
   classifyTreeRef.value?.setCheckedKeys([]);
-  emit("reset");
+  emit("reset", filterForm.value.accountBookId);
 };
 
 const handleExport = async () => {
@@ -449,7 +449,7 @@ const treeProps = {
             <el-select
               v-model="filterForm.accountBookId"
               :placeholder="t('bill.pureSelectPlaceholder')"
-              clearable
+              :clearable="false"
               style="width: 100%"
             >
               <el-option

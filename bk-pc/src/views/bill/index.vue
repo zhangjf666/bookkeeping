@@ -72,9 +72,9 @@ const handleQuery = (accountBookId?: number) => {
   billStore.loadList(userId.value, accountBookId);
 };
 
-const handleReset = () => {
+const handleReset = (accountBookId?: number) => {
   billStore.resetQueryParams();
-  billStore.loadList(userId.value, undefined);
+  billStore.loadList(userId.value, accountBookId);
 };
 
 const handleSelectionChange = (selection: IncomeExpense[]) => {
