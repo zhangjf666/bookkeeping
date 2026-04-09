@@ -7,7 +7,7 @@ import com.hc.bookkeeping.common.annotation.Anonymous;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.exception.BusinessException;
 import com.hc.bookkeeping.common.model.LogType;
-import com.hc.bookkeeping.common.model.Response;
+import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.utils.RedisUtil;
 import com.hc.bookkeeping.common.utils.SpringSecurityUtil;
@@ -72,7 +72,7 @@ public class AuthenticationController {
     @ApiOperation("登录授权")
     @Anonymous
     @PostMapping("/login")
-    public Response login(@Validated @RequestBody LoginUserDto loginUserDto, HttpServletRequest request) {
+    public Map<String, Object> login(@Validated @RequestBody LoginUserDto loginUserDto, HttpServletRequest request) {
         //检查验证码
         checkCaptcha(loginUserDto);
         //用户校验
@@ -94,7 +94,7 @@ public class AuthenticationController {
             put("token", properties.getTokenStartWith() + token);
             put("user", BeanUtil.copyProperties(jwtUserDetails.getUser(), UserDto.class));
         }};
-        return Response.ok(authInfo);
+        return authInfo;
     }
 
     private void checkCaptcha(@RequestBody @Validated LoginUserDto loginUserDto) {
@@ -117,7 +117,7 @@ public class AuthenticationController {
     @Anonymous
     @ApiOperation("获取验证码")
     @GetMapping("/captcha")
-    public Response getCaptcha() {
+    public Map<String, Object> getCaptcha() {
         //生成验证码
         SpecCaptcha specCaptcha = new SpecCaptcha(130, 48, 4);
         String captcha = specCaptcha.text().toLowerCase();
@@ -127,67 +127,66 @@ public class AuthenticationController {
         Map<String, Object> res = new HashMap<>(2);
         res.put("img", specCaptcha.toBase64());
         res.put("uuid", uuid);
-        return Response.ok(res);
+        return res;
     }
 
     @ApiOperation("注册用户")
     @Anonymous
     @PostMapping("/register")
-    public Response create(@Validated(Insert.class) @RequestBody RegisterUserDto dto){
+    public boolean create(@Validated(Insert.class) @RequestBody RegisterUserDto dto){
         if(userService.checkExist(dto.getUsername())) {
             throw new BusinessException("用户名已存在");
         }
         if(!dto.getPassword().equals(dto.getRepeatPassword())){
             throw new BusinessException("2次密码不相同");
         }
-        bookkeepingUserService.registerUser(dto);
-        return Response.ok();
+        return bookkeepingUserService.registerUser(dto);
     }
 
     @Log("获取用户缓存信息")
     @ApiOperation("获取用户缓存信息")
     @PostMapping("/user-info")
-    public Response getCacheUser() {
+    public Dict getCacheUser() {
         CacheUser cacheUser = ((JwtUserDetails) SpringSecurityUtil.getCurrentUser()).getUser();
         List<String> userPermissions = cacheUser.getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        return Response.ok(Dict.create().set("user",BeanUtil.copyProperties(cacheUser, UserDto.class))
-                .set("permission",userPermissions));
+        return Dict.create().set("user",BeanUtil.copyProperties(cacheUser, UserDto.class))
+                .set("permission",userPermissions);
     }
 
     @Log("获取用户缓存信息")
     @ApiOperation("获取用户缓存信息")
     @PostMapping("/user-permission")
-    public Response getUserPermission() {
+    public List<String> getUserPermission() {
         List<String> userPermissions = SpringSecurityUtil.getCurrentUser().getAuthorities().stream()
                 .map(GrantedAuthority::getAuthority).collect(Collectors.toList());
-        return Response.ok(userPermissions);
+        return userPermissions;
     }
 
     @Log(value = "退出登录",type = LogType.USER)
     @ApiOperation("退出登录")
     @PostMapping("/logout")
-    public Response logout(HttpServletRequest request) {
+    public boolean logout(HttpServletRequest request) {
         onlineUserService.logout(jwtService.getToken(request));
-        return Response.ok();
+        return true;
     }
 
     @Log("查询在线用户")
     @ApiOperation("查询在线用户")
     @GetMapping("/online")
     @PreAuthorize("@ph.check()")
-    public Response getOnlineUser(String username, Pageable pageable){
-        return Response.ok(onlineUserService.getAll(username, pageable));
+    public Page getOnlineUser(String username, Pageable pageable){
+        return onlineUserService.getAll(username, pageable);
     }
 
     @Log("踢出用户")
     @ApiOperation("踢出用户")
     @PostMapping("/online-kickout")
     @PreAuthorize("@ph.check()")
-    public Response kickout(@RequestBody Set<String> userKeys){
+    public boolean kickout(@RequestBody Set<String> userKeys){
         for (String key : userKeys) {
             onlineUserService.kickOut(key);
         }
-        return Response.ok();
+        return true;
     }
 }

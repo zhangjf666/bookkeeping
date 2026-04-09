@@ -1,7 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.modules.bkeeping.dto.AvatarUploadResult;
 import com.hc.bookkeeping.modules.bkeeping.dto.BookkeepingUserDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.ChangePasswordDto;
@@ -31,31 +30,28 @@ public class BookkeepingUserController {
     @Log("获取当前用户信息")
     @ApiOperation("获取当前用户信息")
     @GetMapping
-    public Response<BookkeepingUserDto> getCurrentUser() {
-        BookkeepingUserDto user = userService.getCurrentUser();
-        return Response.ok(user);
+    public BookkeepingUserDto getCurrentUser() {
+        return userService.getCurrentUser();
     }
 
     @Log("更新当前用户信息")
     @ApiOperation("更新当前用户信息")
     @PutMapping
-    public Response<BookkeepingUserDto> updateCurrentUser(@RequestBody @Validated BookkeepingUserDto userDto) throws IOException {
-        return Response.ok(userService.updateCurrentUser(userDto));
+    public BookkeepingUserDto updateCurrentUser(@RequestBody @Validated BookkeepingUserDto userDto) throws IOException {
+        return userService.updateCurrentUser(userDto);
     }
 
     @Log("修改密码")
     @ApiOperation("修改密码")
     @PostMapping("/changePwd")
-    public Response<Void> changePassword(@RequestBody @Validated ChangePasswordDto changePasswordDto) {
-        userService.changePassword(changePasswordDto);
-        return Response.ok();
+    public boolean changePassword(@RequestBody @Validated ChangePasswordDto changePasswordDto) {
+        return userService.changePassword(changePasswordDto);
     }
 
     @Log("上传头像")
     @ApiOperation("上传头像")
     @PostMapping("/avatar")
-    public Response<AvatarUploadResult> uploadAvatar(@RequestParam("file") MultipartFile file) throws IOException {
-        AvatarUploadResult result = userService.uploadAvatar(file);
-        return Response.ok(result);
+    public AvatarUploadResult uploadAvatar(@RequestParam("file") MultipartFile file) throws IOException {
+        return userService.uploadAvatar(file);
     }
 }

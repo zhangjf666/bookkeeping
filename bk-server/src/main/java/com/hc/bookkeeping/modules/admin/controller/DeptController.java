@@ -5,7 +5,6 @@ import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.constants.Constants;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.common.utils.TreeUtil;
@@ -47,7 +46,7 @@ public class DeptController {
     @ApiOperation("查询部门")
     @GetMapping
     @PreAuthorize("@ph.check('system:dept:list')")
-    public Response getDept(@Validated DeptQueryDto queryDto, Page pageable){
+    public Page getDept(@Validated DeptQueryDto queryDto, Page pageable){
         pageable.setPageSize(9999);
         Page page = deptService.queryPage(queryDto, pageable);
         List<DeptDto> dtos = page.getRecord();
@@ -57,14 +56,14 @@ public class DeptController {
             vo.setHasChildren(deptService.count(new QueryWrapper<Dept>().lambda().eq(Dept::getPid,vo.getId())) > 0);
         }
         page.setRecord(volist);
-        return Response.ok(page);
+        return page;
     }
 
     @Log("查询部门")
     @ApiOperation("查询部门:根据ID获取同级与上级数据")
     @PostMapping("/superior")
     @PreAuthorize("@ph.check('system:dept:list')")
-    public Response getSuperior(@RequestBody List<Long> ids) {
+    public List<DeptVo> getSuperior(@RequestBody List<Long> ids) {
         Set<DeptDto> deptDtos  = new LinkedHashSet<>();
         for (Long id : ids) {
             DeptDto deptDto = deptService.queryById(id);
@@ -75,44 +74,41 @@ public class DeptController {
                 deptDtos.stream().map(dto -> BeanUtil.toBean(dto,DeptVo.class)).collect(Collectors.toList());
         volist = TreeUtil.build(volist, Constants.TREE_ROOT);
         deptService.superiorCheckChildren(volist);
-        return Response.ok(volist);
+        return volist;
     }
 
     @Log("获取所有部门树")
     @ApiOperation("获取所有部门树")
     @GetMapping("/tree")
     @PreAuthorize("@ph.check('system:menu:list')")
-    public Response getDeptTree() {
+    public List<DeptVo> getDeptTree() {
         List<DeptDto> dtos = deptService.query(new DeptQueryDto());
         List<DeptVo> volist =
                 dtos.stream().map(dto -> BeanUtil.toBean(dto, DeptVo.class)).collect(Collectors.toList());
-        return Response.ok(TreeUtil.build(volist, Constants.TREE_ROOT));
+        return TreeUtil.build(volist, Constants.TREE_ROOT);
     }
 
     @Log("创建部门")
     @ApiOperation("创建部门")
     @PostMapping
     @PreAuthorize("@ph.check('system:dept:add')")
-    public Response create(@Validated(Insert.class) @RequestBody DeptDto dto){
-        deptService.create(dto);
-        return Response.ok();
+    public DeptDto create(@Validated(Insert.class) @RequestBody DeptDto dto){
+        return deptService.create(dto);
     }
 
     @Log("编辑部门")
     @ApiOperation("编辑部门")
     @PutMapping
     @PreAuthorize("@ph.check('system:dept:edit')")
-    public Response update(@Validated(Update.class) @RequestBody DeptDto dto){
-        deptService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody DeptDto dto){
+        return deptService.update(dto);
     }
 
     @Log("删除部门")
     @ApiOperation("删除部门")
     @DeleteMapping
     @PreAuthorize("@ph.check('system:dept:del')")
-    public Response delete(@RequestBody Set<Long> ids){
-        deptService.removeByIds(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids){
+        return deptService.removeByIds(ids);
     }
 }

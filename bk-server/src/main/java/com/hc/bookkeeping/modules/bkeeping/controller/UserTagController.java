@@ -2,12 +2,9 @@ package com.hc.bookkeeping.modules.bkeeping.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.common.utils.QueryUtil;
-import com.hc.bookkeeping.modules.bkeeping.dto.IncomeExpenseDto;
-import com.hc.bookkeeping.modules.bkeeping.dto.IncomeExpenseQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.UserTagDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.UserTagQueryDto;
 import com.hc.bookkeeping.modules.bkeeping.service.UserTagService;
@@ -33,39 +30,35 @@ public class UserTagController {
     @Log("分页查询用户标签")
     @ApiOperation("分页查询用户标签")
     @GetMapping("/page")
-    public Response<Page<UserTagDto>> getPage(@Validated UserTagQueryDto queryDto, Page page) {
-        Page<UserTagDto> result = userTagService.queryPage(page, QueryUtil.bulid(queryDto));
-        return Response.ok(result);
+    public Page<UserTagDto> getPage(@Validated UserTagQueryDto queryDto, Page page) {
+        return userTagService.queryPage(page, QueryUtil.bulid(queryDto));
     }
 
     @Log("查询用户标签")
     @ApiOperation("查询用户标签")
     @GetMapping
-    public Response get(@Validated UserTagQueryDto queryDto){
-        List<UserTagDto> list = userTagService.queryList(QueryUtil.bulid(queryDto));
-        return Response.ok(list);
+    public List<UserTagDto> get(@Validated UserTagQueryDto queryDto){
+        return userTagService.queryList(QueryUtil.bulid(queryDto));
     }
 
     @Log("创建用户标签")
     @ApiOperation("创建用户标签")
     @PostMapping
-    public Response<UserTagDto> create(@Validated(Insert.class) @RequestBody UserTagDto dto){
-        return Response.ok(userTagService.create(dto));
+    public UserTagDto create(@Validated(Insert.class) @RequestBody UserTagDto dto){
+        return userTagService.create(dto);
     }
 
     @Log("编辑用户标签")
     @ApiOperation("编辑用户标签")
     @PutMapping
-    public Response update(@Validated(Update.class) @RequestBody UserTagDto dto){
-        userTagService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody UserTagDto dto){
+        return userTagService.update(dto);
     }
 
     @Log("删除用户标签")
     @ApiOperation("删除用户标签")
     @DeleteMapping
-    public Response delete(@RequestBody Set<Long> ids){
-        userTagService.delete(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids){
+        return userTagService.deleteByIds(ids);
     }
 }

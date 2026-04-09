@@ -43,7 +43,7 @@ public interface BookkeepingUserService extends BaseService<BookkeepingUserDto, 
      * 修改密码
      * @param changePasswordDto 修改密码参数
      */
-    void changePassword(ChangePasswordDto changePasswordDto);
+    boolean changePassword(ChangePasswordDto changePasswordDto);
 
     /**
      * 上传头像

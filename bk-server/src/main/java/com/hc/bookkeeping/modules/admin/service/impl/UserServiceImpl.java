@@ -1,16 +1,13 @@
 package com.hc.bookkeeping.modules.admin.service.impl;
 
-import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hc.bookkeeping.common.base.BaseServiceImpl;
 import com.hc.bookkeeping.common.exception.DataNotExsitException;
-import com.hc.bookkeeping.common.model.BoolEnum;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
 import com.hc.bookkeeping.modules.admin.dto.RoleDto;
 import com.hc.bookkeeping.modules.admin.dto.UserDto;
 import com.hc.bookkeeping.modules.admin.dto.UserQueryDto;
-import com.hc.bookkeeping.modules.admin.entity.Role;
 import com.hc.bookkeeping.modules.admin.entity.User;
 import com.hc.bookkeeping.modules.admin.entity.UserRole;
 import com.hc.bookkeeping.modules.admin.mapper.UserMapper;
@@ -18,20 +15,16 @@ import com.hc.bookkeeping.modules.admin.mapper.UserRoleMapper;
 import com.hc.bookkeeping.modules.admin.mapstruct.UserMapstruct;
 import com.hc.bookkeeping.modules.admin.service.RoleService;
 import com.hc.bookkeeping.modules.admin.service.UserService;
-import com.hc.bookkeeping.modules.bkeeping.entity.AccountBook;
-import com.hc.bookkeeping.modules.bkeeping.entity.Classify;
-import com.hc.bookkeeping.modules.bkeeping.entity.UserConfig;
 import com.hc.bookkeeping.modules.bkeeping.mapper.AccountBookMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapper.ClassifyMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapper.UserConfigMapper;
-import com.hc.bookkeeping.modules.bkeeping.model.BillType;
-import com.hc.bookkeeping.modules.security.dto.RegisterUserDto;
 import lombok.RequiredArgsConstructor;
 import org.springframework.security.crypto.bcrypt.BCryptPasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -115,9 +108,11 @@ public class UserServiceImpl extends BaseServiceImpl<UserMapstruct, UserDto, Use
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteById(Long id) {
-        baseMapper.deleteById(id);
-        userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, id));
+    public boolean deleteByIds(Collection<? extends Serializable> ids) {
+        for (Serializable id:ids) {
+            baseMapper.deleteById(id);
+            userRoleMapper.delete(Wrappers.<UserRole>lambdaQuery().eq(UserRole::getUserId, id));
+        }
         return true;
     }
 

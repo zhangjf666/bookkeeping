@@ -1,5 +1,6 @@
 package com.hc.bookkeeping.modules.bkeeping.service.impl;
 
+import com.baomidou.mybatisplus.core.conditions.query.LambdaQueryWrapper;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
 import com.hc.bookkeeping.common.base.BaseServiceImpl;
 import com.hc.bookkeeping.common.model.Page;
@@ -12,6 +13,10 @@ import com.hc.bookkeeping.modules.bkeeping.mapstruct.ClassifyMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.service.ClassifyService;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.io.Serializable;
+import java.util.Collection;
 
 /**
  * <p>
@@ -38,5 +43,15 @@ public class ClassifyServiceImpl extends BaseServiceImpl<ClassifyMapstruct, Clas
             return baseMapstruct.toDto(classify);
         }
         return null;
+    }
+
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public boolean deleteByIds(Collection<? extends Serializable> ids) {
+        for (Serializable id:ids) {
+            baseMapper.deleteById(id);
+            baseMapper.delete(new LambdaQueryWrapper<Classify>().eq(Classify::getPid, id));
+        }
+        return true;
     }
 }

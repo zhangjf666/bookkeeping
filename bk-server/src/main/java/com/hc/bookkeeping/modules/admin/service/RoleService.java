@@ -9,6 +9,7 @@ import com.hc.bookkeeping.modules.admin.entity.Role;
 import org.springframework.security.core.GrantedAuthority;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -75,7 +76,7 @@ public interface RoleService extends BaseService<RoleDto, Role> {
      * @param id 角色id
      * @return
      */
-    boolean deleteById(Long id);
+    boolean deleteByIds(Collection<? extends Serializable> ids);
 
     /**
      * 获取用户对应的角色

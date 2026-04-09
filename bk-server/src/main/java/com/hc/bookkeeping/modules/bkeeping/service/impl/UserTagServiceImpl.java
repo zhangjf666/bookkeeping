@@ -6,7 +6,6 @@ import com.hc.bookkeeping.modules.bkeeping.entity.UserTag;
 import com.hc.bookkeeping.modules.bkeeping.mapper.UserTagMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapstruct.UserTagMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.service.UserTagService;
-import com.baomidou.mybatisplus.extension.service.impl.ServiceImpl;
 import org.springframework.stereotype.Service;
 
 /**

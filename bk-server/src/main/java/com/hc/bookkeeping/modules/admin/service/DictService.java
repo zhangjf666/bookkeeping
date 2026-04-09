@@ -6,6 +6,8 @@ import com.hc.bookkeeping.modules.admin.dto.DictDto;
 import com.hc.bookkeeping.modules.admin.dto.DictQueryDto;
 import com.hc.bookkeeping.modules.admin.entity.Dict;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 import java.util.Set;
 
@@ -39,5 +41,5 @@ public interface DictService extends BaseService<DictDto, Dict> {
      * @param ids 字典id
      * @return
      */
-    boolean deleteDicts(Set<Long> ids);
+    boolean deleteByIds(Collection<? extends Serializable> ids);
 }

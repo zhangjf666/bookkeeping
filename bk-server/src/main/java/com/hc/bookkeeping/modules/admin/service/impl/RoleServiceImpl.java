@@ -5,15 +5,15 @@ import com.hc.bookkeeping.common.base.BaseServiceImpl;
 import com.hc.bookkeeping.common.constants.Constants;
 import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.common.utils.QueryUtil;
-import com.hc.bookkeeping.modules.admin.dto.*;
+import com.hc.bookkeeping.modules.admin.dto.MenuDto;
+import com.hc.bookkeeping.modules.admin.dto.RoleDto;
+import com.hc.bookkeeping.modules.admin.dto.RoleQueryDto;
+import com.hc.bookkeeping.modules.admin.dto.UserDto;
 import com.hc.bookkeeping.modules.admin.entity.Role;
-import com.hc.bookkeeping.modules.admin.entity.RoleDept;
 import com.hc.bookkeeping.modules.admin.entity.RoleMenu;
-import com.hc.bookkeeping.modules.admin.mapper.RoleDeptMapper;
 import com.hc.bookkeeping.modules.admin.mapper.RoleMapper;
 import com.hc.bookkeeping.modules.admin.mapper.RoleMenuMapper;
 import com.hc.bookkeeping.modules.admin.mapstruct.RoleMapstruct;
-import com.hc.bookkeeping.modules.admin.service.DeptService;
 import com.hc.bookkeeping.modules.admin.service.MenuService;
 import com.hc.bookkeeping.modules.admin.service.RoleService;
 import com.hc.bookkeeping.modules.security.dto.PermissionGrantedAuthority;
@@ -24,13 +24,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.io.Serializable;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import java.util.*;
 import java.util.stream.Collectors;
-
-import static com.hc.bookkeeping.constants.SystemConstants.ROLE_DATASCOPE_CUSTOM;
 
 
 /**
@@ -119,9 +114,11 @@ public class RoleServiceImpl extends BaseServiceImpl<RoleMapstruct, RoleDto, Rol
 
     @Transactional(rollbackFor = Exception.class)
     @Override
-    public boolean deleteById(Long id) {
-        baseMapper.deleteById(id);
-        roleMenuMapper.delete(Wrappers.<RoleMenu>lambdaQuery().eq(RoleMenu::getRoleId, id));
+    public boolean deleteByIds(Collection<? extends Serializable> ids) {
+        for (Serializable id: ids) {
+            baseMapper.deleteById(id);
+            roleMenuMapper.delete(Wrappers.<RoleMenu>lambdaQuery().eq(RoleMenu::getRoleId, id));
+        }
         return true;
     }
 

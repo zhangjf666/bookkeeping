@@ -2,7 +2,7 @@ package com.hc.bookkeeping.modules.admin.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
+import com.hc.bookkeeping.modules.admin.dto.LogDto;
 import com.hc.bookkeeping.modules.admin.dto.LogQueryDto;
 import com.hc.bookkeeping.modules.admin.service.LogService;
 import io.swagger.annotations.Api;
@@ -33,24 +33,22 @@ public class LogController {
     @ApiOperation("查询日志")
     @GetMapping
     @PreAuthorize("@ph.check('monitor:log:list')")
-    public Response getLogs(@Validated LogQueryDto queryDto, Page pageable){
-        Page page = logService.queryPage(queryDto, pageable);
-        return Response.ok(page);
+    public Page getLogs(@Validated LogQueryDto queryDto, Page pageable){
+        return logService.queryPage(queryDto, pageable);
     }
 
     @ApiOperation("查询单个日志")
     @GetMapping("/{id}")
     @PreAuthorize("@ph.check('monitor:log:list')")
-    public Response getLog(@PathVariable Long id){
-        return Response.ok(logService.queryById(id));
+    public LogDto getLog(@PathVariable Long id){
+        return logService.queryById(id);
     }
 
     @Log("删除日志")
     @ApiOperation("删除日志")
     @DeleteMapping
     @PreAuthorize("@ph.check('monitor:log:del')")
-    public Response delete(@RequestBody Set<Long> ids){
-        logService.removeByIds(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids){
+        return logService.removeByIds(ids);
     }
 }

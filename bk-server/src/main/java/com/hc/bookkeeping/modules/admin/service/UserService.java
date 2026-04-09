@@ -5,9 +5,9 @@ import com.hc.bookkeeping.common.model.Page;
 import com.hc.bookkeeping.modules.admin.dto.UserDto;
 import com.hc.bookkeeping.modules.admin.dto.UserQueryDto;
 import com.hc.bookkeeping.modules.admin.entity.User;
-import com.hc.bookkeeping.modules.security.dto.RegisterUserDto;
 
 import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
 
 /**
@@ -65,10 +65,10 @@ public interface UserService extends BaseService<UserDto, User> {
 
     /**
      * 删除用户
-     * @param id 用户id
+     * @param ids 用户id
      * @return
      */
-    boolean deleteById(Long id);
+    boolean deleteByIds(Collection<? extends Serializable> ids);
 
     /**
      * 查询用户名是否已存在

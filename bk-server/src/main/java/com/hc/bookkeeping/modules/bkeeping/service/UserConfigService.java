@@ -32,5 +32,5 @@ public interface UserConfigService extends BaseService<UserConfigDto, UserConfig
      * @param type 1:设置月限额(当月),2:设置年限额(当年)
      * @param expenseLimit 限额数值
      */
-    void setAdditionalExpenseLimit(Long userId, ExpenseLimitShowType type, String expenseLimit);
+    boolean setAdditionalExpenseLimit(Long userId, ExpenseLimitShowType type, String expenseLimit);
 }

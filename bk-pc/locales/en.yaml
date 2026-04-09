@@ -208,6 +208,9 @@ bill:
   exportSuccess: Export successful
   exportFailed: Export failed
   pureExport: Export
+  pureWarning: Warning
+  pureDeleteConfirm: Are you sure you want to delete this record?
+  pureBatchDeleteConfirm: Are you sure you want to delete the selected {count} records?
 
 tag:
   pureAddTag: Add Tag

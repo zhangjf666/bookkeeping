@@ -37,7 +37,7 @@ public class UserConfigServiceImpl extends BaseServiceImpl<UserConfigMapstruct, 
     }
 
     @Override
-    public void setAdditionalExpenseLimit(Long userId, ExpenseLimitShowType type, String expenseLimit) {
+    public boolean setAdditionalExpenseLimit(Long userId, ExpenseLimitShowType type, String expenseLimit) {
         String configName = "";
         if(ExpenseLimitShowType.MONTHLY == type){
             configName = Constants.EXPENSE_LIMIT_PREFIX + DateUtil.format(new Date(), DatePattern.SIMPLE_MONTH_PATTERN);
@@ -59,5 +59,6 @@ public class UserConfigServiceImpl extends BaseServiceImpl<UserConfigMapstruct, 
             userConfig.setValue(expenseLimit);
             updateById(userConfig);
         }
+        return true;
     }
 }

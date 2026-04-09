@@ -2,7 +2,6 @@ package com.hc.bookkeeping.modules.admin.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.modules.admin.dto.PositionDto;
@@ -37,35 +36,31 @@ public class PositionController {
     @ApiOperation("查询职位")
     @GetMapping
     @PreAuthorize("@ph.check('system:position:list')")
-    public Response getPosition(@Validated PositionQueryDto queryDto, Page pageable){
-        Page page = positionService.queryPage(queryDto, pageable);
-        return Response.ok(page);
+    public Page getPosition(@Validated PositionQueryDto queryDto, Page pageable){
+        return positionService.queryPage(queryDto, pageable);
     }
 
     @Log("创建职位")
     @ApiOperation("创建职位")
     @PostMapping
     @PreAuthorize("@ph.check('system:position:add')")
-    public Response create(@Validated(Insert.class) @RequestBody PositionDto dto){
-        positionService.create(dto);
-        return Response.ok();
+    public PositionDto create(@Validated(Insert.class) @RequestBody PositionDto dto){
+        return positionService.create(dto);
     }
 
     @Log("编辑职位")
     @ApiOperation("编辑职位")
     @PutMapping
     @PreAuthorize("@ph.check('system:position:edit')")
-    public Response update(@Validated(Update.class) @RequestBody PositionDto dto){
-        positionService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody PositionDto dto){
+        return positionService.update(dto);
     }
 
     @Log("删除职位")
     @ApiOperation("删除职位")
     @DeleteMapping
     @PreAuthorize("@ph.check('system:position:del')")
-    public Response delete(@RequestBody Set<Long> ids){
-        positionService.removeByIds(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids){
+        return positionService.removeByIds(ids);
     }
 }

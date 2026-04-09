@@ -261,6 +261,9 @@ bill:
   exportSuccess: 导出成功
   exportFailed: 导出失败
   pureExport: 导出
+  pureWarning: 警告
+  pureDeleteConfirm: 确定要删除该记录吗？
+  pureBatchDeleteConfirm: 确定要删除选中的 {count} 个记录吗？
 
 tag:
   pureAddTag: 新增标签

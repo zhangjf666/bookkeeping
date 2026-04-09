@@ -2,6 +2,7 @@ package com.hc.bookkeeping.modules.bkeeping.service.impl;
 
 import cn.hutool.core.util.RandomUtil;
 import com.baomidou.mybatisplus.core.toolkit.Wrappers;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import com.hc.bookkeeping.common.base.BaseServiceImpl;
 import com.hc.bookkeeping.common.exception.BusinessException;
 import com.hc.bookkeeping.common.model.BoolEnum;
@@ -15,7 +16,6 @@ import com.hc.bookkeeping.modules.bkeeping.constants.Constants;
 import com.hc.bookkeeping.modules.bkeeping.dto.AvatarUploadResult;
 import com.hc.bookkeeping.modules.bkeeping.dto.BookkeepingUserDto;
 import com.hc.bookkeeping.modules.bkeeping.dto.ChangePasswordDto;
-import com.hc.bookkeeping.modules.bkeeping.model.UserDefaultConfig;
 import com.hc.bookkeeping.modules.bkeeping.entity.AccountBook;
 import com.hc.bookkeeping.modules.bkeeping.entity.BookkeepingUser;
 import com.hc.bookkeeping.modules.bkeeping.entity.Classify;
@@ -26,6 +26,7 @@ import com.hc.bookkeeping.modules.bkeeping.mapper.ClassifyMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapper.UserConfigMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapstruct.BookkeepingUserMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.model.BillType;
+import com.hc.bookkeeping.modules.bkeeping.model.UserDefaultConfig;
 import com.hc.bookkeeping.modules.bkeeping.service.BookkeepingUserService;
 import com.hc.bookkeeping.modules.security.dto.RegisterUserDto;
 import lombok.RequiredArgsConstructor;
@@ -34,8 +35,6 @@ import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.multipart.MultipartFile;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
 
 import java.io.File;
 import java.io.IOException;
@@ -147,7 +146,7 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public void changePassword(ChangePasswordDto changePasswordDto) {
+    public boolean changePassword(ChangePasswordDto changePasswordDto) {
         Long userId = SpringSecurityUtil.getCurrentUserId();
         BookkeepingUser user = baseMapper.selectById(userId);
         
@@ -168,6 +167,7 @@ public class BookkeepingUserServiceImpl extends BaseServiceImpl<BookkeepingUserM
         // 更新密码
         user.setPassword(passwordEncoder.encode(changePasswordDto.getNewPassword()));
         baseMapper.updateById(user);
+        return true;
     }
 
     @Override

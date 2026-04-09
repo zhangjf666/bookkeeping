@@ -7,7 +7,6 @@ import com.hc.bookkeeping.common.model.Page;
 import java.io.Serializable;
 import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * @Author: zjf
@@ -46,5 +45,5 @@ public interface BaseService<D,E> extends IService<E> {
      * @param ids id列表
      * @return
      */
-    boolean delete(Collection<? extends Serializable> ids);
+    boolean deleteByIds(Collection<? extends Serializable> ids);
 }
