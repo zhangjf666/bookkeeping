@@ -10,8 +10,8 @@ import type {
   PureHttpRequestConfig
 } from "./types.d";
 import { stringify } from "qs";
-import { getToken, formatToken } from "@/utils/auth";
-import { useUserStoreHook } from "@/store/modules/user";
+import { getToken, formatToken, removeToken } from "@/utils/auth";
+import router from "@/router";
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
 const defaultConfig: AxiosRequestConfig = {
@@ -112,6 +112,11 @@ class PureHttp {
           return response.data;
         }
         const res = response.data;
+        if (res.code === 401) {
+          removeToken();
+          router.push("/login");
+          return;
+        }
         if (res.code !== 0) {
           return Promise.reject(new Error(res.msg || "请求失败"));
         }
@@ -129,7 +134,8 @@ class PureHttp {
               $error.config.url.endsWith(url)
             );
             if (!isWhite) {
-              useUserStoreHook().logOut();
+              removeToken();
+              router.push("/login");
             }
           }
         }
