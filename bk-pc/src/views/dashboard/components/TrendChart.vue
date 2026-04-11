@@ -187,6 +187,14 @@ watch(
   }
 );
 
+defineExpose({
+  refresh: () => {
+    if (props.userId) {
+      fetchData(activeMode.value);
+    }
+  }
+});
+
 onMounted(() => {
   if (props.userId && props.accountBookId) {
     fetchData(activeMode.value);

@@ -182,6 +182,7 @@ bill:
   pureSelectFirst: Please select records first
   pureAddToCommon: Add to common remark
   pureCreditCard: Credit Card
+  pureAccountBookRequired: Please select account book
   pureAmountRequired: Please enter amount
   pureAmountInvalid: Amount must be greater than 0
   pureTypeRequired: Please select type

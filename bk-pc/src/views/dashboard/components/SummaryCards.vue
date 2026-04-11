@@ -14,7 +14,6 @@ defineOptions({
 
 interface Props {
   data: Summary | null;
-  loading: boolean;
   showExpenseLimit?: "1" | "2" | "3";
 }
 

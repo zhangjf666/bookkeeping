@@ -36,6 +36,7 @@ const limitForm = ref({
 });
 
 const summaryData = ref<Summary | null>(null);
+const trendChartRef = ref();
 
 const loadData = async () => {
   const userId = userStore.id;
@@ -130,6 +131,7 @@ const handleQuickAdd = () => {
 const handleBillFormSuccess = () => {
   showBillForm.value = false;
   loadData();
+  trendChartRef.value?.refresh();
 };
 
 const handleEditLimit = () => {
@@ -173,22 +175,19 @@ const summaryParams = computed(() => ({
       </div>
     </div>
 
-    <el-skeleton :loading="loading" animated :rows="8">
+    <div v-loading="loading" class="dashboard-content">
       <SummaryCards
         :data="summaryData"
-        :loading="loading"
         :show-expense-limit="showExpenseLimitMode"
         @edit-limit="handleEditLimit"
       />
       <TrendChart
+        ref="trendChartRef"
         :user-id="userStore.id"
         :account-book-id="billStore.currentAccountBook?.id"
       />
-      <RecentRecords
-        :records="summaryData?.incomeExpenseList || []"
-        :loading="loading"
-      />
-    </el-skeleton>
+      <RecentRecords :records="summaryData?.incomeExpenseList || []" />
+    </div>
 
     <el-dialog
       v-model="showBillForm"

@@ -235,6 +235,7 @@ bill:
   pureSelectFirst: 请先选择记录
   pureAddToCommon: 加入常用备注
   pureCreditCard: 信用卡消费
+  pureAccountBookRequired: 请选择账本
   pureAmountRequired: 请输入金额
   pureAmountInvalid: 金额必须大于0
   pureTypeRequired: 请选择收支类型

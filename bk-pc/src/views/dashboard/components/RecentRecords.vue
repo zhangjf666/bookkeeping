@@ -10,7 +10,6 @@ defineOptions({
 
 interface Props {
   records: IncomeExpenseRecord[];
-  loading: boolean;
 }
 
 const props = defineProps<Props>();
@@ -80,13 +79,7 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
         <span>{{ t("dashboard.pureRecentRecords") }}</span>
       </div>
     </template>
-    <el-table
-      v-loading="loading"
-      :data="records"
-      border
-      stripe
-      style="width: 100%"
-    >
+    <el-table :data="records" border stripe style="width: 100%">
       <el-table-column prop="date" :label="t('bill.pureDate')" width="100" />
       <el-table-column :label="t('bill.pureAmount')" width="100" align="right">
         <template #default="{ row }">
@@ -151,7 +144,7 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
       </el-table-column>
     </el-table>
     <el-empty
-      v-if="!loading && records.length === 0"
+      v-if="records.length === 0"
       :description="t('dashboard.pureNoRecords')"
     />
   </el-card>
