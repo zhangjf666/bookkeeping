@@ -253,6 +253,8 @@ bill:
   pureRecordCount: 记录笔数
   pureMonthBill: 月账单
   pureYearBill: 年账单
+  pureMonth: 月
+  pureYear: 年
   pureCustom: 自定义
   pureSelectedClassify: 已选择 {count} 个分类
   pureAllExpense: 全部支出

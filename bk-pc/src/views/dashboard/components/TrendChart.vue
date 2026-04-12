@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import * as echarts from "echarts";
 import type { TrendData } from "@/types/bill";
 import { getTrendData } from "@/api/incomeExpense";
+import { formatAmount } from "@/utils/format";
 import dayjs from "dayjs";
 import quarterOfYear from "dayjs/plugin/quarterOfYear";
 
@@ -123,7 +124,7 @@ const updateChart = () => {
         const fullDate = dateLabels[dateIndex];
         let result = fullDate + "<br/>";
         params.forEach((item: any) => {
-          result += `${item.marker} ${item.seriesName}: ¥${Number(item.value).toFixed(2)}<br/>`;
+          result += `${item.marker} ${item.seriesName}: ¥${formatAmount(Number(item.value))}<br/>`;
         });
         return result;
       }
@@ -218,12 +219,12 @@ onUnmounted(() => {
           <span class="total-info">
             <span class="total-item income">
               {{ t("dashboard.pureTotalIncome") }}: ¥{{
-                (trendData?.incomeTotal ?? 0).toFixed(2)
+                formatAmount(trendData?.incomeTotal ?? 0)
               }}
             </span>
             <span class="total-item expense">
               {{ t("dashboard.pureTotalExpense") }}: ¥{{
-                (trendData?.expenseTotal ?? 0).toFixed(2)
+                formatAmount(trendData?.expenseTotal ?? 0)
               }}
             </span>
           </span>

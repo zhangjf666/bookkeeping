@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { IncomeExpense } from "@/types/bill";
 import { useBillStoreHook } from "@/store/modules/bill";
+import { formatAmount } from "@/utils/format";
 import { Edit, Delete } from "@element-plus/icons-vue";
 
 defineOptions({
@@ -25,9 +26,9 @@ const emit = defineEmits<{
 const { t } = useI18n();
 const billStore = useBillStoreHook();
 
-const formatAmount = (amount: number, type: string) => {
+const formatAmountWithPrefix = (amount: number, type: string) => {
   const prefix = type === "EXPENSE" ? "-" : "+";
-  return `${prefix}¥${amount.toFixed(2)}`;
+  return `${prefix}¥${formatAmount(amount)}`;
 };
 
 const getTypeLabel = (type: string) => {
@@ -101,10 +102,10 @@ const handleDelete = (row: IncomeExpense) => {
         {{ getAccountBookName(row.accountBookId) }}
       </template>
     </el-table-column>
-    <el-table-column :label="t('bill.pureAmount')" width="110" align="right">
+    <el-table-column :label="t('bill.pureAmount')" width="130" align="right">
       <template #default="{ row }">
         <span :style="{ color: isExpense(row.type) ? '#f56c6c' : '#67c23a' }">
-          {{ formatAmount(row.amount, row.type) }}
+          {{ formatAmountWithPrefix(row.amount, row.type) }}
         </span>
       </template>
     </el-table-column>

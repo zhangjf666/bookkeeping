@@ -200,6 +200,8 @@ bill:
   pureRecordCount: Records
   pureMonthBill: Monthly Bill
   pureYearBill: Yearly Bill
+  pureMonth: Month
+  pureYear: Year
   pureCustom: Custom
   pureSelectedClassify: Selected {count} classifies
   pureAllExpense: All Expense

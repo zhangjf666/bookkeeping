@@ -8,6 +8,7 @@ import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import { getClassifyReportData } from "@/api/incomeExpense";
 import { getClassifyIcon } from "@/utils/classifyIcons";
+import { formatAmount } from "@/utils/format";
 import type {
   ClassifyReportData,
   ClassifySummary,
@@ -212,7 +213,7 @@ const initChart = () => {
           recordCountLabel.includes("笔") || recordCountLabel === "Records"
             ? recordCountLabel
             : `${recordCountLabel}`;
-        return `${data.classifyImage ? "" : ""}${data.name}<br/>${t("bill.purePercent")}: ${data.percent}%<br/>${recordCountText}: ${data.num}${recordCountLabel.includes("笔") ? "" : "笔"}<br/>${t("bill.pureAmount")}: ¥${data.value.toFixed(2)}`;
+        return `${data.classifyImage ? "" : ""}${data.name}<br/>${t("bill.purePercent")}: ${data.percent}%<br/>${recordCountText}: ${data.num}${recordCountLabel.includes("笔") ? "" : "笔"}<br/>${t("bill.pureAmount")}: ¥${formatAmount(data.value)}`;
       }
     },
     legend: {
@@ -403,12 +404,12 @@ onMounted(async () => {
           <span class="total-info">
             <span class="total-item income">
               {{ t("dashboard.pureTotalIncome") }}: ¥{{
-                (reportData?.incomeTotal ?? 0).toFixed(2)
+                formatAmount(reportData?.incomeTotal ?? 0)
               }}
             </span>
             <span class="total-item expense">
               {{ t("dashboard.pureTotalExpense") }}: ¥{{
-                (reportData?.expenseTotal ?? 0).toFixed(2)
+                formatAmount(reportData?.expenseTotal ?? 0)
               }}
             </span>
           </span>
@@ -450,11 +451,11 @@ onMounted(async () => {
                   ? t("bill.pureIncome")
                   : t("bill.pureExpense")
               }}：¥{{
-                (
+                formatAmount(
                   selectedClassifyData.expense ||
-                  selectedClassifyData.income ||
-                  0
-                ).toFixed(2)
+                    selectedClassifyData.income ||
+                    0
+                )
               }}
             </span>
           </span>
@@ -493,7 +494,7 @@ onMounted(async () => {
             </el-table-column>
             <el-table-column
               :label="t('bill.pureAmount')"
-              width="100"
+              width="130"
               align="right"
             >
               <template #default="{ row }">
@@ -507,7 +508,7 @@ onMounted(async () => {
                 >
                   {{
                     row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                  }}¥{{ row.amount.toFixed(2) }}
+                  }}¥{{ formatAmount(row.amount) }}
                 </span>
               </template>
             </el-table-column>
@@ -602,7 +603,7 @@ onMounted(async () => {
               </el-table-column>
               <el-table-column
                 :label="t('bill.pureAmount')"
-                width="100"
+                width="130"
                 align="right"
               >
                 <template #default="{ row }">
@@ -616,7 +617,7 @@ onMounted(async () => {
                   >
                     {{
                       row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                    }}¥{{ row.amount.toFixed(2) }}
+                    }}¥{{ formatAmount(row.amount) }}
                   </span>
                 </template>
               </el-table-column>

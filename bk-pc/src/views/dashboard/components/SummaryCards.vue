@@ -2,6 +2,7 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { Summary } from "@/types/bill";
+import { formatAmount } from "@/utils/format";
 import Edit from "~icons/ep/edit";
 import ShoppingCart from "~icons/ep/shopping-cart";
 import Money from "~icons/ep/money";
@@ -26,11 +27,6 @@ const emit = defineEmits<{
 }>();
 
 const { t } = useI18n();
-
-const formatAmount = (amount: number | undefined) => {
-  if (amount === undefined || amount === null) return "0.00";
-  return amount.toFixed(2);
-};
 
 const shouldShowLimit = computed(() => props.showExpenseLimit !== "1");
 

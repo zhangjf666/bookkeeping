@@ -3,6 +3,7 @@ import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import type { IncomeExpenseRecord } from "@/types/bill";
 import { useBillStoreHook } from "@/store/modules/bill";
+import { formatAmount } from "@/utils/format";
 
 defineOptions({
   name: "RecentRecords"
@@ -16,9 +17,9 @@ const props = defineProps<Props>();
 const { t } = useI18n();
 const billStore = useBillStoreHook();
 
-const formatAmount = (amount: number, type: string) => {
+const formatAmountWithPrefix = (amount: number, type: string) => {
   const prefix = type === "EXPENSE" ? "-" : "+";
-  return `${prefix}¥${amount.toFixed(2)}`;
+  return `${prefix}¥${formatAmount(amount)}`;
 };
 
 const isExpense = (type: string) => {
@@ -81,10 +82,10 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
     </template>
     <el-table :data="records" border stripe style="width: 100%">
       <el-table-column prop="date" :label="t('bill.pureDate')" width="100" />
-      <el-table-column :label="t('bill.pureAmount')" width="100" align="right">
+      <el-table-column :label="t('bill.pureAmount')" width="130" align="right">
         <template #default="{ row }">
           <span :style="{ color: isExpense(row.type) ? '#f56c6c' : '#67c23a' }">
-            {{ formatAmount(row.amount, row.type) }}
+            {{ formatAmountWithPrefix(row.amount, row.type) }}
           </span>
         </template>
       </el-table-column>

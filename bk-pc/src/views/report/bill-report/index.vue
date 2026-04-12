@@ -7,6 +7,7 @@ import { ElMessage } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useBillStoreHook } from "@/store/modules/bill";
 import { getTrendData } from "@/api/incomeExpense";
+import { formatAmount } from "@/utils/format";
 import type { TrendData, IncomeExpenseRecord } from "@/types/bill";
 import ReportFilter from "../components/ReportFilter.vue";
 
@@ -205,7 +206,7 @@ const updateChart = () => {
         }
         let result = dateLabel + "<br/>";
         params.forEach((item: any) => {
-          result += `${item.marker} ${item.seriesName}: ¥${Number(item.value).toFixed(2)}<br/>`;
+          result += `${item.marker} ${item.seriesName}: ¥${formatAmount(Number(item.value))}<br/>`;
         });
         return result;
       }
@@ -483,12 +484,12 @@ onMounted(async () => {
           <span class="total-info">
             <span class="total-item income">
               {{ t("dashboard.pureTotalIncome") }}: ¥{{
-                (trendData?.incomeTotal ?? 0).toFixed(2)
+                trendData?.incomeTotal ?? 0
               }}
             </span>
             <span class="total-item expense">
               {{ t("dashboard.pureTotalExpense") }}: ¥{{
-                (trendData?.expenseTotal ?? 0).toFixed(2)
+                trendData?.expenseTotal ?? 0
               }}
             </span>
           </span>
@@ -526,12 +527,12 @@ onMounted(async () => {
               <span class="month-summary">
                 <span class="income-text"
                   >{{ t("bill.pureIncome") }}: ¥{{
-                    getMonthSummary(group.month).income.toFixed(2)
+                    formatAmount(getMonthSummary(group.month).income)
                   }}</span
                 >
                 <span class="expense-text"
                   >{{ t("bill.pureExpense") }}: ¥{{
-                    getMonthSummary(group.month).expense.toFixed(2)
+                    formatAmount(getMonthSummary(group.month).expense)
                   }}</span
                 >
                 <span
@@ -544,10 +545,8 @@ onMounted(async () => {
                   "
                   class="balance-text"
                   >结余: ¥{{
-                    (
-                      getMonthSummary(group.month).income -
-                      getMonthSummary(group.month).expense
-                    ).toFixed(2)
+                    getMonthSummary(group.month).income -
+                    getMonthSummary(group.month).expense
                   }}</span
                 >
               </span>
@@ -580,7 +579,7 @@ onMounted(async () => {
               </el-table-column>
               <el-table-column
                 :label="t('bill.pureAmount')"
-                width="100"
+                width="130"
                 align="right"
               >
                 <template #default="{ row }">
@@ -594,7 +593,7 @@ onMounted(async () => {
                   >
                     {{
                       row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                    }}¥{{ row.amount.toFixed(2) }}
+                    }}¥{{ formatAmount(row.amount) }}
                   </span>
                 </template>
               </el-table-column>
@@ -695,7 +694,7 @@ onMounted(async () => {
             </el-table-column>
             <el-table-column
               :label="t('bill.pureAmount')"
-              width="100"
+              width="130"
               align="right"
             >
               <template #default="{ row }">
@@ -709,7 +708,7 @@ onMounted(async () => {
                 >
                   {{
                     row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                  }}¥{{ row.amount.toFixed(2) }}
+                  }}¥{{ formatAmount(row.amount) }}
                 </span>
               </template>
             </el-table-column>
@@ -804,7 +803,7 @@ onMounted(async () => {
               </el-table-column>
               <el-table-column
                 :label="t('bill.pureAmount')"
-                width="100"
+                width="130"
                 align="right"
               >
                 <template #default="{ row }">
@@ -818,7 +817,7 @@ onMounted(async () => {
                   >
                     {{
                       row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                    }}¥{{ row.amount.toFixed(2) }}
+                    }}¥{{ formatAmount(row.amount) }}
                   </span>
                 </template>
               </el-table-column>

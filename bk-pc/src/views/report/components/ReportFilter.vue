@@ -463,7 +463,7 @@ const handleReset = () => {
             v-model="localYear"
             type="year"
             value-format="YYYY"
-            :placeholder="t('dashboard.pureYear')"
+            :placeholder="t('bill.pureYear')"
             style="width: 100px"
             :clearable="false"
           />
