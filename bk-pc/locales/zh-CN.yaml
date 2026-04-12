@@ -150,6 +150,7 @@ dashboard:
   pureDefault: 默认
   pureTotalExpense: 总支出
   pureTotalIncome: 总收入
+  pureBalance: 结余
   pureNoData: 暂无数据
   pureMonthlyExpenseLimit: 月支出限额
   pureYearlyExpenseLimit: 年支出限额

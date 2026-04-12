@@ -27,8 +27,7 @@ const { t } = useI18n();
 const billStore = useBillStoreHook();
 
 const formatAmountWithPrefix = (amount: number, type: string) => {
-  const prefix = type === "EXPENSE" ? "-" : "+";
-  return `${prefix}¥${formatAmount(amount)}`;
+  return `¥${formatAmount(amount)}`;
 };
 
 const getTypeLabel = (type: string) => {
@@ -96,7 +95,7 @@ const handleDelete = (row: IncomeExpense) => {
     @selection-change="emit('selection-change', $event)"
   >
     <el-table-column type="selection" width="50" />
-    <el-table-column prop="date" :label="t('bill.pureDate')" width="120" />
+    <el-table-column prop="date" :label="t('bill.pureDate')" width="100" />
     <el-table-column :label="t('bill.pureAccountBook')" width="100">
       <template #default="{ row }">
         {{ getAccountBookName(row.accountBookId) }}

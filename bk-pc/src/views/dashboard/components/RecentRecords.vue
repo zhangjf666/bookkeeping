@@ -18,8 +18,7 @@ const { t } = useI18n();
 const billStore = useBillStoreHook();
 
 const formatAmountWithPrefix = (amount: number, type: string) => {
-  const prefix = type === "EXPENSE" ? "-" : "+";
-  return `${prefix}¥${formatAmount(amount)}`;
+  return `¥${formatAmount(amount)}`;
 };
 
 const isExpense = (type: string) => {

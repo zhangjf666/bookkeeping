@@ -54,6 +54,8 @@ const formData = ref<FormData>({
   tagCodes: []
 });
 
+const displayBillType = ref<"month" | "year" | "custom">("month");
+
 const trendData = ref<TrendData | null>(null);
 
 const detailSortType = ref<"time" | "amount">("time");
@@ -156,6 +158,7 @@ const fetchData = async () => {
   try {
     const result = await getTrendData(params);
     trendData.value = result;
+    displayBillType.value = formData.value.billType;
     updateChart();
   } catch (error: any) {
     ElMessage.error(error?.message || "获取数据失败");
@@ -444,7 +447,7 @@ watch(
 );
 
 watch(
-  () => formData.value.billType,
+  () => displayBillType.value,
   () => {
     expandedMonths.value.clear();
   }
@@ -484,12 +487,27 @@ onMounted(async () => {
           <span class="total-info">
             <span class="total-item income">
               {{ t("dashboard.pureTotalIncome") }}: ¥{{
-                trendData?.incomeTotal ?? 0
+                formatAmount(trendData?.incomeTotal ?? 0)
               }}
             </span>
             <span class="total-item expense">
               {{ t("dashboard.pureTotalExpense") }}: ¥{{
-                trendData?.expenseTotal ?? 0
+                formatAmount(trendData?.expenseTotal ?? 0)
+              }}
+            </span>
+            <span
+              :class="
+                (trendData?.incomeTotal ?? 0) - (trendData?.expenseTotal ?? 0) >=
+                0
+                  ? 'balance-positive'
+                  : 'balance-negative'
+              "
+              class="total-item"
+            >
+              {{ t("dashboard.pureBalance") }}: ¥{{
+                formatAmount(
+                  (trendData?.incomeTotal ?? 0) - (trendData?.expenseTotal ?? 0)
+                )
               }}
             </span>
           </span>
@@ -513,7 +531,7 @@ onMounted(async () => {
         </div>
       </template>
       <div v-loading="loading" class="detail-content">
-        <template v-if="formData.billType === 'year'">
+        <template v-if="displayBillType === 'year'">
           <div
             v-for="group in yearGroupedRecords"
             :key="group.month"
@@ -544,9 +562,11 @@ onMounted(async () => {
                       : 'balance-negative'
                   "
                   class="balance-text"
-                  >结余: ¥{{
-                    getMonthSummary(group.month).income -
-                    getMonthSummary(group.month).expense
+                  >{{ t("dashboard.pureBalance") }}: ¥{{
+                    formatAmount(
+                      getMonthSummary(group.month).income -
+                        getMonthSummary(group.month).expense
+                    )
                   }}</span
                 >
               </span>
@@ -591,9 +611,7 @@ onMounted(async () => {
                           : '#67c23a'
                     }"
                   >
-                    {{
-                      row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                    }}¥{{ formatAmount(row.amount) }}
+                    ¥{{ formatAmount(row.amount) }}
                   </span>
                 </template>
               </el-table-column>
@@ -815,9 +833,7 @@ onMounted(async () => {
                           : '#67c23a'
                     }"
                   >
-                    {{
-                      row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                    }}¥{{ formatAmount(row.amount) }}
+                    ¥{{ formatAmount(row.amount) }}
                   </span>
                 </template>
               </el-table-column>
@@ -924,6 +940,14 @@ onMounted(async () => {
         }
 
         &.expense {
+          color: #f56c6c;
+        }
+
+        &.balance-positive {
+          color: #67c23a;
+        }
+
+        &.balance-negative {
           color: #f56c6c;
         }
       }

@@ -139,6 +139,7 @@ dashboard:
   pureDefault: Default
   pureTotalExpense: Total Expense
   pureTotalIncome: Total Income
+  pureBalance: Balance
   pureMonthlyExpenseLimit: Monthly Budget
   pureYearlyExpenseLimit: Yearly Budget
   pureMonthlyExpenseSurplus: Monthly Remaining

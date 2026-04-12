@@ -412,6 +412,22 @@ onMounted(async () => {
                 formatAmount(reportData?.expenseTotal ?? 0)
               }}
             </span>
+            <span
+              :class="
+                (reportData?.incomeTotal ?? 0) -
+                  (reportData?.expenseTotal ?? 0) >=
+                0
+                  ? 'balance-positive'
+                  : 'balance-negative'
+              "
+              class="total-item"
+            >
+              {{ t("dashboard.pureBalance") }}: ¥{{
+                formatAmount(
+                  (reportData?.incomeTotal ?? 0) - (reportData?.expenseTotal ?? 0)
+                )
+              }}
+            </span>
           </span>
         </div>
       </template>
@@ -615,9 +631,7 @@ onMounted(async () => {
                           : '#67c23a'
                     }"
                   >
-                    {{
-                      row.type === "EXPENSE" || row.type === "0" ? "-" : "+"
-                    }}¥{{ formatAmount(row.amount) }}
+                    ¥{{ formatAmount(row.amount) }}
                   </span>
                 </template>
               </el-table-column>
@@ -728,6 +742,14 @@ onMounted(async () => {
         }
 
         &.expense {
+          color: #f56c6c;
+        }
+
+        &.balance-positive {
+          color: #67c23a;
+        }
+
+        &.balance-negative {
           color: #f56c6c;
         }
       }
