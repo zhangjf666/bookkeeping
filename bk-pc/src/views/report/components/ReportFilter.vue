@@ -28,7 +28,9 @@ interface Emits {
   "update:month": [value: string];
   "update:year": [value: string];
   "update:dateRange": [value: [string, string] | null | undefined];
-  "update:classifyList": [value: (number | string)[]];
+  "update:classifyList": [
+    value: { mainClassifyId: number; subClassifyId: number | null }[]
+  ];
   "update:remark": [value: string];
   "update:tagCodes": [value: number[]];
   query: [];
@@ -372,11 +374,11 @@ const handleSelectAllIncome = (checked: boolean) => {
 const prevHasAllExpense = ref(false);
 const prevHasAllIncome = ref(false);
 
-const billTypeOptions = [
+const billTypeOptions = computed(() => [
   { label: t("bill.pureMonthBill"), value: "month" },
   { label: t("bill.pureYearBill"), value: "year" },
   { label: t("bill.pureCustom"), value: "custom" }
-];
+]);
 
 const handleQuery = () => {
   if (

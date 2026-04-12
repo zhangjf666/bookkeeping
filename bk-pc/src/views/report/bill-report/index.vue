@@ -497,7 +497,8 @@ onMounted(async () => {
             </span>
             <span
               :class="
-                (trendData?.incomeTotal ?? 0) - (trendData?.expenseTotal ?? 0) >=
+                (trendData?.incomeTotal ?? 0) -
+                  (trendData?.expenseTotal ?? 0) >=
                 0
                   ? 'balance-positive'
                   : 'balance-negative'
@@ -684,9 +685,9 @@ onMounted(async () => {
             </el-table>
           </div>
         </template>
-        <template v-else>
+        <div v-show="displayBillType !== 'year'">
           <el-table
-            v-if="detailSortType === 'amount'"
+            v-show="detailSortType === 'amount'"
             :data="
               (dateGroupedRecords[0]?.records || []).sort(
                 (a, b) => b.amount - a.amount
@@ -797,115 +798,114 @@ onMounted(async () => {
               </template>
             </el-table-column>
           </el-table>
-          <template v-else>
-            <el-table
-              :data="flatRecordsByTime"
-              border
-              stripe
-              style="width: 100%"
-              :span-method="dateSpanMethod"
+          <el-table
+            v-show="detailSortType === 'time'"
+            :data="flatRecordsByTime"
+            border
+            stripe
+            style="width: 100%"
+            :span-method="dateSpanMethod"
+          >
+            <el-table-column
+              :label="t('bill.pureDate')"
+              width="100"
+              align="center"
             >
-              <el-table-column
-                :label="t('bill.pureDate')"
-                width="100"
-                align="center"
-              >
-                <template #default="{ row }">
-                  {{ row.date }}
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('bill.pureAccountBook')" width="100">
-                <template #default="{ row }">
-                  {{ getAccountBookName(row.accountBookId) }}
-                </template>
-              </el-table-column>
-              <el-table-column
-                :label="t('bill.pureAmount')"
-                width="130"
-                align="right"
-              >
-                <template #default="{ row }">
-                  <span
-                    :style="{
-                      color:
-                        row.type === 'EXPENSE' || row.type === '0'
-                          ? '#f56c6c'
-                          : '#67c23a'
-                    }"
-                  >
-                    ¥{{ formatAmount(row.amount) }}
-                  </span>
-                </template>
-              </el-table-column>
-              <el-table-column
-                :label="t('bill.pureType')"
-                width="80"
-                align="center"
-              >
-                <template #default="{ row }">
-                  <el-tag
-                    :type="
+              <template #default="{ row }">
+                {{ row.date }}
+              </template>
+            </el-table-column>
+            <el-table-column :label="t('bill.pureAccountBook')" width="100">
+              <template #default="{ row }">
+                {{ getAccountBookName(row.accountBookId) }}
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="t('bill.pureAmount')"
+              width="130"
+              align="right"
+            >
+              <template #default="{ row }">
+                <span
+                  :style="{
+                    color:
                       row.type === 'EXPENSE' || row.type === '0'
-                        ? 'danger'
-                        : 'success'
-                    "
-                    size="small"
-                  >
-                    {{
-                      row.type === "EXPENSE" || row.type === "0"
-                        ? t("bill.pureExpense")
-                        : t("bill.pureIncome")
-                    }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column :label="t('bill.pureClassify')" min-width="200">
-                <template #default="{ row }">
-                  <span>{{ row.mainClassifyName }}</span>
-                  <span v-if="row.subClassifyName" style="color: #909399">
-                    / {{ row.subClassifyName }}</span
-                  >
-                </template>
-              </el-table-column>
-              <el-table-column
-                :label="t('bill.pureCreditCard')"
-                width="100"
-                align="center"
-              >
-                <template #default="{ row }">
-                  <el-tag
-                    :type="row.isCreditCard === 'YES' ? 'warning' : 'info'"
-                    size="small"
-                  >
-                    {{
-                      row.isCreditCard === "YES"
-                        ? t("bill.pureYes")
-                        : t("bill.pureNo")
-                    }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-              <el-table-column
-                prop="remark"
-                :label="t('bill.pureRemark')"
-                min-width="300"
-              />
-              <el-table-column :label="t('bill.pureTag')" min-width="300">
-                <template #default="{ row }">
-                  <el-tag
-                    v-for="tag in getTagsByCodes(row.tagCodes)"
-                    :key="tag.id"
-                    :color="tag.color"
-                    size="small"
-                    :style="{ color: '#fff', marginRight: '4px' }"
-                  >
-                    {{ tag.name }}
-                  </el-tag>
-                </template>
-              </el-table-column>
-            </el-table>
-          </template>
-        </template>
+                        ? '#f56c6c'
+                        : '#67c23a'
+                  }"
+                >
+                  ¥{{ formatAmount(row.amount) }}
+                </span>
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="t('bill.pureType')"
+              width="80"
+              align="center"
+            >
+              <template #default="{ row }">
+                <el-tag
+                  :type="
+                    row.type === 'EXPENSE' || row.type === '0'
+                      ? 'danger'
+                      : 'success'
+                  "
+                  size="small"
+                >
+                  {{
+                    row.type === "EXPENSE" || row.type === "0"
+                      ? t("bill.pureExpense")
+                      : t("bill.pureIncome")
+                  }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column :label="t('bill.pureClassify')" min-width="200">
+              <template #default="{ row }">
+                <span>{{ row.mainClassifyName }}</span>
+                <span v-if="row.subClassifyName" style="color: #909399">
+                  / {{ row.subClassifyName }}</span
+                >
+              </template>
+            </el-table-column>
+            <el-table-column
+              :label="t('bill.pureCreditCard')"
+              width="100"
+              align="center"
+            >
+              <template #default="{ row }">
+                <el-tag
+                  :type="row.isCreditCard === 'YES' ? 'warning' : 'info'"
+                  size="small"
+                >
+                  {{
+                    row.isCreditCard === "YES"
+                      ? t("bill.pureYes")
+                      : t("bill.pureNo")
+                  }}
+                </el-tag>
+              </template>
+            </el-table-column>
+            <el-table-column
+              prop="remark"
+              :label="t('bill.pureRemark')"
+              min-width="300"
+            />
+            <el-table-column :label="t('bill.pureTag')" min-width="300">
+              <template #default="{ row }">
+                <el-tag
+                  v-for="tag in getTagsByCodes(row.tagCodes)"
+                  :key="tag.id"
+                  :color="tag.color"
+                  size="small"
+                  :style="{ color: '#fff', marginRight: '4px' }"
+                >
+                  {{ tag.name }}
+                </el-tag>
+              </template>
+            </el-table-column>
+          </el-table>
+        </div>
         <el-empty
           v-if="!loading && !trendData?.incomeExpenseList?.length"
           :description="t('dashboard.pureNoRecords')"
