@@ -27,7 +27,13 @@ export const useBillStore = defineStore("pure-bill", {
     total: 0,
     queryParams: {
       pageNo: 1,
-      pageSize: 10
+      pageSize: 10,
+      accountBookId: undefined as number | undefined,
+      date: undefined as string | undefined,
+      amount: undefined as number | undefined,
+      classifyList: [] as (number | string)[],
+      remark: undefined as string | undefined,
+      tagCodes: undefined as number[] | undefined
     },
     listLoading: false,
     classifyList: [] as Classify[],
@@ -104,10 +110,7 @@ export const useBillStore = defineStore("pure-bill", {
       await this.loadList(userId);
     },
     setQueryParams(params: Partial<IncomeExpenseQuery>) {
-      const newParams: any = {
-        pageNo: 1,
-        pageSize: 10
-      };
+      const newParams: any = { ...this.queryParams };
       Object.entries(params).forEach(([key, value]) => {
         if (value !== undefined && value !== null && value !== "") {
           if (Array.isArray(value) && value.length === 0) {

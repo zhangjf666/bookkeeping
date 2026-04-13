@@ -149,8 +149,6 @@ onMounted(async () => {
         :page-sizes="[10, 20, 50, 100]"
         :total="billStore.total"
         layout="total, sizes, prev, pager, next, jumper"
-        @size-change="(val: number) => (pageSize = val)"
-        @current-change="(val: number) => (currentPage = val)"
       />
     </div>
 

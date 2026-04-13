@@ -286,6 +286,10 @@ const handleQuery = () => {
     queryParams.tagCodes = selectedTagCodes;
   }
 
+  if (queryParams.accountBookId !== billStore.queryParams.accountBookId) {
+    queryParams.pageNo = 1;
+  }
+
   billStore.setQueryParams(queryParams);
   emit("query");
 };

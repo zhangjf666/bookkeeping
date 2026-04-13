@@ -17,7 +17,7 @@ interface Props {
   month?: string;
   year?: string;
   dateRange?: [string, string] | null;
-  classifyList?: (number | string)[];
+  classifyList?: { mainClassifyId: number; subClassifyId: number | null }[];
   remark?: string;
   tagCodes?: number[];
 }
