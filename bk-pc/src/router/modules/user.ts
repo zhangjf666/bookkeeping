@@ -1,10 +1,9 @@
 import { $t } from "@/plugins/i18n";
-const Layout = () => import("@/layout/index.vue");
 
 export default {
   path: "/user",
   name: "User",
-  component: Layout,
+  component: () => import("@/components/DeviceAwareLayout.vue"),
   redirect: "/user/profile",
   meta: {
     icon: "ep:user",
@@ -15,11 +14,14 @@ export default {
     {
       path: "/user/profile",
       name: "Profile",
-      component: () => import("@/views/user/Profile.vue"),
+      component: () => import("@/components/DeviceAwareView.vue"),
       meta: {
         icon: "ep:user",
         title: $t("menus.pureUserProfile"),
-        showLink: false
+        showLink: false,
+        pcComponent: () => import("@/views/user/Profile.vue"),
+        mobileComponent: () => import("@/views/mobile/user/index.vue"),
+        showTabBar: true
       }
     }
   ]

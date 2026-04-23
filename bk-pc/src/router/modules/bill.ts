@@ -1,10 +1,9 @@
 import { $t } from "@/plugins/i18n";
-const Layout = () => import("@/layout/index.vue");
 
 export default {
   path: "/bill",
   name: "Bill",
-  component: Layout,
+  component: () => import("@/components/DeviceAwareLayout.vue"),
   redirect: "/bill-list",
   meta: {
     icon: "ep:ticket",
@@ -15,9 +14,12 @@ export default {
     {
       path: "/bill-list",
       name: "BillList",
-      component: () => import("@/views/bill/index.vue"),
+      component: () => import("@/components/DeviceAwareView.vue"),
       meta: {
-        title: $t("menus.pureBill")
+        title: $t("menus.pureBill"),
+        pcComponent: () => import("@/views/bill/index.vue"),
+        mobileComponent: () => import("@/views/mobile/bill/index.vue"),
+        showTabBar: true
       }
     }
   ]

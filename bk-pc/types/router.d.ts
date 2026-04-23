@@ -58,6 +58,12 @@ declare global {
     activePath?: string;
     /** 当前页面是否已经加载过 */
     loaded?: boolean;
+    /** PC端组件加载器 `可选` - 用于设备感知路由 */
+    pcComponent?: () => Promise<any>;
+    /** 移动端组件加载器 `可选` - 用于设备感知路由 */
+    mobileComponent?: () => Promise<any>;
+    /** 是否显示底部TabBar `可选` - 移动端专用 */
+    showTabBar?: boolean;
   }
 
   /**
@@ -98,6 +104,12 @@ declare global {
       showLink?: boolean;
       /** 菜单升序排序，值越高排的越后（只针对顶级路由）`可选` */
       rank?: number;
+      /** PC端组件加载器 `可选` - 用于设备感知路由 */
+      pcComponent?: () => Promise<any>;
+      /** 移动端组件加载器 `可选` - 用于设备感知路由 */
+      mobileComponent?: () => Promise<any>;
+      /** 是否显示底部TabBar `可选` - 移动端专用 */
+      showTabBar?: boolean;
     };
     /** 子路由配置项 */
     children?: Array<RouteChildrenConfigsTable>;

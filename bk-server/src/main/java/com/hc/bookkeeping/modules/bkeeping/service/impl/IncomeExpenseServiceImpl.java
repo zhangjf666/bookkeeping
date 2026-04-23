@@ -32,6 +32,7 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
 
+import java.io.Serializable;
 import java.math.BigDecimal;
 import java.text.DecimalFormat;
 import java.time.format.DateTimeFormatter;
@@ -310,23 +311,39 @@ public class IncomeExpenseServiceImpl extends BaseServiceImpl<IncomeExpenseMapst
         return billResultDto;
     }
 
-    private void fillClassify(List<IncomeExpenseDto> list){
-        for (IncomeExpenseDto dto:list) {
-            if(dto.getMainClassify() != null) {
-                ClassifyDto mclassify = classifyService.queryUserClassifyById(dto.getUserId(), dto.getMainClassify());
-                if(mclassify != null) {
-                    dto.setMainClassifyName(mclassify.getName());
-                    dto.setMainClassifyImage(mclassify.getImage());
-                }
-            }
-            if(dto.getSubClassify() != null) {
-                ClassifyDto sclassify = classifyService.queryUserClassifyById(dto.getUserId(),dto.getSubClassify());
-                if(sclassify != null) {
-                    dto.setSubClassifyName(sclassify.getName());
-                    dto.setSubClassifyImage(sclassify.getImage());
-                }
+    /**
+     * 填充单个收支记录的分类信息
+     */
+    private void fillClassifyForDto(IncomeExpenseDto dto) {
+        if (dto.getMainClassify() != null) {
+            ClassifyDto mclassify = classifyService.queryUserClassifyById(dto.getUserId(), dto.getMainClassify());
+            if (mclassify != null) {
+                dto.setMainClassifyName(mclassify.getName());
+                dto.setMainClassifyImage(mclassify.getImage());
             }
         }
+        if (dto.getSubClassify() != null) {
+            ClassifyDto sclassify = classifyService.queryUserClassifyById(dto.getUserId(), dto.getSubClassify());
+            if (sclassify != null) {
+                dto.setSubClassifyName(sclassify.getName());
+                dto.setSubClassifyImage(sclassify.getImage());
+            }
+        }
+    }
+
+    private void fillClassify(List<IncomeExpenseDto> list) {
+        for (IncomeExpenseDto dto : list) {
+            fillClassifyForDto(dto);
+        }
+    }
+
+    @Override
+    public IncomeExpenseDto queryById(Serializable id) {
+        IncomeExpenseDto dto = baseMapstruct.toDto(getById(id));
+        if (dto != null) {
+            fillClassifyForDto(dto);
+        }
+        return dto;
     }
 
     @Override

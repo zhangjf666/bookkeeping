@@ -41,6 +41,13 @@ public class IncomeExpenseController {
         return incomeExpenseService.queryPage(page, queryDto);
     }
 
+    @Log("按id查询收入支出")
+    @ApiOperation("按id查询收入支出")
+    @GetMapping("/{id}")
+    public IncomeExpenseDto getById(@PathVariable Long id) {
+        return incomeExpenseService.queryById(id);
+    }
+
     @Log("查询收入支出")
     @ApiOperation("查询收入支出")
     @PostMapping("/list")

@@ -57,6 +57,7 @@ public class IncomeExpense implements Serializable {
     private Long mainClassify;
 
     @ApiModelProperty(value = "子分类id")
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Long subClassify;
 
     @ApiModelProperty(value = "是否信用卡消费(0:否,1;是)")

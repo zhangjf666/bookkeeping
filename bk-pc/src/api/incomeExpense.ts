@@ -69,6 +69,14 @@ export const getRemarkList = (userId: number) => {
   );
 };
 
+export const getIncomeExpenseById = (id: number) => {
+  return http.request<IncomeExpense>("get", `/incomeExpense/${id}`);
+};
+
+export const createRemark = (data: { userId: number; remark: string; classifyId: number }) => {
+  return http.request<void>("post", "/userRemark", { data });
+};
+
 export const getTrendData = (params: TrendParams) => {
   return http.request<TrendData>("post", "/incomeExpense/sumPeriod", {
     data: params

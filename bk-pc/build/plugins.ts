@@ -14,6 +14,8 @@ import removeConsole from "vite-plugin-remove-console";
 import VueI18nPlugin from "@intlify/unplugin-vue-i18n/vite";
 import { codeInspectorPlugin } from "code-inspector-plugin";
 import { vitePluginFakeServer } from "vite-plugin-fake-server";
+import Components from "unplugin-vue-components/vite";
+import { VantResolver } from "@vant/auto-import-resolver";
 
 export function getPluginsList(
   VITE_CDN: boolean,
@@ -58,6 +60,13 @@ export function getPluginsList(
     Icons({
       compiler: "vue3",
       scale: 1
+    }),
+    // Vant 组件自动导入
+    Components({
+      resolvers: [VantResolver()],
+      dts: false,  // 禁用类型声明文件生成，避免冲突
+      dirs: [],    // 不扫描任何目录，只使用 resolver
+      extensions: ["vue"]
     }),
     VITE_CDN ? cdn : null,
     configCompressPlugin(VITE_COMPRESSION),

@@ -27,7 +27,7 @@ export const useBillStore = defineStore("pure-bill", {
     total: 0,
     queryParams: {
       pageNo: 1,
-      pageSize: 10,
+      pageSize: 20,
       accountBookId: undefined as number | undefined,
       date: undefined as string | undefined,
       amount: undefined as number | undefined,
@@ -69,7 +69,7 @@ export const useBillStore = defineStore("pure-bill", {
     setCurrentAccountBook(accountBook: AccountBook) {
       this.currentAccountBook = accountBook;
     },
-    async loadList(userId: number) {
+    async loadList(userId: number, append = false) {
       this.listLoading = true;
       try {
         const params: Record<string, any> = {};
@@ -86,15 +86,32 @@ export const useBillStore = defineStore("pure-bill", {
         }
         const result = await getIncomeExpenseList(userId, params);
         if (Array.isArray(result)) {
-          this.list = result;
+          if (append) {
+            // 追加数据，去重
+            const existingIds = new Set(this.list.map(item => item.id));
+            const newItems = result.filter(item => !existingIds.has(item.id));
+            this.list = [...this.list, ...newItems];
+          } else {
+            this.list = result;
+          }
           this.total = result.length;
         } else {
-          this.list = (result as any).record || result.list || [];
+          const records = (result as any).record || result.list || [];
+          if (append) {
+            // 追加数据，去重
+            const existingIds = new Set(this.list.map(item => item.id));
+            const newItems = records.filter((item: IncomeExpense) => !existingIds.has(item.id));
+            this.list = [...this.list, ...newItems];
+          } else {
+            this.list = records;
+          }
           this.total = (result as any).totalCount || result.total || 0;
         }
       } catch {
-        this.list = [];
-        this.total = 0;
+        if (!append) {
+          this.list = [];
+          this.total = 0;
+        }
       } finally {
         this.listLoading = false;
       }

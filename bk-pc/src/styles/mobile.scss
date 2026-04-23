@@ -1,0 +1,342 @@
+/**
+ * 移动端全局样式
+ * 包含：安全区域适配、主题变量、通用样式
+ */
+
+// ==================== 主题变量 ====================
+:root {
+  // 主题色 - 红色系
+  --mobile-primary: #d83d34;
+  --mobile-primary-light: #e8645c;
+  --mobile-success: #00a151;
+  --mobile-warning: #ff976a;
+  --mobile-danger: #d83d34;
+
+  // 文字颜色
+  --mobile-text-primary: #323233;
+  --mobile-text-secondary: #969799;
+  --mobile-text-placeholder: #c8c9cc;
+  --mobile-text-disabled: #c8c9cc;
+
+  // 背景色
+  --mobile-bg-page: #f7f8fa;
+  --mobile-bg-card: #ffffff;
+  --mobile-bg-disabled: #f5f5f5;
+
+  // 边框
+  --mobile-border-color: #ebedf0;
+
+  // 圆角
+  --mobile-radius-sm: 4px;
+  --mobile-radius-md: 8px;
+  --mobile-radius-lg: 12px;
+  --mobile-radius-xl: 16px;
+
+  // 安全区域
+  --mobile-safe-area-top: env(safe-area-inset-top);
+  --mobile-safe-area-bottom: env(safe-area-inset-bottom);
+  --mobile-safe-area-left: env(safe-area-inset-left);
+  --mobile-safe-area-right: env(safe-area-inset-right);
+
+  // Vant 主题色覆盖
+  --van-primary-color: #d83d34;
+  --van-success-color: #00a151;
+  --van-danger-color: #d83d34;
+  --van-warning-color: #ff976a;
+}
+
+// ==================== 安全区域适配 ====================
+
+// 页面容器
+.mobile-page {
+  min-height: 100vh;
+  padding-top: var(--mobile-safe-area-top);
+  padding-bottom: var(--mobile-safe-area-bottom);
+  padding-left: var(--mobile-safe-area-left);
+  padding-right: var(--mobile-safe-area-right);
+  background-color: var(--mobile-bg-page);
+}
+
+// 固定顶部元素
+.mobile-fixed-top {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  padding-top: var(--mobile-safe-area-top);
+  z-index: 100;
+}
+
+// 固定底部元素
+.mobile-fixed-bottom {
+  position: fixed;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  padding-bottom: var(--mobile-safe-area-bottom);
+  z-index: 100;
+}
+
+// ==================== 通用样式 ====================
+
+// 文字省略
+.mobile-ellipsis {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+// 多行省略
+.mobile-ellipsis-2 {
+  display: -webkit-box;
+  -webkit-box-orient: vertical;
+  -webkit-line-clamp: 2;
+  overflow: hidden;
+}
+
+// Flex 布局
+.mobile-flex {
+  display: flex;
+}
+
+.mobile-flex-center {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+
+.mobile-flex-between {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+}
+
+.mobile-flex-column {
+  display: flex;
+  flex-direction: column;
+}
+
+// 卡片样式
+.mobile-card {
+  background: var(--mobile-bg-card);
+  border-radius: var(--mobile-radius-lg);
+  margin: 10px;
+  padding: 15px;
+}
+
+// 分隔线
+.mobile-divider {
+  height: 1px;
+  background: var(--mobile-border-color);
+  margin: 10px 0;
+}
+
+// 安全底部占位
+.mobile-safe-bottom {
+  height: calc(50px + var(--mobile-safe-area-bottom));
+}
+
+// ==================== 主题按钮样式 ====================
+
+.mobile-btn-primary {
+  background: var(--mobile-primary);
+  color: #fff;
+  border: none;
+  border-radius: var(--mobile-radius-md);
+  padding: 12px 24px;
+  font-size: 16px;
+  font-weight: 500;
+  cursor: pointer;
+  transition: opacity 0.3s;
+
+  &:active {
+    opacity: 0.8;
+  }
+
+  &:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
+  }
+}
+
+// 悬浮按钮
+.mobile-fab {
+  position: fixed;
+  right: 20px;
+  bottom: calc(70px + var(--mobile-safe-area-bottom));
+  width: 56px;
+  height: 56px;
+  border-radius: 50%;
+  background: var(--mobile-primary);
+  color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 28px;
+  box-shadow: 0 4px 12px rgba(216, 61, 52, 0.4);
+  cursor: pointer;
+  z-index: 99;
+  transition: transform 0.2s, box-shadow 0.2s;
+
+  &:active {
+    transform: scale(0.95);
+    box-shadow: 0 2px 8px rgba(216, 61, 52, 0.3);
+  }
+}
+
+// ==================== 金额显示样式 ====================
+
+.mobile-amount {
+  font-family: "DIN Alternate", "Helvetica Neue", sans-serif;
+  font-weight: 600;
+
+  &.expense {
+    color: var(--mobile-text-primary);
+  }
+
+  &.income {
+    color: var(--mobile-success);
+  }
+
+  &.danger {
+    color: var(--mobile-danger);
+  }
+}
+
+// ==================== 动画 ====================
+
+// 淡入动画
+@keyframes mobile-fade-in {
+  from {
+    opacity: 0;
+  }
+  to {
+    opacity: 1;
+  }
+}
+
+// 从底部滑入
+@keyframes mobile-slide-up {
+  from {
+    transform: translateY(100%);
+  }
+  to {
+    transform: translateY(0);
+  }
+}
+
+// 缩放动画
+@keyframes mobile-scale {
+  from {
+    transform: scale(0.9);
+    opacity: 0;
+  }
+  to {
+    transform: scale(1);
+    opacity: 1;
+  }
+}
+
+.mobile-animate-fade {
+  animation: mobile-fade-in 0.3s ease;
+}
+
+.mobile-animate-slide {
+  animation: mobile-slide-up 0.3s ease;
+}
+
+.mobile-animate-scale {
+  animation: mobile-scale 0.3s ease;
+}
+
+// ==================== Vant 组件样式覆盖 ====================
+
+// 导航栏
+.van-nav-bar {
+  background: var(--mobile-primary);
+
+  .van-nav-bar__title {
+    font-weight: 600;
+    color: #fff;
+  }
+
+  .van-nav-bar__arrow {
+    color: #fff;
+  }
+
+  .van-nav-bar__text {
+    color: #fff;
+  }
+}
+
+// TabBar
+.van-tabbar {
+  .van-tabbar-item--active {
+    color: var(--mobile-primary);
+  }
+}
+
+// 按钮
+.van-button--primary {
+  background: var(--mobile-primary);
+  border: none;
+}
+
+.van-button--danger {
+  background: var(--mobile-danger);
+  border: none;
+}
+
+// 单元格
+.van-cell-group--inset {
+  margin: 10px;
+  border-radius: var(--mobile-radius-lg);
+}
+
+// 弹窗
+.van-popup--round {
+  border-radius: var(--mobile-radius-xl) var(--mobile-radius-xl) 0 0;
+}
+
+// 标签
+.van-tag {
+  border-radius: var(--mobile-radius-sm);
+}
+
+// 搜索框
+.van-search {
+  .van-search__content {
+    border-radius: var(--mobile-radius-lg);
+  }
+}
+
+// 日历
+.van-calendar {
+  .van-calendar__selected-day {
+    background: var(--mobile-primary);
+  }
+
+  .van-calendar__top-info {
+    color: var(--mobile-primary);
+  }
+}
+
+// Tab 标签页
+.van-tabs {
+  .van-tabs__nav {
+    background: transparent;
+  }
+
+  .van-tab--active {
+    color: var(--mobile-primary);
+  }
+
+  .van-tabs__line {
+    background: var(--mobile-primary);
+  }
+}
+
+// 开关
+.van-switch--on {
+  background: var(--mobile-primary);
+}

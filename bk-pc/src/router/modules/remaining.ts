@@ -5,19 +5,23 @@ export default [
   {
     path: "/login",
     name: "Login",
-    component: () => import("@/views/login/index.vue"),
+    component: () => import("@/components/DeviceAwareView.vue"),
     meta: {
       title: $t("menus.pureLogin"),
-      showLink: false
+      showLink: false,
+      pcComponent: () => import("@/views/login/index.vue"),
+      mobileComponent: () => import("@/views/mobile/login/index.vue")
     }
   },
   {
     path: "/register",
     name: "Register",
-    component: () => import("@/views/register/index.vue"),
+    component: () => import("@/components/DeviceAwareView.vue"),
     meta: {
       title: $t("menus.pureRegister"),
-      showLink: false
+      showLink: false,
+      pcComponent: () => import("@/views/register/index.vue"),
+      mobileComponent: () => import("@/views/mobile/register/index.vue")
     }
   },
   // 全屏403（无权访问）页面
