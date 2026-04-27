@@ -205,6 +205,9 @@ bill:
   pureAddRecord: 记一笔
   pureAdd: 新增
   pureEdit: 编辑
+  pureRecord: 新增记录
+  pureEditRecord: 编辑记录
+  pureSearch: 搜索
   pureDelete: 删除
   pureBatchDelete: 批量删除
   pureQuery: 查询

@@ -1,6 +1,8 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
 import type { Classify } from "@/types/classify";
+import { getClassifyIcon } from "@/utils/classifyIcons";
 
 defineOptions({
   name: "ClassifyPicker"
@@ -8,49 +10,135 @@ defineOptions({
 
 const props = defineProps<{
   modelValue: boolean;
-  type: "EXPENSE" | "INCOME";
   classifyList: Classify[];
-  selectedId?: number;
+  type: "EXPENSE" | "INCOME";
+  mainClassifyId: number | null;
+  subClassifyId: number | null;
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  select: [classify: Classify];
+  select: [mainClassify: Classify, subClassify?: Classify];
 }>();
+
+const { t } = useI18n();
 
 const show = computed({
   get: () => props.modelValue,
-  set: (val) => emit("update:modelValue", val)
+  set: val => emit("update:modelValue", val)
 });
 
-// 搜索关键词
-const keyword = ref("");
+// 当前展开的顶级分类ID
+const expandedMainId = ref<number | null>(null);
 
-// 筛选后的分类列表
-const filteredList = computed(() => {
-  if (!keyword.value.trim()) {
-    return props.classifyList;
-  }
-  return props.classifyList.filter((item) =>
-    item.name.toLowerCase().includes(keyword.value.toLowerCase())
+// 顶级分类列表（根据类型过滤）
+const mainClassifyList = computed(() => {
+  return props.classifyList.filter(
+    item =>
+      item.type === props.type &&
+      item.enable === "YES" &&
+      (item.pid === 0 || item.pid === -1 || item.pid === null || !item.pid)
   );
 });
 
-// 选择分类
-const handleSelect = (classify: Classify) => {
-  emit("select", classify);
+// 将顶级分类按每行4个分组
+const mainClassifyRows = computed(() => {
+  const rows: Classify[][] = [];
+  const items = mainClassifyList.value;
+  for (let i = 0; i < items.length; i += 4) {
+    rows.push(items.slice(i, i + 4));
+  }
+  return rows;
+});
+
+// 获取某个顶级分类的子分类列表
+const getSubList = (mainId: number) => {
+  return props.classifyList.filter(
+    item => item.pid === mainId && item.enable === "YES"
+  );
+};
+
+// 检查顶级分类是否有子分类
+const hasChildren = (mainId: number) => {
+  return props.classifyList.some(
+    item => item.pid === mainId && item.enable === "YES"
+  );
+};
+
+// 点击顶级分类
+const handleMainClick = (mainClassify: Classify) => {
+  const childrenExist = hasChildren(mainClassify.id);
+
+  if (childrenExist) {
+    // 如果点击的是当前展开的，收起并选中该顶级分类
+    if (expandedMainId.value === mainClassify.id) {
+      expandedMainId.value = null;
+      emit("select", mainClassify);
+      show.value = false;
+    } else {
+      // 展开新的顶级分类
+      expandedMainId.value = mainClassify.id;
+    }
+  } else {
+    // 没有子分类，直接选中并关闭
+    emit("select", mainClassify);
+    show.value = false;
+  }
+};
+
+// 点击子分类
+const handleSubClick = (mainClassify: Classify, subClassify: Classify) => {
+  emit("select", mainClassify, subClassify);
   show.value = false;
 };
 
-// 关闭弹窗
+// 点击遮罩层关闭
 const handleClose = () => {
-  show.value = false;
+  // 只有当用户展开了子分类，且当前没有已选中的子分类属于这个展开的顶级分类时
+  // 才选中当前展开的顶级分类
+  if (expandedMainId.value) {
+    // 检查是否已有属于该顶级分类的子分类被选中
+    const hasSelectedSub = props.subClassifyId &&
+      props.classifyList.some(
+        item => item.id === props.subClassifyId && item.pid === expandedMainId.value
+      );
+
+    // 如果没有已选中的子分类属于这个顶级分类，才选中顶级分类
+    if (!hasSelectedSub) {
+      const mainClassify = mainClassifyList.value.find(
+        item => item.id === expandedMainId.value
+      );
+      if (mainClassify) {
+        emit("select", mainClassify);
+      }
+    }
+  }
 };
 
-// 重置搜索
-watch(show, (val) => {
-  if (!val) {
-    keyword.value = "";
+// 弹窗打开时，根据已选中的分类初始化展开状态
+watch(show, val => {
+  if (val) {
+    // 如果有选中的子分类，展开对应的顶级分类
+    if (props.subClassifyId) {
+      const subClassify = props.classifyList.find(
+        item => item.id === props.subClassifyId
+      );
+      if (subClassify && subClassify.pid) {
+        expandedMainId.value = subClassify.pid;
+      }
+    } else if (props.mainClassifyId) {
+      // 只有顶级分类选中，检查是否有子分类，如果有则展开
+      const childrenExist = hasChildren(props.mainClassifyId);
+      if (childrenExist) {
+        expandedMainId.value = props.mainClassifyId;
+      } else {
+        expandedMainId.value = null;
+      }
+    } else {
+      expandedMainId.value = null;
+    }
+  } else {
+    expandedMainId.value = null;
   }
 });
 </script>
@@ -61,112 +149,232 @@ watch(show, (val) => {
     position="bottom"
     round
     style="height: 60%"
+    @close="handleClose"
   >
     <div class="classify-picker">
       <!-- 头部 -->
       <div class="picker-header">
-        <span class="title">选择分类</span>
-        <van-icon name="cross" @click="handleClose" />
+        <span class="title">{{ t("mobile.record.classify") }}</span>
+        <van-icon name="cross" @click="show = false" />
       </div>
 
-      <!-- 搜索框 -->
-      <div class="search-bar">
-        <van-search
-          v-model="keyword"
-          placeholder="搜索分类"
-          shape="round"
-        />
-      </div>
-
-      <!-- 分类网格 -->
-      <div class="classify-grid">
+      <!-- 分类内容 -->
+      <div class="classify-content">
+        <!-- 按行渲染顶级分类 -->
         <div
-          v-for="item in filteredList"
-          :key="item.id"
-          class="classify-item"
-          :class="{ selected: item.id === selectedId }"
-          @click="handleSelect(item)"
+          v-for="(row, rowIndex) in mainClassifyRows"
+          :key="rowIndex"
+          class="classify-row"
         >
-          <span class="icon">{{ item.image || "📝" }}</span>
-          <span class="name">{{ item.name }}</span>
+          <!-- 顶级分类网格 -->
+          <div class="main-classify-grid">
+            <div
+              v-for="mainClassify in row"
+              :key="mainClassify.id"
+              class="main-classify-item"
+              :class="{
+                active: mainClassifyId === mainClassify.id && !subClassifyId,
+                'has-sub-active': mainClassifyId === mainClassify.id && subClassifyId,
+                expanded: expandedMainId === mainClassify.id
+              }"
+              @click="handleMainClick(mainClassify)"
+            >
+              <span class="main-icon">{{ getClassifyIcon(mainClassify.image) }}</span>
+              <span class="main-name">{{ mainClassify.name }}</span>
+            </div>
+          </div>
+
+          <!-- 子分类展开区域（在该行下方弹出） -->
+          <transition name="drawer">
+            <div
+              v-if="row.some(item => item.id === expandedMainId) && getSubList(expandedMainId!).length > 0"
+              class="sub-classify-drawer"
+            >
+              <div
+                v-for="subClassify in getSubList(expandedMainId!)"
+                :key="subClassify.id"
+                class="sub-classify-item"
+                :class="{ active: subClassifyId === subClassify.id }"
+                @click="
+                  handleSubClick(
+                    mainClassifyList.find(c => c.id === expandedMainId)!,
+                    subClassify
+                  )
+                "
+              >
+                <span class="sub-icon">{{ getClassifyIcon(subClassify.image) }}</span>
+                <span class="sub-name">{{ subClassify.name }}</span>
+              </div>
+            </div>
+          </transition>
         </div>
       </div>
-
-      <!-- 空状态 -->
-      <van-empty
-        v-if="filteredList.length === 0"
-        description="暂无分类"
-      />
     </div>
   </van-popup>
 </template>
 
 <style lang="scss" scoped>
+@use "@/styles/mobile/variables.scss" as *;
+
 .classify-picker {
-  height: 100%;
   display: flex;
   flex-direction: column;
+  height: 100%;
+  padding-bottom: env(safe-area-inset-bottom);
+}
 
-  .picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 15px 20px;
-    border-bottom: 1px solid #eee;
+.picker-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 15px 20px;
+  border-bottom: 1px solid $color-border;
 
-    .title {
-      font-size: 16px;
-      font-weight: 500;
+  .title {
+    font-size: 16px;
+    font-weight: 500;
+    color: $color-text-primary;
+  }
+}
+
+.classify-content {
+  flex: 1;
+  padding: 16px;
+  overflow-y: auto;
+}
+
+.classify-row {
+  margin-bottom: 12px;
+}
+
+.main-classify-grid {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 12px;
+}
+
+.main-classify-item {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  align-items: center;
+  justify-content: center;
+  padding: 12px 8px;
+  cursor: pointer;
+  background-color: $color-background;
+  border-radius: 12px;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+
+  &.active {
+    background-color: rgba($color-primary, 0.15);
+    border-color: $color-primary;
+
+    .main-icon {
+      transform: scale(1.1);
     }
   }
 
-  .search-bar {
-    padding: 10px;
+  &.has-sub-active {
+    background-color: rgba($color-primary, 0.1);
+    border-color: rgba($color-primary, 0.5);
   }
 
-  .classify-grid {
-    flex: 1;
-    overflow-y: auto;
-    padding: 15px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 15px;
+  &.expanded {
+    background-color: rgba($color-primary, 0.15);
+    border-color: $color-primary;
+  }
 
-    .classify-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      gap: 5px;
-      cursor: pointer;
+  .main-icon {
+    font-size: 28px;
+    transition: transform 0.2s;
+  }
 
-      &.selected {
-        .icon {
-          background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        }
-      }
+  .main-name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 13px;
+    color: $color-text-primary;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
 
-      .icon {
-        width: 50px;
-        height: 50px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        background: #f5f5f5;
-        border-radius: 10px;
-        font-size: 24px;
-        transition: background 0.3s;
-      }
+.sub-classify-drawer {
+  margin-top: 8px;
+  padding: 10px;
+  background-color: rgba($color-primary, 0.05);
+  border-radius: 10px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
 
-      .name {
-        font-size: 12px;
-        color: #333;
-        text-align: center;
-        overflow: hidden;
-        text-overflow: ellipsis;
-        white-space: nowrap;
-        max-width: 60px;
-      }
+.sub-classify-item {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+  align-items: center;
+  justify-content: center;
+  width: 65px;
+  padding: 8px 4px;
+  cursor: pointer;
+  background-color: $color-card;
+  border-radius: 8px;
+  transition: all 0.2s;
+  border: 2px solid transparent;
+
+  &.active {
+    background-color: rgba($color-primary, 0.15);
+    border-color: $color-primary;
+
+    .sub-icon {
+      transform: scale(1.1);
     }
   }
+
+  &:active {
+    opacity: 0.8;
+    transform: scale(0.95);
+  }
+
+  .sub-icon {
+    font-size: 20px;
+    color: $color-text-primary;
+    transition: all 0.2s;
+  }
+
+  .sub-name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 11px;
+    color: $color-text-primary;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    transition: color 0.2s;
+  }
+}
+
+// 抽屉展开动画
+.drawer-enter-active,
+.drawer-leave-active {
+  transition: all 0.3s ease;
+}
+
+.drawer-enter-from,
+.drawer-leave-to {
+  opacity: 0;
+  max-height: 0;
+  padding-top: 0;
+  padding-bottom: 0;
+  margin-top: 0;
+}
+
+.drawer-enter-to,
+.drawer-leave-from {
+  opacity: 1;
+  max-height: 150px;
 }
 </style>

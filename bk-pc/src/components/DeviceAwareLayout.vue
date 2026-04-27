@@ -14,7 +14,7 @@ const loadLayout = async () => {
   loading.value = true;
   isMobileDevice.value = isMobile();
   const loader = isMobileDevice.value
-    ? () => import("@/layouts/MobileLayout.vue")
+    ? () => import("@/mobile-layout/MobileLayout.vue")
     : () => import("@/layout/index.vue");
   try {
     const module = await loader();

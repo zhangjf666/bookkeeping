@@ -6,3 +6,5 @@ export { default as DatePicker } from "./DatePicker.vue";
 export { default as SummaryCard } from "./SummaryCard.vue";
 export { default as MobilePage } from "./MobilePage.vue";
 export { default as PullRefreshList } from "./PullRefreshList.vue";
+export { default as TagPicker } from "./TagPicker.vue";
+export { default as RemarkPicker } from "./RemarkPicker.vue";

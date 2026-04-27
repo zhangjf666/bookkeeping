@@ -1,14 +1,32 @@
 <script setup lang="ts">
 import { ref, computed, onMounted, watch } from "vue";
 import { useRoute, useRouter } from "vue-router";
-import { showNotify, showConfirmDialog } from "vant";
+import { useI18n } from "vue-i18n";
+import { storeToRefs } from "pinia";
 import dayjs from "dayjs";
 import { useUserStoreHook } from "@/store/modules/user";
-import { useBillStoreHook } from "@/store/modules/bill";
-import { createIncomeExpense, updateIncomeExpense, deleteIncomeExpense, getIncomeExpenseById } from "@/api/incomeExpense";
-import type { IncomeExpenseForm, IncomeExpense } from "@/types/bill";
-import { formatNumber } from "@/utils/format";
-import { getClassifyIcon } from "@/utils/classifyIcons";
+import { useAccountBookStore } from "@/store/modules/accountBook";
+import { useUserTagStore } from "@/store/modules/userTag";
+import { useRemarkStore } from "@/store/modules/remark";
+import { useClassifyStore } from "@/store/modules/classify";
+import {
+  getIncomeExpenseById,
+  createIncomeExpense,
+  updateIncomeExpense
+} from "@/api/incomeExpense";
+import type { IncomeExpense, IncomeExpenseRecord } from "@/types/bill";
+import type { Classify } from "@/types/classify";
+import type { UserRemark } from "@/types/remark";
+import {
+  showLoading,
+  hideLoading,
+  showError,
+  showSuccess
+} from "@/utils/mobile/message";
+import AmountInput from "@/components/mobile/AmountInput.vue";
+import TagPicker from "@/components/mobile/TagPicker.vue";
+import RemarkPicker from "@/components/mobile/RemarkPicker.vue";
+import ClassifyPicker from "@/components/mobile/ClassifyPicker.vue";
 
 defineOptions({
   name: "MobileRecord"
@@ -16,1196 +34,623 @@ defineOptions({
 
 const route = useRoute();
 const router = useRouter();
-const userStore = useUserStoreHook();
-const billStore = useBillStoreHook();
+const { t } = useI18n();
 
-const isEdit = computed(() => !!route.params.id);
-const recordId = computed(() => Number(route.params.id));
+// 用户信息
+const userStore = useUserStoreHook();
+const userId = computed(() => userStore.id);
+
+// Stores
+const accountBookStore = useAccountBookStore();
+const userTagStore = useUserTagStore();
+const remarkStore = useRemarkStore();
+const classifyStore = useClassifyStore();
+
+// 路由参数
+const recordId = computed(() => route.params.id as string);
+const isEdit = computed(() => !!recordId.value);
 
 // 表单数据
-const form = ref<IncomeExpenseForm>({
-  accountBookId: 0,
+const formData = ref({
+  type: "EXPENSE" as "EXPENSE" | "INCOME",
   amount: 0,
-  type: "EXPENSE",
+  accountBookId: null as number | null,
+  mainClassifyId: null as number | null,
+  subClassifyId: null as number | null,
   date: dayjs().format("YYYY-MM-DD"),
   remark: "",
-  mainClassify: 0,
-  subClassify: undefined,
-  isCreditCard: "NO",
-  isAddRemark: "NO",
-  tagCodes: ""
+  addToRemark: false,
+  tagIds: [] as number[],
+  isCreditCard: false
 });
 
-const loading = ref(false);
-const submitting = ref(false);
-
-// 弹窗控制
-const showClassifyPicker = ref(false);
-const showSubClassifyPicker = ref(false);
-const showCalendar = ref(false);
+// 弹窗状态
 const showTagPicker = ref(false);
 const showRemarkPicker = ref(false);
-const showNumberKeyboard = ref(false);
+const showDatePicker = ref(false);
+const showAccountBookPicker = ref(false);
+const showClassifyPicker = ref(false);
 
-// 选中的分类ID
-const selectedClassifyId = ref<number | undefined>(undefined);
-const selectedTags = ref<number[]>([]);
+// 日期选择器
+const selectedDate = ref(new Date());
 
-// 分类选择状态
-const tempSelectedMainClassifyId = ref<number | undefined>(undefined);
-
-// 标签搜索
-const tagSearchKeyword = ref("");
-
-// 金额输入（用于数字键盘）
-const amountInput = ref("");
-
-// 金额显示值（键盘打开时显示原始输入，关闭时显示格式化后的值）
-const amountDisplay = computed(() => {
-  if (showNumberKeyboard.value) {
-    // 键盘打开时，直接显示输入的值
-    return amountInput.value || "0";
-  }
-  // 键盘关闭时，格式化为两位小数
-  if (form.value.amount === 0) return "0.00";
-  return form.value.amount.toFixed(2);
-});
-
-// 打开金额键盘
-const openAmountKeyboard = () => {
-  // 将当前金额转为字符串
-  amountInput.value = form.value.amount === 0 ? "" : String(form.value.amount);
-  showNumberKeyboard.value = true;
-};
-
-// 金额键盘输入
-const onAmountInput = (key: string) => {
-  // 处理小数点
-  if (key === ".") {
-    if (amountInput.value.includes(".")) {
-      return; // 已有小数点，不能再输入
+// 初始化选中日期
+watch(
+  () => formData.value.date,
+  val => {
+    if (val) {
+      selectedDate.value = new Date(val);
     }
-    if (amountInput.value === "") {
-      amountInput.value = "0."; // 空时以0.开头
-    } else {
-      amountInput.value += ".";
-    }
-    return;
-  }
+  },
+  { immediate: true }
+);
 
-  // 处理数字
-  // 检查小数位数，如果已有两位小数，不能再输入
-  const dotIndex = amountInput.value.indexOf(".");
-  if (dotIndex !== -1) {
-    const decimalPart = amountInput.value.substring(dotIndex + 1);
-    if (decimalPart.length >= 2) {
-      return; // 已有两位小数，不能再输入
-    }
-  }
-
-  amountInput.value += key;
+// 日期选择变化 - 直接保存并关闭弹窗
+const handleDateSelect = (date: Date) => {
+  formData.value.date = dayjs(date).format("YYYY-MM-DD");
+  showDatePicker.value = false;
 };
 
-// 金额键盘删除
-const onAmountDelete = () => {
-  amountInput.value = amountInput.value.slice(0, -1);
-};
+// 加载状态
+const loading = ref(false);
+const saving = ref(false);
 
-// 金额键盘关闭时更新表单
-const onAmountKeyboardClose = () => {
-  // 格式化为两位小数并更新表单
-  if (amountInput.value && amountInput.value !== "." && amountInput.value !== "0.") {
-    form.value.amount = parseFloat(amountInput.value);
-  } else {
-    form.value.amount = 0;
-  }
-  showNumberKeyboard.value = false;
-};
+// 账本列表
+const { list: accountBookList } = storeToRefs(accountBookStore);
+const { list: tagList } = storeToRefs(userTagStore);
+const { list: remarkList } = storeToRefs(remarkStore);
+const { list: classifyList } = storeToRefs(classifyStore);
 
-// 日期显示
-const dateDisplay = computed(() => {
-  const d = dayjs(form.value.date);
-  return `${d.format("YYYY-MM-DD")} ${["周日", "周一", "周二", "周三", "周四", "周五", "周六"][d.day()]}`;
-});
-
-// 分类列表（根据类型筛选）
-const classifyTreeData = computed(() => {
-  return billStore.classifyTree.filter(c => c.type === form.value.type);
-});
-
-// 当前选中的主分类
-const currentMainClassify = computed(() => {
-  if (!tempSelectedMainClassifyId.value) return null;
-  return classifyTreeData.value.find(c => c.id === tempSelectedMainClassifyId.value);
-});
-
-// 子分类列表
-const subClassifyList = computed(() => {
-  if (!currentMainClassify.value?.children) return [];
-  return currentMainClassify.value.children;
-});
-
-// 过滤后的标签列表
-const filteredTagList = computed(() => {
-  if (!tagSearchKeyword.value) return billStore.tagList;
-  return billStore.tagList.filter(tag =>
-    tag.name.toLowerCase().includes(tagSearchKeyword.value.toLowerCase())
+// 选中的账本名称
+const selectedAccountBookName = computed(() => {
+  const book = accountBookList.value.find(
+    item => item.id === formData.value.accountBookId
   );
+  return book?.name || "";
 });
 
-// 选中的分类名称显示
-const classifyName = computed(() => {
-  if (!selectedClassifyId.value) return "";
-  const classify = billStore.classifyList.find(c => c.id === selectedClassifyId.value);
-  if (!classify) return "";
-  const icon = getClassifyIcon(classify.image || "");
-  if (classify.pid === -1) {
-    return `${icon} ${classify.name}`;
-  } else {
-    const parent = billStore.classifyList.find(c => c.id === classify.pid);
-    return `${icon} ${parent?.name || ""} - ${classify.name}`;
+// 选中的分类名称
+const selectedClassifyName = computed(() => {
+  if (!formData.value.mainClassifyId) return "";
+
+  const mainClassify = classifyList.value.find(
+    item => item.id === formData.value.mainClassifyId
+  );
+  if (!mainClassify) return "";
+
+  if (formData.value.subClassifyId) {
+    const subClassify = classifyList.value.find(
+      item => item.id === formData.value.subClassifyId
+    );
+    if (subClassify) {
+      return `${mainClassify.name}-${subClassify.name}`;
+    }
   }
+
+  return mainClassify.name;
 });
 
-// 获取标签颜色
-const getTagColor = (tagId: number) => {
-  const tag = billStore.tagList.find(t => t.id === tagId);
-  return tag ? tag.color : "#d83d34";
-};
+// 选中的标签列表
+const selectedTags = computed(() => {
+  return tagList.value.filter(item => formData.value.tagIds.includes(item.id));
+});
 
-// 获取标签名称
-const getTagName = (tagId: number) => {
-  const tag = billStore.tagList.find(t => t.id === tagId);
-  return tag ? tag.name : "";
-};
-
-// 根据标签ID获取标签code
-const getTagCodesByIds = (tagIds: number[]) => {
-  return tagIds
-    .map(id => {
-      const tag = billStore.tagList.find(t => t.id === id);
-      return tag ? (tag as any).code : null;
-    })
-    .filter(code => code !== null)
-    .join(",");
-};
-
-// 根据标签code获取标签ID
-const getTagIdsByCodes = (tagCodesStr: string) => {
-  if (!tagCodesStr) return [];
-  const codes = tagCodesStr.split(",").map(c => Number(c.trim()));
-  return billStore.tagList
-    .filter(tag => codes.includes((tag as any).code))
-    .map(tag => tag.id);
-};
-
-// 切换标签选中状态
-const toggleTag = (tagId: number) => {
-  const index = selectedTags.value.indexOf(tagId);
-  if (index === -1) {
-    selectedTags.value = [...selectedTags.value, tagId];
-  } else {
-    selectedTags.value = selectedTags.value.filter(id => id !== tagId);
+// 类型切换
+const handleTypeChange = () => {
+  // 清空分类选择
+  formData.value.mainClassifyId = null;
+  formData.value.subClassifyId = null;
+  // 如果是收入类型，清空信用卡消费
+  if (formData.value.type === "INCOME") {
+    formData.value.isCreditCard = false;
   }
 };
 
-// 移除标签
-const removeTag = (tagId: number) => {
-  selectedTags.value = selectedTags.value.filter(id => id !== tagId);
+// 选择分类
+const handleClassifySelect = (
+  mainClassify: Classify,
+  subClassify?: Classify
+) => {
+  formData.value.mainClassifyId = mainClassify.id;
+  formData.value.subClassifyId = subClassify?.id || null;
+};
+
+// 选择备注
+const handleRemarkSelect = (
+  remark: UserRemark,
+  mainClassify?: Classify,
+  subClassify?: Classify
+) => {
+  formData.value.remark = remark.remark;
+  // 如果备注关联了分类，自动设置
+  if (mainClassify) {
+    // 根据分类类型切换收入/支出
+    if (mainClassify.type !== formData.value.type) {
+      formData.value.type = mainClassify.type;
+    }
+    formData.value.mainClassifyId = mainClassify.id;
+    formData.value.subClassifyId = subClassify?.id || null;
+  }
+};
+
+// 选择账本
+const handleSelectAccountBook = (bookId: number) => {
+  formData.value.accountBookId = bookId;
+  showAccountBookPicker.value = false;
+};
+
+// 表单验证
+const validate = () => {
+  if (!formData.value.amount || formData.value.amount <= 0) {
+    showError(t("mobile.record.validateAmount"));
+    return false;
+  }
+  if (!formData.value.accountBookId) {
+    showError(t("mobile.record.validateAccountBook"));
+    return false;
+  }
+  if (!formData.value.mainClassifyId) {
+    showError(t("mobile.record.validateClassify"));
+    return false;
+  }
+  if (!formData.value.date) {
+    showError(t("mobile.record.validateDate"));
+    return false;
+  }
+  return true;
+};
+
+// 保存
+const handleSave = async () => {
+  if (!validate() || !userId.value) return;
+
+  saving.value = true;
+  showLoading(t("mobile.common.loading"));
+
+  try {
+    const params = {
+      accountBookId: formData.value.accountBookId!,
+      amount: formData.value.amount,
+      type: formData.value.type,
+      date: formData.value.date,
+      remark: formData.value.remark || "",
+      mainClassify: formData.value.mainClassifyId!,
+      subClassify: formData.value.subClassifyId || undefined,
+      isCreditCard: formData.value.isCreditCard ? "YES" : "NO",
+      isAddRemark: formData.value.addToRemark ? "YES" : "NO",
+      tagCodes: formData.value.tagIds.join(",")
+    };
+
+    if (isEdit.value) {
+      await updateIncomeExpense(userId.value, {
+        id: parseInt(recordId.value),
+        ...params
+      });
+    } else {
+      await createIncomeExpense(userId.value, params);
+    }
+
+    hideLoading();
+
+    // 如果勾选了加入常用备注，重新加载备注列表
+    if (formData.value.addToRemark) {
+      await remarkStore.fetchList(userId.value);
+    }
+
+    showSuccess(t("mobile.record.saveSuccess"));
+    router.back();
+  } catch (error: any) {
+    hideLoading();
+    showError(error?.message || t("mobile.record.saveFailed"));
+  } finally {
+    saving.value = false;
+  }
 };
 
 // 加载编辑数据
 const loadEditData = async () => {
-  if (!isEdit.value || !recordId.value) return;
+  if (!isEdit.value) return;
 
-  loading.value = true;
-  try {
-    // 先从store中查找，找不到则从API获取
-    let record = billStore.list.find((r: IncomeExpense) => r.id === recordId.value);
+  // 优先使用 sessionStorage 传递的数据
+  const storedData = sessionStorage.getItem("editRecordData");
+  if (storedData) {
+    try {
+      const stateData = JSON.parse(storedData) as IncomeExpenseRecord;
 
-    if (!record) {
-      // 从API获取单条记录
-      record = await getIncomeExpenseById(recordId.value);
-    }
-
-    if (record) {
-      // 先设置类型，确保分类列表正确筛选
-      form.value.type = record.type;
-
-      form.value = {
-        id: record.id,
-        accountBookId: record.accountBookId,
-        amount: record.amount,
-        type: record.type,
-        date: record.date,
-        remark: record.remark,
-        mainClassify: record.mainClassify,
-        subClassify: record.subClassify || undefined,
-        isCreditCard: record.isCreditCard,
-        isAddRemark: "NO",
-        tagCodes: record.tagCodes || ""
-      };
-      if (record.subClassify) {
-        selectedClassifyId.value = record.subClassify;
-      } else if (record.mainClassify) {
-        selectedClassifyId.value = record.mainClassify;
+      // 处理标签ID：从 tagCodes 解析（逗号分隔的字符串）
+      let tagIds: number[] = [];
+      if (stateData.tagCodes) {
+        if (typeof stateData.tagCodes === "string") {
+          tagIds = stateData.tagCodes.split(",").filter(Boolean).map(Number);
+        } else if (Array.isArray(stateData.tagCodes)) {
+          tagIds = stateData.tagCodes.map(Number);
+        }
       }
-      selectedTags.value = getTagIdsByCodes(record.tagCodes || "");
+
+      formData.value = {
+        type: stateData.type as "EXPENSE" | "INCOME",
+        amount: stateData.amount,
+        accountBookId: stateData.accountBookId,
+        mainClassifyId: stateData.mainClassify,
+        subClassifyId: stateData.subClassify,
+        date: stateData.date,
+        remark: stateData.remark || "",
+        addToRemark: false,
+        tagIds,
+        isCreditCard: stateData.isCreditCard === "YES"
+      };
+      // 使用后清除
+      sessionStorage.removeItem("editRecordData");
+      return;
+    } catch (e) {
+      console.error("解析存储数据失败:", e);
     }
+  }
+
+  // 如果没有存储数据，则调用接口获取
+  loading.value = true;
+  showLoading(t("mobile.common.loading"));
+
+  try {
+    const data = await getIncomeExpenseById(parseInt(recordId.value));
+
+    // 处理标签ID：从 tagCodes 解析
+    let tagIds: number[] = [];
+    if (data.tagCodes) {
+      if (typeof data.tagCodes === "string") {
+        tagIds = data.tagCodes.split(",").filter(Boolean).map(Number);
+      } else if (Array.isArray(data.tagCodes)) {
+        tagIds = data.tagCodes.map(Number);
+      }
+    }
+
+    formData.value = {
+      type: data.type as "EXPENSE" | "INCOME",
+      amount: data.amount,
+      accountBookId: data.accountBookId,
+      mainClassifyId: data.mainClassify,
+      subClassifyId: data.subClassify,
+      date: data.date,
+      remark: data.remark || "",
+      addToRemark: false,
+      tagIds,
+      isCreditCard: data.isCreditCard === "YES"
+    };
+
+    hideLoading();
   } catch (error: any) {
-    showNotify({ type: "danger", message: error?.message || "加载失败" });
+    hideLoading();
+    showError(error?.message || t("mobile.common.failed"));
+    router.back();
   } finally {
     loading.value = false;
   }
 };
 
-// 初始化信用卡配置
-const initCreditCardFromConfig = () => {
-  const config = billStore.userConfigList.find(c => c.name === "is_credit_card");
-  form.value.isCreditCard = config?.value === "1" ? "YES" : "NO";
-};
-
 // 初始化
-onMounted(async () => {
-  if (!userStore.id) {
-    router.replace("/login");
-    return;
+const init = async () => {
+  if (!userId.value) return;
+
+  // 只获取没有数据的store
+  const promises = [];
+  if (accountBookStore.list.length === 0) {
+    promises.push(accountBookStore.fetchList(userId.value));
+  }
+  if (userTagStore.list.length === 0) {
+    promises.push(userTagStore.fetchList(userId.value));
+  }
+  if (remarkStore.list.length === 0) {
+    promises.push(remarkStore.fetchList(userId.value));
+  }
+  if (classifyStore.list.length === 0) {
+    promises.push(classifyStore.fetchList(userId.value));
+  }
+  if (promises.length > 0) {
+    await Promise.all(promises);
   }
 
-  await billStore.loadClassifyAndTag(userStore.id);
-
-  if (billStore.currentAccountBook) {
-    form.value.accountBookId = billStore.currentAccountBook.id;
+  // 设置默认账本
+  if (!formData.value.accountBookId) {
+    formData.value.accountBookId = accountBookStore.defaultAccountBookId;
   }
 
-  initCreditCardFromConfig();
-  await loadEditData();
+  // 如果是编辑模式，加载编辑数据
+  if (isEdit.value) {
+    await loadEditData();
+  }
+};
+
+onMounted(() => {
+  init();
 });
-
-// 监听分类选择变化
-watch(selectedClassifyId, val => {
-  if (val) {
-    const classify = billStore.classifyList.find(c => c.id === val);
-    if (classify) {
-      if (classify.pid === -1) {
-        form.value.mainClassify = val;
-        form.value.subClassify = undefined;
-      } else {
-        form.value.mainClassify = classify.pid;
-        form.value.subClassify = val;
-      }
-    }
-  } else {
-    form.value.mainClassify = 0;
-    form.value.subClassify = undefined;
-  }
-});
-
-// 监听标签变化
-watch(selectedTags, val => {
-  form.value.tagCodes = getTagCodesByIds(val);
-}, { deep: true });
-
-// 切换类型
-const toggleType = (type: "INCOME" | "EXPENSE") => {
-  form.value.type = type;
-  selectedClassifyId.value = undefined;
-  form.value.mainClassify = 0;
-  form.value.subClassify = undefined;
-  tempSelectedMainClassifyId.value = undefined;
-};
-
-// 打开分类选择弹窗时，初始化临时选中状态
-const onOpenClassifyPicker = () => {
-  // 根据当前选中的分类ID，设置临时选中状态
-  if (selectedClassifyId.value) {
-    const classify = billStore.classifyList.find(c => c.id === selectedClassifyId.value);
-    if (classify) {
-      // 如果选中的是子分类，设置其父分类为临时选中
-      if (classify.pid !== -1) {
-        tempSelectedMainClassifyId.value = classify.pid;
-      } else {
-        tempSelectedMainClassifyId.value = selectedClassifyId.value;
-      }
-    }
-  } else {
-    tempSelectedMainClassifyId.value = undefined;
-  }
-};
-
-// 选择主分类
-const onSelectMainClassify = (classify: any) => {
-  tempSelectedMainClassifyId.value = classify.id;
-};
-
-// 确认主分类选择（点击确定按钮）
-const onConfirmMainClassify = () => {
-  if (tempSelectedMainClassifyId.value) {
-    selectedClassifyId.value = tempSelectedMainClassifyId.value;
-    showClassifyPicker.value = false;
-    tempSelectedMainClassifyId.value = undefined;
-  }
-};
-
-// 打开子分类选择
-const openSubClassifyPicker = () => {
-  showSubClassifyPicker.value = true;
-};
-
-// 选择子分类
-const onSelectSubClassify = (classifyId: number) => {
-  selectedClassifyId.value = classifyId;
-  showSubClassifyPicker.value = false;
-  showClassifyPicker.value = false;
-  tempSelectedMainClassifyId.value = undefined;
-};
-
-// 关闭子分类弹窗（不选择子分类，不改变分类）
-const onCloseSubClassifyPicker = () => {
-  showSubClassifyPicker.value = false;
-  // 不改变分类，保持原来的状态
-};
-
-// 日期选择 - 点击日期后自动关闭并填入
-const onSelectDate = (date: Date) => {
-  form.value.date = dayjs(date).format("YYYY-MM-DD");
-  showCalendar.value = false;
-};
-
-// 关闭分类弹窗时清除临时选择
-const onCloseClassifyPicker = () => {
-  tempSelectedMainClassifyId.value = undefined;
-};
-
-// 打开标签选择弹窗时，清空搜索
-const onOpenTagPicker = () => {
-  tagSearchKeyword.value = "";
-};
-
-// 选择常用备注
-const onSelectCommonRemark = (remark: { remark: string; classifyId: number }) => {
-  form.value.remark = remark.remark;
-  // 根据classifyId选中对应分类
-  if (remark.classifyId) {
-    const classify = billStore.classifyList.find(c => c.id === remark.classifyId);
-    if (classify) {
-      // 切换到对应的类型（收入/支出）
-      if (classify.type !== form.value.type) {
-        form.value.type = classify.type;
-        selectedClassifyId.value = undefined;
-        form.value.mainClassify = 0;
-        form.value.subClassify = undefined;
-      }
-      // 设置分类
-      if (classify.pid === -1) {
-        selectedClassifyId.value = classify.id;
-      } else {
-        selectedClassifyId.value = classify.id;
-      }
-    }
-  }
-  showRemarkPicker.value = false;
-};
-
-// 提交
-const handleSubmit = async () => {
-  if (form.value.amount <= 0) {
-    showNotify({ type: "warning", message: "请输入金额" });
-    return;
-  }
-
-  if (!form.value.mainClassify) {
-    showNotify({ type: "warning", message: "请选择分类" });
-    return;
-  }
-
-  if (form.value.type === "INCOME") {
-    form.value.isCreditCard = "NO";
-  }
-
-  submitting.value = true;
-  try {
-    // 构建提交数据，确保 subClassify 为 null 时明确传递
-    const submitData = {
-      ...form.value,
-      subClassify: form.value.subClassify ?? null
-    };
-
-    if (isEdit.value) {
-      await updateIncomeExpense(userStore.id!, submitData);
-      showNotify({ type: "success", message: "修改成功" });
-    } else {
-      await createIncomeExpense(userStore.id!, submitData);
-      showNotify({ type: "success", message: "记账成功" });
-    }
-    router.back();
-  } catch (error: any) {
-    showNotify({ type: "danger", message: error?.message || "操作失败" });
-  } finally {
-    submitting.value = false;
-  }
-};
-
-// 删除
-const handleDelete = async () => {
-  try {
-    await showConfirmDialog({
-      title: "确认删除",
-      message: "删除后无法恢复，确定要删除吗？"
-    });
-    await deleteIncomeExpense([recordId.value]);
-    showNotify({ type: "success", message: "删除成功" });
-    router.back();
-  } catch {
-    // 取消删除
-  }
-};
 </script>
 
 <template>
-  <div class="mobile-record">
-    <van-loading v-if="loading" class="page-loading" />
-
-    <template v-else>
-      <!-- 类型切换 -->
-      <div class="type-tabs">
-        <div
-          class="tab"
-          :class="{ active: form.type === 'EXPENSE' }"
-          @click="toggleType('EXPENSE')"
-        >
-          支出
-        </div>
-        <div
-          class="tab"
-          :class="{ active: form.type === 'INCOME' }"
-          @click="toggleType('INCOME')"
-        >
-          收入
-        </div>
+  <div class="record-page">
+    <!-- 类型切换 -->
+    <div class="type-switch">
+      <div
+        class="type-btn expense"
+        :class="{ active: formData.type === 'EXPENSE' }"
+        @click.stop="
+          formData.type = 'EXPENSE';
+          handleTypeChange();
+        "
+      >
+        {{ t("mobile.record.expense") }}
       </div>
-
-      <!-- 金额输入 -->
-      <div class="amount-section" @click="openAmountKeyboard">
-        <div class="amount-label">{{ form.type === 'EXPENSE' ? '支出' : '收入' }}金额</div>
-        <div class="amount-input">
-          <span class="currency">¥</span>
-          <span class="input">{{ amountDisplay }}</span>
-        </div>
+      <div
+        class="type-btn income"
+        :class="{ active: formData.type === 'INCOME' }"
+        @click.stop="
+          formData.type = 'INCOME';
+          handleTypeChange();
+        "
+      >
+        {{ t("mobile.record.income") }}
       </div>
+    </div>
 
-      <!-- 表单项 -->
-      <van-cell-group inset class="form-group">
-        <!-- 分类 -->
-        <van-cell
-          title="分类"
-          :value="classifyName || '请选择'"
-          is-link
-          @click="showClassifyPicker = true"
-        >
-          <template #icon>
-            <span class="cell-icon">📂</span>
-          </template>
-        </van-cell>
+    <!-- 金额输入 -->
+    <AmountInput
+      v-model="formData.amount"
+      :type="formData.type"
+      @click.stop
+    />
 
-        <!-- 日期 -->
-        <van-cell
-          title="日期"
-          :value="dateDisplay"
-          is-link
-          @click="showCalendar = true"
-        >
-          <template #icon>
-            <span class="cell-icon">📅</span>
-          </template>
-        </van-cell>
+    <!-- 表单区域 -->
+    <van-cell-group inset class="form-group">
+      <!-- 账本选择 -->
+      <van-cell
+        :title="t('mobile.record.accountBook')"
+        :value="
+          selectedAccountBookName || t('mobile.record.accountBookPlaceholder')
+        "
+        is-link
+        @click.stop="showAccountBookPicker = true"
+      />
 
-        <!-- 备注 -->
-        <van-cell
-          title="备注"
-          :value="form.remark || '添加备注'"
-          is-link
-          @click="showRemarkPicker = true"
-        >
-          <template #icon>
-            <span class="cell-icon">📝</span>
-          </template>
-        </van-cell>
+      <!-- 分类选择 -->
+      <van-cell
+        :title="t('mobile.record.classify')"
+        :value="selectedClassifyName || t('mobile.record.classifyPlaceholder')"
+        is-link
+        @click.stop="showClassifyPicker = true"
+      />
 
-        <!-- 标签 -->
-        <van-cell title="标签" is-link @click="showTagPicker = true">
-          <template #icon>
-            <span class="cell-icon">🏷️</span>
-          </template>
-          <template #value>
-            <div v-if="selectedTags.length > 0" class="selected-tags-preview">
-              <span
-                v-for="tagId in selectedTags"
-                :key="tagId"
-                class="selected-tag"
-                :style="{ background: getTagColor(tagId) }"
-              >
-                {{ getTagName(tagId) }}
-              </span>
-            </div>
-            <span v-else class="placeholder-text">添加标签</span>
-          </template>
-        </van-cell>
+      <!-- 日期选择 -->
+      <van-cell
+        :title="t('mobile.record.date')"
+        :value="formData.date"
+        is-link
+        @click.stop="showDatePicker = true"
+      />
 
-        <!-- 信用卡消费（仅支出类型显示） -->
-        <van-cell v-if="form.type === 'EXPENSE'" title="信用卡消费">
-          <template #icon>
-            <span class="cell-icon">💳</span>
-          </template>
-          <template #value>
-            <van-switch
-              v-model="form.isCreditCard"
-              active-value="YES"
-              inactive-value="NO"
-              size="20"
-              active-color="#d83d34"
-            />
-          </template>
-        </van-cell>
+      <!-- 备注选择 -->
+      <van-cell
+        :title="t('mobile.record.remark')"
+        :value="formData.remark || t('mobile.record.remarkPlaceholder')"
+        is-link
+        @click.stop="showRemarkPicker = true"
+      />
 
-        <!-- 添加到常用备注 -->
-        <van-cell title="添加到常用备注">
-          <template #icon>
-            <span class="cell-icon">📌</span>
-          </template>
-          <template #value>
-            <van-switch
-              v-model="form.isAddRemark"
-              active-value="YES"
-              inactive-value="NO"
-              size="20"
-              active-color="#d83d34"
-            />
-          </template>
-        </van-cell>
-      </van-cell-group>
-
-      <!-- 操作按钮 -->
-      <div class="actions">
-        <van-button
-          type="primary"
-          block
-          :loading="submitting"
-          @click="handleSubmit"
-        >
-          保存
-        </van-button>
-
-        <van-button
-          v-if="isEdit"
-          type="danger"
-          block
-          plain
-          @click="handleDelete"
-        >
-          删除
-        </van-button>
-      </div>
-    </template>
-
-    <!-- 主分类选择弹窗 -->
-    <van-popup
-      v-model:show="showClassifyPicker"
-      position="bottom"
-      round
-      style="height: 70%"
-      @open="onOpenClassifyPicker"
-      @close="onCloseClassifyPicker"
-    >
-      <div class="classify-picker">
-        <div class="picker-header">
-          <span class="title">选择分类</span>
-          <van-icon name="cross" @click="showClassifyPicker = false" />
-        </div>
-        <div class="classify-grid">
-          <div
-            v-for="item in classifyTreeData"
-            :key="item.id"
-            class="classify-item"
-            :class="{ active: tempSelectedMainClassifyId === item.id }"
-            @click="onSelectMainClassify(item)"
-          >
-            <span class="icon">{{ getClassifyIcon(item.image) }}</span>
-            <span class="name">{{ item.name }}</span>
-          </div>
-        </div>
-        <div class="picker-footer">
-          <van-button
-            v-if="currentMainClassify?.children?.length > 0"
-            type="default"
-            block
-            @click="openSubClassifyPicker"
-          >
-            选择子分类
-          </van-button>
-          <van-button type="primary" block @click="onConfirmMainClassify">
-            确定
-          </van-button>
-        </div>
-      </div>
-    </van-popup>
-
-    <!-- 子分类选择弹窗 -->
-    <van-popup
-      v-model:show="showSubClassifyPicker"
-      position="bottom"
-      round
-      style="height: 60%"
-      @close="onCloseSubClassifyPicker"
-    >
-      <div class="classify-picker">
-        <div class="picker-header">
-          <span class="title">选择子分类 - {{ currentMainClassify?.name }}</span>
-          <van-icon name="cross" @click="showSubClassifyPicker = false" />
-        </div>
-        <div class="classify-grid">
-          <div
-            v-for="item in subClassifyList"
-            :key="item.id"
-            class="classify-item"
-            :class="{ active: selectedClassifyId === item.id }"
-            @click="onSelectSubClassify(item.id)"
-          >
-            <span class="icon">{{ getClassifyIcon(item.image) }}</span>
-            <span class="name">{{ item.name }}</span>
-          </div>
-        </div>
-      </div>
-    </van-popup>
-
-    <!-- 日期选择弹窗 -->
-    <van-popup
-      v-model:show="showCalendar"
-      position="bottom"
-      round
-      style="height: 580px"
-    >
-      <div class="calendar-picker">
-        <div class="picker-header">
-          <span class="title">选择日期</span>
-          <van-icon name="cross" @click="showCalendar = false" />
-        </div>
-        <van-calendar
-          :show-confirm="false"
-          :default-date="new Date(form.date)"
-          :min-date="new Date('2020-01-01')"
-          :max-date="new Date()"
-          :poppable="false"
-          :show-title="false"
-          class="calendar-content"
-          @select="onSelectDate"
-        />
-      </div>
-    </van-popup>
-
-    <!-- 备注选择弹窗 -->
-    <van-popup
-      v-model:show="showRemarkPicker"
-      position="bottom"
-      round
-      style="height: 50%"
-    >
-      <div class="remark-picker">
-        <div class="picker-header">
-          <span class="title">添加备注</span>
-          <van-icon name="cross" @click="showRemarkPicker = false" />
-        </div>
-        <div class="remark-content">
-          <van-field
-            v-model="form.remark"
-            placeholder="请输入备注内容"
-            class="remark-input"
+      <!-- 加入常用备注 -->
+      <van-cell center :title="t('mobile.record.addToRemark')">
+        <template #right-icon>
+          <van-switch
+            v-model="formData.addToRemark"
+            size="20"
+            active-color="#ee0a24"
           />
-          <div class="common-remarks" v-if="billStore.remarkList.length > 0">
-            <div class="section-title">常用备注</div>
-            <div class="remark-tags">
-              <span
-                v-for="remark in billStore.remarkList.slice(0, 12)"
-                :key="remark.id"
-                class="remark-tag"
-                @click="onSelectCommonRemark(remark)"
-              >
-                {{ remark.remark }}
-              </span>
-            </div>
-          </div>
-        </div>
-      </div>
-    </van-popup>
+        </template>
+      </van-cell>
 
-    <!-- 标签选择弹窗 -->
-    <van-popup
-      v-model:show="showTagPicker"
-      position="bottom"
-      round
-      style="height: 60%"
-      @open="onOpenTagPicker"
-    >
-      <div class="tag-picker">
-        <div class="picker-header">
-          <span class="title">选择标签</span>
-          <van-icon name="cross" @click="showTagPicker = false" />
-        </div>
-        <div class="tag-content">
-          <van-search
-            v-model="tagSearchKeyword"
-            placeholder="搜索标签"
-            class="tag-search"
-          />
-          <div class="tag-list">
-            <span
-              v-for="tag in filteredTagList"
+      <!-- 标签选择 -->
+      <van-cell
+        :title="t('mobile.record.tag')"
+        is-link
+        @click.stop="showTagPicker = true"
+      >
+        <template #value>
+          <div v-if="selectedTags.length > 0" class="selected-tags-cell">
+            <van-tag
+              v-for="tag in selectedTags"
               :key="tag.id"
-              class="tag-item"
-              :class="{ active: selectedTags.includes(tag.id) }"
-              :style="{
-                background: selectedTags.includes(tag.id) ? tag.color : 'transparent',
-                color: selectedTags.includes(tag.id) ? '#fff' : tag.color,
-                border: `1px solid ${tag.color}`
-              }"
-              @click="toggleTag(tag.id)"
+              :color="tag.color"
+              text-color="#fff"
             >
               {{ tag.name }}
-            </span>
+            </van-tag>
           </div>
-          <van-empty v-if="filteredTagList.length === 0" description="暂无标签" />
-        </div>
-        <div class="picker-footer" v-if="selectedTags.length > 0">
-          <div class="selected-tags">
-            <span class="label">已选：</span>
-            <span
-              v-for="tagId in selectedTags"
-              :key="tagId"
-              class="selected-tag-item"
-              :style="{ background: getTagColor(tagId) }"
-            >
-              {{ getTagName(tagId) }}
-              <van-icon name="cross" class="remove-icon" @click.stop="removeTag(tagId)" />
-            </span>
-          </div>
-        </div>
-      </div>
-    </van-popup>
+          <span v-else class="placeholder">{{
+            t("mobile.record.tagPlaceholder")
+          }}</span>
+        </template>
+      </van-cell>
 
-    <!-- 金额数字键盘 -->
-    <van-number-keyboard
-      :show="showNumberKeyboard"
-      theme="custom"
-      extra-key="."
-      close-button-text="完成"
-      @input="onAmountInput"
-      @delete="onAmountDelete"
-      @close="onAmountKeyboardClose"
-      @blur="onAmountKeyboardClose"
+      <!-- 信用卡消费（仅支出） -->
+      <van-cell
+        v-if="formData.type === 'EXPENSE'"
+        center
+        :title="t('mobile.record.isCreditCard')"
+      >
+        <template #right-icon>
+          <van-switch
+            v-model="formData.isCreditCard"
+            size="20"
+            active-color="#ee0a24"
+          />
+        </template>
+      </van-cell>
+    </van-cell-group>
+
+    <!-- 保存按钮 -->
+    <div class="save-btn-wrapper">
+      <van-button
+        type="danger"
+        block
+        round
+        :loading="saving"
+        @click.stop="handleSave"
+      >
+        {{ t("mobile.record.save") }}
+      </van-button>
+    </div>
+
+    <!-- 分类选择器 -->
+    <ClassifyPicker
+      v-model="showClassifyPicker"
+      :classify-list="classifyList"
+      :type="formData.type"
+      :main-classify-id="formData.mainClassifyId"
+      :sub-classify-id="formData.subClassifyId"
+      @select="handleClassifySelect"
     />
+
+    <!-- 标签选择器 -->
+    <TagPicker
+      v-model="showTagPicker"
+      :tag-list="tagList"
+      :selected-ids="formData.tagIds"
+      @update:selected-ids="formData.tagIds = $event"
+    />
+
+    <!-- 备注选择器 -->
+    <RemarkPicker
+      v-model="showRemarkPicker"
+      :remark-list="remarkList"
+      :classify-list="classifyList"
+      :current-remark="formData.remark"
+      @select="handleRemarkSelect"
+    />
+
+    <!-- 日期选择器 -->
+    <van-calendar
+      v-model:show="showDatePicker"
+      :default-date="selectedDate"
+      :min-date="new Date(2020, 0, 1)"
+      :max-date="new Date()"
+      :show-confirm="false"
+      position="bottom"
+      round
+      teleport="body"
+      @select="handleDateSelect"
+    />
+
+    <!-- 账本选择器 -->
+    <van-action-sheet
+      v-model:show="showAccountBookPicker"
+      :title="t('mobile.home.selectAccountBook')"
+    >
+      <div class="account-book-list">
+        <van-cell
+          v-for="book in accountBookList"
+          :key="book.id"
+          clickable
+          @click="handleSelectAccountBook(book.id)"
+        >
+          <template #title>
+            <div class="book-item">
+              <span class="book-name">{{ book.name }}</span>
+              <span v-if="book.isDefault === 'YES'" class="default-tag"
+                >默认</span
+              >
+            </div>
+          </template>
+        </van-cell>
+      </div>
+    </van-action-sheet>
   </div>
 </template>
 
 <style lang="scss" scoped>
-.mobile-record {
+@use "@/styles/mobile/variables.scss" as *;
+
+.record-page {
   min-height: 100vh;
-  background-color: #f7f8fa;
-  padding-bottom: 20px;
+  padding-bottom: calc(80px + env(safe-area-inset-bottom));
+  background-color: $color-background;
 }
 
-.page-loading {
+.type-switch {
   display: flex;
-  justify-content: center;
-  padding-top: 100px;
-}
-
-.type-tabs {
-  display: flex;
-  background: #fff;
-  padding: 15px 20px;
   gap: 12px;
+  padding: 12px 16px;
+  background-color: $color-card;
 
-  .tab {
+  .type-btn {
     flex: 1;
-    text-align: center;
-    padding: 12px;
-    border-radius: 8px;
-    background: #f7f8fa;
-    font-size: 16px;
-    font-weight: 500;
-    color: #646566;
-    transition: all 0.3s;
-
-    &.active {
-      background: #d83d34;
-      color: #fff;
-    }
-  }
-}
-
-.amount-section {
-  background: #fff;
-  padding: 24px 20px;
-  margin-bottom: 10px;
-  cursor: pointer;
-
-  .amount-label {
+    padding: 10px 0;
     font-size: 14px;
-    color: #969799;
-    margin-bottom: 12px;
-  }
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid $color-border;
+    border-radius: 8px;
+    transition: all 0.2s;
 
-  .amount-input {
-    display: flex;
-    align-items: baseline;
+    &.expense {
+      color: $color-text-secondary;
 
-    .currency {
-      font-size: 28px;
-      font-weight: 600;
-      color: #323233;
-      margin-right: 4px;
+      &.active {
+        color: #fff;
+        background-color: $color-primary;
+        border-color: $color-primary;
+      }
     }
 
-    .input {
-      flex: 1;
-      font-size: 40px;
-      font-weight: 600;
-      color: #323233;
+    &.income {
+      color: $color-text-secondary;
+
+      &.active {
+        color: #fff;
+        background-color: $color-secondary;
+        border-color: $color-secondary;
+      }
     }
   }
 }
 
 .form-group {
-  margin-bottom: 20px;
-
-  .cell-icon {
-    font-size: 18px;
-    margin-right: 8px;
-  }
-
-  .selected-tags-preview {
-    display: flex;
-    flex-wrap: wrap;
-    gap: 4px;
-    justify-content: flex-end;
-
-    .selected-tag {
-      display: inline-block;
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 12px;
-      color: #fff;
-    }
-  }
-
-  .placeholder-text {
-    color: #969799;
-  }
+  margin: 12px 16px;
 }
 
-.actions {
-  padding: 0 16px;
-
-  .van-button--primary {
-    background: #d83d34;
-    border-color: #d83d34;
-  }
-
-  .van-button--danger {
-    &.van-button--plain {
-      background: #fff;
-      border-color: #d83d34;
-      color: #d83d34;
-    }
-  }
-
-  .van-button {
-    margin-bottom: 12px;
-  }
+.save-btn-wrapper {
+  position: fixed;
+  right: 0;
+  bottom: 0;
+  left: 0;
+  z-index: 10;
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
+  background-color: $color-background;
 }
 
-// 分类选择器
-.classify-picker {
-  height: 100%;
+.selected-tags-cell {
   display: flex;
-  flex-direction: column;
-
-  .picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #ebedf0;
-
-    .title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #323233;
-    }
-  }
-
-  .classify-grid {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 12px;
-    align-content: start;
-
-    .classify-item {
-      display: flex;
-      flex-direction: column;
-      align-items: center;
-      padding: 12px 8px;
-      border-radius: 12px;
-      background: #f7f8fa;
-      cursor: pointer;
-      transition: all 0.2s;
-
-      &:active {
-        background: #e8e8e8;
-      }
-
-      &.active {
-        background: #fff5f5;
-        border: 2px solid #d83d34;
-      }
-
-      .icon {
-        font-size: 28px;
-        margin-bottom: 6px;
-      }
-
-      .name {
-        font-size: 12px;
-        color: #323233;
-        text-align: center;
-      }
-    }
-  }
-
-  .picker-footer {
-    padding: 12px 16px;
-    border-top: 1px solid #ebedf0;
-    display: flex;
-    gap: 12px;
-
-    .van-button {
-      flex: 1;
-    }
-
-    .van-button--primary {
-      background: #d83d34;
-      border-color: #d83d34;
-    }
-  }
+  flex-wrap: wrap;
+  gap: 6px;
+  justify-content: flex-end;
 }
 
-// 日历选择器
-.calendar-picker {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  .picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #ebedf0;
-
-    .title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #323233;
-    }
-  }
-
-  .calendar-content {
-    flex: 1;
-    height: auto;
-  }
-
-  :deep(.van-calendar) {
-    height: 100%;
-
-    .van-calendar__selected-day {
-      background: #d83d34;
-    }
-
-    .van-calendar__top-info {
-      color: #d83d34;
-    }
-
-    // 当前日期红色边框 - 只显示边框，不影响选中状态
-    .van-calendar__day--today {
-      position: relative;
-
-      &::after {
-        content: "";
-        position: absolute;
-        top: 50%;
-        left: 50%;
-        transform: translate(-50%, -50%);
-        width: 28px;
-        height: 28px;
-        border: 2px solid #d83d34;
-        border-radius: 50%;
-        pointer-events: none;
-        z-index: 1;
-      }
-
-      // 如果今天被选中，边框颜色变白以保持可见
-      &.van-calendar__selected-day::after {
-        border-color: #fff;
-      }
-    }
-  }
+.placeholder {
+  color: $color-text-secondary;
 }
 
-// 备注选择器
-.remark-picker {
-  height: 100%;
-  display: flex;
-  flex-direction: column;
-
-  .picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #ebedf0;
-
-    .title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #323233;
-    }
-  }
-
-  .remark-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-
-    .remark-input {
-      margin-bottom: 16px;
-    }
-
-    .section-title {
-      font-size: 14px;
-      color: #969799;
-      margin-bottom: 12px;
-    }
-
-    .remark-tags {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-
-      .remark-tag {
-        display: inline-block;
-        padding: 6px 12px;
-        background: #f7f8fa;
-        border-radius: 6px;
-        font-size: 13px;
-        color: #323233;
-        cursor: pointer;
-
-        &:active {
-          background: #e8e8e8;
-        }
-      }
-    }
-  }
+.account-book-list {
+  max-height: 300px;
+  padding-bottom: env(safe-area-inset-bottom);
+  overflow-y: auto;
 }
 
-// 标签选择器
-.tag-picker {
-  height: 100%;
+.book-item {
   display: flex;
-  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+}
 
-  .picker-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    padding: 16px;
-    border-bottom: 1px solid #ebedf0;
-
-    .title {
-      font-size: 16px;
-      font-weight: 600;
-      color: #323233;
-    }
-  }
-
-  .tag-content {
-    flex: 1;
-    overflow-y: auto;
-    padding: 12px;
-
-    .tag-search {
-      margin-bottom: 12px;
-      padding: 0;
-    }
-
-    .tag-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 8px;
-
-      .tag-item {
-        display: inline-block;
-        padding: 6px 14px;
-        border-radius: 6px;
-        font-size: 13px;
-        cursor: pointer;
-        transition: all 0.2s;
-
-        &:active {
-          opacity: 0.8;
-        }
-
-        &.active {
-          box-shadow: 0 2px 8px rgba(0, 0, 0, 0.15);
-        }
-      }
-    }
-  }
-
-  .picker-footer {
-    padding: 12px 16px;
-    border-top: 1px solid #ebedf0;
-    background: #fff;
-
-    .selected-tags {
-      display: flex;
-      flex-wrap: wrap;
-      align-items: center;
-      gap: 8px;
-
-      .label {
-        font-size: 14px;
-        color: #646566;
-      }
-
-      .selected-tag-item {
-        display: inline-flex;
-        align-items: center;
-        gap: 4px;
-        padding: 4px 10px;
-        border-radius: 4px;
-        font-size: 12px;
-        color: #fff;
-
-        .remove-icon {
-          font-size: 12px;
-          cursor: pointer;
-        }
-      }
-    }
-  }
+.default-tag {
+  font-size: 12px;
+  color: #00a151;
 }
 </style>

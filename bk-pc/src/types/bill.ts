@@ -83,8 +83,10 @@ export interface IncomeExpenseRecord {
   mainClassifyName: string;
   subClassifyName: string;
   mainClassifyImage: string;
+  subClassifyImage: string | null;
   tagCodes: string | null;
   isCreditCard: string;
+  tags?: Tag[];
 }
 
 export interface DaySum {

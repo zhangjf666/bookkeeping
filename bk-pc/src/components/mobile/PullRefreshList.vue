@@ -23,7 +23,7 @@ const loadingMore = ref(false);
 // 监听外部 loading 状态
 watch(
   () => props.loading,
-  (val) => {
+  val => {
     if (!val) {
       refreshing.value = false;
       loadingMore.value = false;

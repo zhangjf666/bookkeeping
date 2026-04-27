@@ -8,6 +8,7 @@ import { storageLocal, isObject } from "@pureadmin/utils";
 import enLocale from "element-plus/es/locale/lang/en";
 import zhLocale from "element-plus/es/locale/lang/zh-cn";
 
+// 加载 PC 端 YAML 文件
 const siphonI18n = (function () {
   // 仅初始化一次国际化配置
   const cache = Object.fromEntries(
@@ -23,13 +24,30 @@ const siphonI18n = (function () {
   };
 })();
 
+// 加载移动端 YAML 文件
+const siphonMobileI18n = (function () {
+  const cache = Object.fromEntries(
+    Object.entries(
+      import.meta.glob("../../locales/mobile/*.y(a)?ml", { eager: true })
+    ).map(([key, value]: any) => {
+      const matched = key.match(/([A-Za-z0-9-_]+)\./i)[1];
+      return [matched, value.default];
+    })
+  );
+  return (prefix = "zh-CN") => {
+    return cache[prefix] || {};
+  };
+})();
+
 export const localesConfigs = {
   zh: {
     ...siphonI18n("zh-CN"),
+    mobile: siphonMobileI18n("zh-CN"),
     ...zhLocale
   },
   en: {
     ...siphonI18n("en"),
+    mobile: siphonMobileI18n("en"),
     ...enLocale
   }
 };

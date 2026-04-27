@@ -1,5 +1,5 @@
 import type { RouteRecordRaw } from "vue-router";
-import MobileLayout from "@/layouts/MobileLayout.vue";
+import MobileLayout from "@/mobile-layout/MobileLayout.vue";
 
 /**
  * 移动端路由配置
@@ -37,7 +37,7 @@ export const mobileRoutes: Array<RouteRecordRaw> = [
         name: "MobileRecord",
         component: () => import("@/views/mobile/record/index.vue"),
         meta: {
-          title: "记账",
+          title: "record.addTitle",
           showTabBar: false
         }
       },
@@ -46,7 +46,7 @@ export const mobileRoutes: Array<RouteRecordRaw> = [
         name: "MobileRecordEdit",
         component: () => import("@/views/mobile/record/index.vue"),
         meta: {
-          title: "编辑记录",
+          title: "record.editTitle",
           showTabBar: false
         }
       },

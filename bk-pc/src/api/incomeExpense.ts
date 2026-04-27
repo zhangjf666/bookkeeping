@@ -73,7 +73,11 @@ export const getIncomeExpenseById = (id: number) => {
   return http.request<IncomeExpense>("get", `/incomeExpense/${id}`);
 };
 
-export const createRemark = (data: { userId: number; remark: string; classifyId: number }) => {
+export const createRemark = (data: {
+  userId: number;
+  remark: string;
+  classifyId: number;
+}) => {
   return http.request<void>("post", "/userRemark", { data });
 };
 

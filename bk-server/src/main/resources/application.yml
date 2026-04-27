@@ -100,7 +100,7 @@ logging:
   logfilterkey: password
   whitelist:
 server:
-  port: 8080
+  port: 8090
   servlet:
     encoding:
       charset: utf-8

@@ -29,10 +29,14 @@ const selectedDate = ref<string[]>([
 // 监听 props 变化更新选中日期
 watch(
   () => props.modelValue,
-  (val) => {
+  val => {
     if (val) {
       const date = new Date(val);
-      selectedDate.value = [String(date.getFullYear()), String(date.getMonth() + 1), String(date.getDate())];
+      selectedDate.value = [
+        String(date.getFullYear()),
+        String(date.getMonth() + 1),
+        String(date.getDate())
+      ];
     }
   },
   { immediate: true }
@@ -90,15 +94,11 @@ const selectYesterday = () => {
 
 <template>
   <div class="date-picker">
-    <van-cell
-      :title="label || '日期'"
-      is-link
-      @click="openPicker"
-    >
+    <van-cell :title="label || '日期'" is-link @click="openPicker">
       <template #value>
         <span class="date-value">
           <span v-if="dateLabel" class="date-label">{{ dateLabel }}</span>
-          {{ displayValue || placeholder || '请选择日期' }}
+          {{ displayValue || placeholder || "请选择日期" }}
         </span>
       </template>
     </van-cell>
@@ -137,15 +137,15 @@ const selectYesterday = () => {
 .date-picker {
   .date-value {
     display: flex;
-    align-items: center;
     gap: 5px;
+    align-items: center;
 
     .date-label {
       padding: 2px 6px;
-      background: #f5f5f5;
-      border-radius: 4px;
       font-size: 12px;
       color: #666;
+      background: #f5f5f5;
+      border-radius: 4px;
     }
   }
 

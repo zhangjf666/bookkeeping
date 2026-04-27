@@ -31,7 +31,8 @@ export default {
         icon: "ep:wallet",
         title: $t("menus.pureAccountBookSetting"),
         pcComponent: () => import("@/views/settings/account-book/index.vue"),
-        mobileComponent: () => import("@/views/settings/account-book/index.vue"),
+        mobileComponent: () =>
+          import("@/views/settings/account-book/index.vue"),
         showTabBar: false
       }
     },

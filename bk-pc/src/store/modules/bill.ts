@@ -100,7 +100,9 @@ export const useBillStore = defineStore("pure-bill", {
           if (append) {
             // 追加数据，去重
             const existingIds = new Set(this.list.map(item => item.id));
-            const newItems = records.filter((item: IncomeExpense) => !existingIds.has(item.id));
+            const newItems = records.filter(
+              (item: IncomeExpense) => !existingIds.has(item.id)
+            );
             this.list = [...this.list, ...newItems];
           } else {
             this.list = records;

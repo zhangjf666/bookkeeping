@@ -41,22 +41,22 @@ const showEmpty = computed(() => props.empty && !props.loading);
 <style lang="scss" scoped>
 .mobile-page {
   min-height: 100vh;
-  background-color: var(--mobile-bg-page, #f5f5f5);
   padding-top: var(--mobile-safe-area-top, 0);
   padding-bottom: var(--mobile-safe-area-bottom, 0);
+  background-color: var(--mobile-bg-page, #f5f5f5);
 }
 
 .page-loading {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   min-height: 50vh;
 }
 
 .page-empty {
   display: flex;
-  justify-content: center;
   align-items: center;
+  justify-content: center;
   min-height: 50vh;
 }
 </style>

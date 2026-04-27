@@ -1,7 +1,15 @@
 import { http } from "@/utils/http";
 import type { UserTag, UserTagForm, UserTagPageResult } from "@/types/userTag";
 
-export const getUserTagList = (
+// 获取用户标签列表（不分页）
+export const getUserTagList = (userId: number) => {
+  return http.request<UserTag[]>("get", "/userTag", {
+    params: { userId }
+  });
+};
+
+// 获取用户标签分页列表
+export const getUserTagPage = (
   userId: number,
   params?: { name?: string; pageNo?: number; pageSize?: number }
 ) => {

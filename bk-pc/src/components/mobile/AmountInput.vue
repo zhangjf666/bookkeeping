@@ -8,24 +8,31 @@ defineOptions({
 const props = defineProps<{
   modelValue: number;
   type?: "EXPENSE" | "INCOME";
-  placeholder?: string;
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: number];
 }>();
 
-// 显示值
-const displayValue = ref("");
+// 数字键盘显示
+const showKeyboard = ref(false);
 
-// 初始化显示值
+// 输入值（字符串形式）
+const inputValue = ref("0");
+
+// 键盘绑定值
+const keyboardValue = ref("");
+
+// 初始化输入值
 watch(
   () => props.modelValue,
-  (val) => {
+  val => {
     if (val === 0) {
-      displayValue.value = "";
+      inputValue.value = "0";
+      keyboardValue.value = "";
     } else {
-      displayValue.value = val.toString();
+      inputValue.value = val.toFixed(2).replace(/\.?0+$/, "");
+      keyboardValue.value = inputValue.value;
     }
   },
   { immediate: true }
@@ -36,147 +43,137 @@ const amountClass = computed(() => {
   return props.type === "INCOME" ? "income" : "expense";
 });
 
-// 标签文字
-const labelText = computed(() => {
-  return props.type === "INCOME" ? "收入金额" : "支出金额";
+// 格式化显示金额（实时显示输入值）
+const displayAmount = computed(() => {
+  const value = inputValue.value;
+  if (!value || value === "0") return "0.00";
+
+  // 如果以小数点结尾，显示格式化
+  if (value.endsWith(".")) {
+    return value + "00";
+  }
+
+  // 如果有小数点，补齐小数位
+  if (value.includes(".")) {
+    const parts = value.split(".");
+    const decimal = (parts[1] || "").padEnd(2, "0").substring(0, 2);
+    return parts[0] + "." + decimal;
+  }
+
+  // 整数，补 .00
+  return value + ".00";
 });
 
-// 输入处理
-const handleInput = (value: string) => {
-  // 只允许数字和小数点
-  let formatted = value.replace(/[^\d.]/g, "");
+// 点击金额区域
+const handleAmountClick = () => {
+  // 如果当前值是 0，清空键盘值，让用户重新输入
+  keyboardValue.value = inputValue.value === "0" ? "" : inputValue.value;
+  showKeyboard.value = true;
+};
 
-  // 只允许一个小数点
-  const parts = formatted.split(".");
-  if (parts.length > 2) {
-    formatted = parts[0] + "." + parts.slice(1).join("");
+// 监听键盘输入变化
+watch(keyboardValue, val => {
+  if (!val) {
+    inputValue.value = "0";
+    return;
   }
 
-  // 限制小数位数为2位
-  if (parts.length === 2 && parts[1].length > 2) {
-    formatted = parts[0] + "." + parts[1].slice(0, 2);
+  // 限制小数位数最多2位
+  if (val.includes(".")) {
+    const parts = val.split(".");
+    if (parts[1] && parts[1].length > 2) {
+      keyboardValue.value = parts[0] + "." + parts[1].substring(0, 2);
+      return;
+    }
   }
 
-  displayValue.value = formatted;
+  // 限制整数位数最多8位
+  const intPart = val.split(".")[0];
+  if (intPart.length > 8) {
+    keyboardValue.value = intPart.substring(0, 8) + (val.includes(".") ? "." + val.split(".")[1] : "");
+    return;
+  }
 
-  // 更新值
-  const numValue = formatted ? parseFloat(formatted) : 0;
+  inputValue.value = val || "0";
+});
+
+// 确认金额
+const handleConfirm = () => {
+  let value = inputValue.value;
+
+  // 格式化为2位小数
+  if (value.includes(".")) {
+    const parts = value.split(".");
+    const decimal = (parts[1] || "").padEnd(2, "0").substring(0, 2);
+    value = parts[0] + "." + decimal;
+  } else {
+    value = value + ".00";
+  }
+
+  const numValue = parseFloat(value) || 0;
   emit("update:modelValue", numValue);
-};
-
-// 快捷金额按钮
-const quickAmounts = [100, 500, 1000, 5000];
-
-const setQuickAmount = (amount: number) => {
-  displayValue.value = amount.toString();
-  emit("update:modelValue", amount);
-};
-
-// 清空
-const clearAmount = () => {
-  displayValue.value = "";
-  emit("update:modelValue", 0);
+  inputValue.value = numValue.toFixed(2).replace(/\.?0+$/, "");
+  showKeyboard.value = false;
 };
 </script>
 
 <template>
   <div class="amount-input">
-    <div class="amount-label">{{ labelText }}</div>
-
-    <div class="amount-field" :class="amountClass">
+    <!-- 金额显示区域 -->
+    <div class="amount-display" :class="amountClass" @click="handleAmountClick">
       <span class="currency">¥</span>
-      <input
-        :value="displayValue"
-        type="text"
-        inputmode="decimal"
-        :placeholder="placeholder || '0.00'"
-        class="input"
-        @input="handleInput(($event.target as HTMLInputElement).value)"
-      />
-      <van-icon
-        v-if="displayValue"
-        name="clear"
-        class="clear-icon"
-        @click="clearAmount"
-      />
+      <span class="value">{{ displayAmount }}</span>
     </div>
 
-    <!-- 快捷金额 -->
-    <div class="quick-amounts">
-      <van-button
-        v-for="amount in quickAmounts"
-        :key="amount"
-        size="small"
-        type="default"
-        @click="setQuickAmount(amount)"
-      >
-        {{ amount }}
-      </van-button>
-    </div>
+    <!-- 数字键盘 -->
+    <van-number-keyboard
+      v-model:show="showKeyboard"
+      v-model="keyboardValue"
+      theme="custom"
+      extra-key="."
+      close-button-text="确定"
+      maxlength="11"
+      @close="handleConfirm"
+      @blur="handleConfirm"
+    />
   </div>
 </template>
 
 <style lang="scss" scoped>
+@use "@/styles/mobile/variables.scss" as *;
+
 .amount-input {
-  background: #fff;
-  padding: 20px;
+  padding: 16px;
+  background-color: $color-card;
+}
 
-  .amount-label {
-    font-size: 14px;
-    color: #666;
-    margin-bottom: 10px;
+.amount-display {
+  display: flex;
+  align-items: baseline;
+  padding: 12px 0;
+  cursor: pointer;
+
+  .currency {
+    margin-right: 4px;
+    font-size: 20px;
+    font-weight: 500;
   }
 
-  .amount-field {
-    display: flex;
-    align-items: center;
-    padding: 10px 0;
-    border-bottom: 2px solid #eee;
-    transition: border-color 0.3s;
-
-    &:focus-within {
-      border-color: #667eea;
-    }
-
-    &.income:focus-within {
-      border-color: #07c160;
-    }
-
-    .currency {
-      font-size: 24px;
-      font-weight: bold;
-      color: #333;
-    }
-
-    .input {
-      flex: 1;
-      font-size: 36px;
-      font-weight: bold;
-      border: none;
-      outline: none;
-      background: transparent;
-      padding-left: 5px;
-
-      &::placeholder {
-        color: #ccc;
-        font-weight: normal;
-      }
-    }
-
-    .clear-icon {
-      color: #999;
-      font-size: 20px;
-    }
+  .value {
+    font-size: 32px;
+    font-weight: 600;
   }
 
-  .quick-amounts {
-    display: flex;
-    gap: 10px;
-    margin-top: 15px;
+  &.expense {
+    color: $color-primary;
+  }
 
-    .van-button {
-      flex: 1;
-    }
+  &.income {
+    color: $color-secondary;
+  }
+
+  &:active {
+    opacity: 0.8;
   }
 }
 </style>

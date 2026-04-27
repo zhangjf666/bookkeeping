@@ -64,8 +64,8 @@ export function getPluginsList(
     // Vant 组件自动导入
     Components({
       resolvers: [VantResolver()],
-      dts: false,  // 禁用类型声明文件生成，避免冲突
-      dirs: [],    // 不扫描任何目录，只使用 resolver
+      dts: false, // 禁用类型声明文件生成，避免冲突
+      dirs: [], // 不扫描任何目录，只使用 resolver
       extensions: ["vue"]
     }),
     VITE_CDN ? cdn : null,

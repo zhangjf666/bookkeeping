@@ -71,7 +71,11 @@ export const getSafeAreaTop = (): number => {
   if (typeof window === "undefined") return 0;
   // CSS env variable support check
   const css = window.CSS;
-  if (css && css.supports && css.supports("padding-top: env(safe-area-inset-top)")) {
+  if (
+    css &&
+    css.supports &&
+    css.supports("padding-top: env(safe-area-inset-top)")
+  ) {
     return 44;
   }
   return 20;
@@ -84,7 +88,11 @@ export const getSafeAreaBottom = (): number => {
   if (typeof window === "undefined") return 0;
   // CSS env variable support check
   const css = window.CSS;
-  if (css && css.supports && css.supports("padding-bottom: env(safe-area-inset-bottom)")) {
+  if (
+    css &&
+    css.supports &&
+    css.supports("padding-bottom: env(safe-area-inset-bottom)")
+  ) {
     return 34;
   }
   return 0;

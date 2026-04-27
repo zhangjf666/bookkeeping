@@ -9,8 +9,8 @@ export interface RegisterParams {
   username: string;
   password: string;
   repeatPassword: string;
-  captcha: string;
-  uuid: string;
+  captcha?: string;
+  uuid?: string;
 }
 
 export interface CaptchaResult {
