@@ -29,7 +29,13 @@ export const useUserStore = defineStore("pure-user", {
       this.id = id;
     },
     SET_AVATAR(avatar: string) {
-      this.avatar = avatar;
+      // 如果 avatar 不为空且不是完整URL，拼接 BASE_URL
+      if (avatar && !avatar.startsWith("http")) {
+        const BASE_URL = import.meta.env.VITE_BASE_URL as string;
+        this.avatar = `${BASE_URL}${avatar}`;
+      } else {
+        this.avatar = avatar;
+      }
     },
     SET_USERNAME(username: string) {
       this.username = username;

@@ -42,7 +42,10 @@ const handleSelectRemark = (remark: UserRemark) => {
   const mainClassify = props.classifyList.find(
     item =>
       item.id === remark.classifyId &&
-      (item.pid === 0 || item.pid === -1 || item.pid === null || item.pid === undefined)
+      (item.pid === 0 ||
+        item.pid === -1 ||
+        item.pid === null ||
+        item.pid === undefined)
   );
 
   if (mainClassify) {

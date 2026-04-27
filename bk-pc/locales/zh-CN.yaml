@@ -199,6 +199,7 @@ profile:
   pureNicknameLength: 昵称不能超过20个字符
   pureEmailFormatError: 请输入正确的邮箱地址
   purePhoneFormatError: 请输入正确的手机号
+  pureAbout: 关于
 
 bill:
   pureTitle: 收支记录

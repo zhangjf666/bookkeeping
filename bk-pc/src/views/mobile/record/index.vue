@@ -392,11 +392,7 @@ onMounted(() => {
     </div>
 
     <!-- 金额输入 -->
-    <AmountInput
-      v-model="formData.amount"
-      :type="formData.type"
-      @click.stop
-    />
+    <AmountInput v-model="formData.amount" :type="formData.type" @click.stop />
 
     <!-- 表单区域 -->
     <van-cell-group inset class="form-group">

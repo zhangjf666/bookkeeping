@@ -1,5 +1,9 @@
 import { http } from "@/utils/http";
-import type { UserRemark, UserRemarkForm, UserRemarkPageResult } from "@/types/remark";
+import type {
+  UserRemark,
+  UserRemarkForm,
+  UserRemarkPageResult
+} from "@/types/remark";
 
 // 获取用户备注列表（不分页）
 export const getUserRemarkList = (userId: number) => {

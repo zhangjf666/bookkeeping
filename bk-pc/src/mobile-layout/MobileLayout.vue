@@ -14,10 +14,10 @@ const { t } = useI18n();
 // 当前激活的 Tab
 const activeTab = computed(() => {
   const path = route.path;
-  if (path === "/m/home" || path === "/m") return "home";
-  if (path === "/m/bill") return "bill";
-  if (path.startsWith("/m/report")) return "report";
-  if (path.startsWith("/m/user")) return "user";
+  if (path === "/dashboard" || path === "/") return "home";
+  if (path === "/bill-list") return "bill";
+  if (path.startsWith("/report")) return "report";
+  if (path.startsWith("/user")) return "user";
   return "";
 });
 
@@ -35,7 +35,15 @@ const pageTitle = computed(() => {
     Record: "mobile.record.addTitle",
     RecordEdit: "mobile.record.editTitle",
     Search: "mobile.search.title",
-    ReportDetail: "mobile.report.title"
+    ReportDetail: "mobile.report.title",
+    UserProfileSettings: "mobile.user.profile",
+    UserPasswordChange: "mobile.user.changePassword",
+    UserAbout: "mobile.user.about",
+    CommonConfigSetting: "mobile.user.commonSettings",
+    AccountBookSetting: "mobile.user.accountBook",
+    ClassifySetting: "mobile.user.classifyManage",
+    TagSetting: "mobile.user.tagManage",
+    RemarkSetting: "mobile.user.remarkManage"
   };
 
   const mobileKey = titleMap[routeName];
@@ -50,12 +58,12 @@ const pageTitle = computed(() => {
 // 是否显示返回按钮
 const showBack = computed(() => {
   const noBackPaths = [
-    "/m/home",
-    "/m/bill",
-    "/m/report",
-    "/m/user",
-    "/m/login",
-    "/m/register"
+    "/dashboard",
+    "/bill-list",
+    "/report/bill-report",
+    "/user/profile",
+    "/login",
+    "/register"
   ];
   return !noBackPaths.includes(route.path);
 });
@@ -68,7 +76,7 @@ const showTabBar = computed(() => {
 // 是否显示导航栏（有 TabBar 的页面不显示导航栏）
 const showNavBar = computed(() => {
   // 登录、注册页面不显示导航栏
-  if (["/m/login", "/m/register"].includes(route.path)) {
+  if (["/login", "/register"].includes(route.path)) {
     return false;
   }
   // 有 TabBar 的页面不显示导航栏
@@ -83,17 +91,17 @@ const onBack = () => {
   router.back();
 };
 
-// TabBar 配置
+// TabBar 配置（使用与PC端一致的路径）
 const tabs = [
-  { name: "home", path: "/m/home", icon: "wap-home-o", text: "首页" },
-  { name: "bill", path: "/m/bill", icon: "notes-o", text: "账单" },
+  { name: "home", path: "/dashboard", icon: "wap-home-o", text: "首页" },
+  { name: "bill", path: "/bill-list", icon: "notes-o", text: "账单" },
   {
     name: "report",
-    path: "/m/report",
+    path: "/report/bill-report",
     icon: "bar-chart-o",
     text: "报表"
   },
-  { name: "user", path: "/m/user", icon: "user-o", text: "我的" }
+  { name: "user", path: "/user/profile", icon: "user-o", text: "我的" }
 ];
 </script>
 

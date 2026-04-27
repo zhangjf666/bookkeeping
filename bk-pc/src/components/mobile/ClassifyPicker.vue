@@ -98,9 +98,11 @@ const handleClose = () => {
   // 才选中当前展开的顶级分类
   if (expandedMainId.value) {
     // 检查是否已有属于该顶级分类的子分类被选中
-    const hasSelectedSub = props.subClassifyId &&
+    const hasSelectedSub =
+      props.subClassifyId &&
       props.classifyList.some(
-        item => item.id === props.subClassifyId && item.pid === expandedMainId.value
+        item =>
+          item.id === props.subClassifyId && item.pid === expandedMainId.value
       );
 
     // 如果没有已选中的子分类属于这个顶级分类，才选中顶级分类
@@ -174,12 +176,15 @@ watch(show, val => {
               class="main-classify-item"
               :class="{
                 active: mainClassifyId === mainClassify.id && !subClassifyId,
-                'has-sub-active': mainClassifyId === mainClassify.id && subClassifyId,
+                'has-sub-active':
+                  mainClassifyId === mainClassify.id && subClassifyId,
                 expanded: expandedMainId === mainClassify.id
               }"
               @click="handleMainClick(mainClassify)"
             >
-              <span class="main-icon">{{ getClassifyIcon(mainClassify.image) }}</span>
+              <span class="main-icon">{{
+                getClassifyIcon(mainClassify.image)
+              }}</span>
               <span class="main-name">{{ mainClassify.name }}</span>
             </div>
           </div>
@@ -187,7 +192,10 @@ watch(show, val => {
           <!-- 子分类展开区域（在该行下方弹出） -->
           <transition name="drawer">
             <div
-              v-if="row.some(item => item.id === expandedMainId) && getSubList(expandedMainId!).length > 0"
+              v-if="
+                row.some(item => item.id === expandedMainId) &&
+                getSubList(expandedMainId!).length > 0
+              "
               class="sub-classify-drawer"
             >
               <div
@@ -202,7 +210,9 @@ watch(show, val => {
                   )
                 "
               >
-                <span class="sub-icon">{{ getClassifyIcon(subClassify.image) }}</span>
+                <span class="sub-icon">{{
+                  getClassifyIcon(subClassify.image)
+                }}</span>
                 <span class="sub-name">{{ subClassify.name }}</span>
               </div>
             </div>
@@ -262,9 +272,9 @@ watch(show, val => {
   padding: 12px 8px;
   cursor: pointer;
   background-color: $color-background;
+  border: 2px solid transparent;
   border-radius: 12px;
   transition: all 0.2s;
-  border: 2px solid transparent;
 
   &.active {
     background-color: rgba($color-primary, 0.15);
@@ -293,22 +303,22 @@ watch(show, val => {
   .main-name {
     max-width: 100%;
     overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 13px;
     color: $color-text-primary;
     text-align: center;
-    text-overflow: ellipsis;
     white-space: nowrap;
   }
 }
 
 .sub-classify-drawer {
-  margin-top: 8px;
-  padding: 10px;
-  background-color: rgba($color-primary, 0.05);
-  border-radius: 10px;
   display: flex;
   flex-wrap: wrap;
   gap: 8px;
+  padding: 10px;
+  margin-top: 8px;
+  background-color: rgba($color-primary, 0.05);
+  border-radius: 10px;
 }
 
 .sub-classify-item {
@@ -321,9 +331,9 @@ watch(show, val => {
   padding: 8px 4px;
   cursor: pointer;
   background-color: $color-card;
+  border: 2px solid transparent;
   border-radius: 8px;
   transition: all 0.2s;
-  border: 2px solid transparent;
 
   &.active {
     background-color: rgba($color-primary, 0.15);
@@ -348,10 +358,10 @@ watch(show, val => {
   .sub-name {
     max-width: 100%;
     overflow: hidden;
+    text-overflow: ellipsis;
     font-size: 11px;
     color: $color-text-primary;
     text-align: center;
-    text-overflow: ellipsis;
     white-space: nowrap;
     transition: color 0.2s;
   }
@@ -365,16 +375,16 @@ watch(show, val => {
 
 .drawer-enter-from,
 .drawer-leave-to {
-  opacity: 0;
   max-height: 0;
   padding-top: 0;
   padding-bottom: 0;
   margin-top: 0;
+  opacity: 0;
 }
 
 .drawer-enter-to,
 .drawer-leave-from {
-  opacity: 1;
   max-height: 150px;
+  opacity: 1;
 }
 </style>

@@ -58,5 +58,15 @@ export default [
         component: () => import("@/layout/redirect.vue")
       }
     ]
+  },
+  // 404 页面 - 必须放在最后
+  {
+    path: "/:pathMatch(.*)*",
+    name: "NotFound",
+    component: () => import("@/views/error/404.vue"),
+    meta: {
+      title: $t("menus.purePageNotFound"),
+      showLink: false
+    }
   }
 ] satisfies Array<RouteConfigsTable>;

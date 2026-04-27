@@ -156,12 +156,127 @@ search:
 # User
 user:
   title: Me
+  nickname: Nickname
+  username: Username
+  notSet: Not set
+  clickToUpload: Click to upload
+  editNickname: Edit Nickname
+  nicknamePlaceholder: Enter nickname
+  gender: Gender
+  selectGender: Select Gender
+  male: Male
+  female: Female
+  unknown: Unknown
+  email: Email
+  editEmail: Edit Email
+  emailPlaceholder: Enter email
+  phone: Phone
+  editPhone: Edit Phone
+  phonePlaceholder: Enter phone number
   profile: Profile
   accountBook: Account Books
   classifyManage: Categories
   tagManage: Tags
   remarkManage: Remarks
+  commonSettings: Settings
+  changePassword: Change Password
   settings: Settings
   about: About
   language: Language
   logout: Logout
+  logoutConfirmTitle: Logout
+  logoutConfirmMessage: Are you sure you want to logout?
+
+# Password
+password:
+  oldPassword: Current Password
+  oldPasswordPlaceholder: Enter current password
+  oldPasswordRequired: Please enter current password
+  newPassword: New Password
+  newPasswordPlaceholder: Enter new password
+  newPasswordRequired: Please enter new password
+  passwordMinLength: Password must be at least 6 characters
+  confirmPassword: Confirm Password
+  confirmPasswordPlaceholder: Enter new password again
+  passwordNotMatch: Passwords do not match
+  confirmChange: Confirm
+  changeSuccess: Password changed successfully
+
+# Common Settings
+commonSettings:
+  commonGroup: Common Settings
+  defaultCreditCard: Default Credit Card Selection for New Records
+  limitGroup: Limit Configuration
+  showExpenseLimit: Home Page Expense Limit Display Mode
+  notDisplay: Don't show
+  monthlyLimit: Monthly Limit
+  yearlyLimit: Yearly Limit
+  monthlyExpenseLimit: Default Monthly Expense Limit
+  yearlyExpenseLimit: Default Yearly Expense Limit
+  amountPlaceholder: Enter amount
+
+# Account Book
+accountBook:
+  searchPlaceholder: Search account books
+  default: Default
+  add: Add Account Book
+  edit: Edit Account Book
+  name: Name
+  namePlaceholder: Enter account book name
+  icon: Icon
+  setAsDefault: Set as default
+  cannotDeleteDefault: Cannot delete default account book
+  deleteConfirm: Are you sure to delete this account book?
+  createSuccess: Created successfully
+  updateSuccess: Updated successfully
+  deleteSuccess: Deleted successfully
+
+# Classify
+classify:
+  add: Add Category
+  edit: Edit Category
+  type: Type
+  parentClassify: Parent Category
+  topLevel: Top Level
+  name: Name
+  namePlaceholder: Enter category name
+  icon: Icon
+  sort: Sort
+  enable: Enable
+  enabled: Enabled
+  disabled: Disabled
+  deleteConfirm: Are you sure to delete this category?
+  createSuccess: Created successfully
+  updateSuccess: Updated successfully
+  deleteSuccess: Deleted successfully
+
+# Remark
+remark:
+  searchPlaceholder: Search remarks
+  add: Add Remark
+  edit: Edit Remark
+  name: Name
+  namePlaceholder: Enter remark name
+  classify: Category
+  selectClassify: Select category
+  deleteConfirm: Are you sure to delete this remark?
+  createSuccess: Created successfully
+  updateSuccess: Updated successfully
+  deleteSuccess: Deleted successfully
+
+# Tag
+tag:
+  searchPlaceholder: Search tags
+  add: Add Tag
+  edit: Edit Tag
+  name: Name
+  namePlaceholder: Enter tag name
+  color: Color
+  customColor: Custom Color
+  opacity: Opacity
+  preview: Preview
+  sort: Sort
+  deleteConfirm: Are you sure to delete this tag?
+  createSuccess: Created successfully
+  updateSuccess: Updated successfully
+  deleteSuccess: Deleted successfully

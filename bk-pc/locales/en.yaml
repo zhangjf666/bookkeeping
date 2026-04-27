@@ -393,5 +393,6 @@ profile:
   pureNicknameLength: Nickname cannot exceed 20 characters
   pureEmailFormatError: Please enter a valid email address
   purePhoneFormatError: Please enter a valid phone number
+  pureAbout: About
 
 

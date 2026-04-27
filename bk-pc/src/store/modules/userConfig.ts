@@ -40,13 +40,18 @@ export const useUserConfigStore = defineStore("userConfig", {
     },
     // 月支出限额
     monthExpenseLimit(): number {
-      const config = this.getConfigByName("monthlyExpenseLimit");
-      return config ? parseFloat(config.value) : 0;
+      const config = this.getConfigByName("default_monthly_expense_limit");
+      return config ? parseFloat(config.value) || 0 : 0;
     },
     // 年支出限额
     yearExpenseLimit(): number {
-      const config = this.getConfigByName("yearlyExpenseLimit");
-      return config ? parseFloat(config.value) : 0;
+      const config = this.getConfigByName("default_yearly_expense_limit");
+      return config ? parseFloat(config.value) || 0 : 0;
+    },
+    // 是否默认选中信用卡
+    isCreditCardDefault(): boolean {
+      const config = this.getConfigByName("is_credit_card");
+      return config?.value === "1";
     }
   },
 

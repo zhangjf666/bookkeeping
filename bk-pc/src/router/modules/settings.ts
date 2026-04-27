@@ -19,7 +19,7 @@ export default {
         icon: "ep:setting",
         title: $t("menus.pureCommonSetting"),
         pcComponent: () => import("@/views/settings/common/index.vue"),
-        mobileComponent: () => import("@/views/settings/common/index.vue"),
+        mobileComponent: () => import("@/views/mobile/user/CommonSettings.vue"),
         showTabBar: false
       }
     },
@@ -31,8 +31,7 @@ export default {
         icon: "ep:wallet",
         title: $t("menus.pureAccountBookSetting"),
         pcComponent: () => import("@/views/settings/account-book/index.vue"),
-        mobileComponent: () =>
-          import("@/views/settings/account-book/index.vue"),
+        mobileComponent: () => import("@/views/mobile/user/AccountBook.vue"),
         showTabBar: false
       }
     },
@@ -44,7 +43,7 @@ export default {
         icon: "ep:folder",
         title: $t("menus.pureClassifySetting"),
         pcComponent: () => import("@/views/settings/classify/index.vue"),
-        mobileComponent: () => import("@/views/settings/classify/index.vue"),
+        mobileComponent: () => import("@/views/mobile/user/Classify.vue"),
         showTabBar: false
       }
     },
@@ -56,7 +55,7 @@ export default {
         icon: "ep:price-tag",
         title: $t("menus.pureTagSetting"),
         pcComponent: () => import("@/views/settings/tag/index.vue"),
-        mobileComponent: () => import("@/views/settings/tag/index.vue"),
+        mobileComponent: () => import("@/views/mobile/user/Tag.vue"),
         showTabBar: false
       }
     },
@@ -68,7 +67,7 @@ export default {
         icon: "ep:document",
         title: $t("menus.pureRemarkSetting"),
         pcComponent: () => import("@/views/settings/remark/index.vue"),
-        mobileComponent: () => import("@/views/settings/remark/index.vue"),
+        mobileComponent: () => import("@/views/mobile/user/Remark.vue"),
         showTabBar: false
       }
     }

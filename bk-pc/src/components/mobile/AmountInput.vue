@@ -90,7 +90,9 @@ watch(keyboardValue, val => {
   // 限制整数位数最多8位
   const intPart = val.split(".")[0];
   if (intPart.length > 8) {
-    keyboardValue.value = intPart.substring(0, 8) + (val.includes(".") ? "." + val.split(".")[1] : "");
+    keyboardValue.value =
+      intPart.substring(0, 8) +
+      (val.includes(".") ? "." + val.split(".")[1] : "");
     return;
   }
 

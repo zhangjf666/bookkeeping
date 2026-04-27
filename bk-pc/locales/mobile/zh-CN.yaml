@@ -156,12 +156,127 @@ search:
 # 我的页
 user:
   title: 我的
+  nickname: 昵称
+  username: 账号
+  notSet: 未设置
+  clickToUpload: 点击上传
+  editNickname: 编辑昵称
+  nicknamePlaceholder: 请输入昵称
+  gender: 性别
+  selectGender: 选择性别
+  male: 男
+  female: 女
+  unknown: 未知
+  email: 邮箱
+  editEmail: 编辑邮箱
+  emailPlaceholder: 请输入邮箱
+  phone: 手机
+  editPhone: 编辑手机
+  phonePlaceholder: 请输入手机号
   profile: 个人信息
   accountBook: 账本管理
   classifyManage: 分类管理
   tagManage: 标签管理
   remarkManage: 备注管理
+  commonSettings: 常用设置
+  changePassword: 修改密码
   settings: 设置
   about: 关于
   language: 语言
   logout: 退出登录
+  logoutConfirmTitle: 退出确认
+  logoutConfirmMessage: 确定要退出登录吗？
+
+# 修改密码
+password:
+  oldPassword: 原密码
+  oldPasswordPlaceholder: 请输入原密码
+  oldPasswordRequired: 请输入原密码
+  newPassword: 新密码
+  newPasswordPlaceholder: 请输入新密码
+  newPasswordRequired: 请输入新密码
+  passwordMinLength: 密码长度不能少于6位
+  confirmPassword: 确认密码
+  confirmPasswordPlaceholder: 请再次输入新密码
+  passwordNotMatch: 两次密码输入不一致
+  confirmChange: 确认修改
+  changeSuccess: 密码修改成功
+
+# 常用设置
+commonSettings:
+  commonGroup: 常用设置
+  defaultCreditCard: 新增收支记录默认选中信用卡
+  limitGroup: 限额配置
+  showExpenseLimit: 首页支出限额显示模式
+  notDisplay: 不显示
+  monthlyLimit: 月限额
+  yearlyLimit: 年限额
+  monthlyExpenseLimit: 默认每月支出限额
+  yearlyExpenseLimit: 默认每年支出限额
+  amountPlaceholder: 请输入金额
+
+# 账本管理
+accountBook:
+  searchPlaceholder: 搜索账本
+  default: 默认
+  add: 新增账本
+  edit: 编辑账本
+  name: 账本名称
+  namePlaceholder: 请输入账本名称
+  icon: 账本图标
+  setAsDefault: 设为默认账本
+  cannotDeleteDefault: 不能删除默认账本
+  deleteConfirm: 确定要删除该账本吗？
+  createSuccess: 创建成功
+  updateSuccess: 更新成功
+  deleteSuccess: 删除成功
+
+# 分类管理
+classify:
+  add: 新增分类
+  edit: 编辑分类
+  type: 类型
+  parentClassify: 父分类
+  topLevel: 顶级分类
+  name: 分类名称
+  namePlaceholder: 请输入分类名称
+  icon: 分类图标
+  sort: 排序
+  enable: 启用
+  enabled: 启用
+  disabled: 禁用
+  deleteConfirm: 确定要删除该分类吗？
+  createSuccess: 创建成功
+  updateSuccess: 更新成功
+  deleteSuccess: 删除成功
+
+# 备注管理
+remark:
+  searchPlaceholder: 搜索备注
+  add: 新增备注
+  edit: 编辑备注
+  name: 备注名称
+  namePlaceholder: 请输入备注名称
+  classify: 关联分类
+  selectClassify: 请选择分类
+  deleteConfirm: 确定要删除该备注吗？
+  createSuccess: 创建成功
+  updateSuccess: 更新成功
+  deleteSuccess: 删除成功
+
+# 标签管理
+tag:
+  searchPlaceholder: 搜索标签
+  add: 新增标签
+  edit: 编辑标签
+  name: 标签名称
+  namePlaceholder: 请输入标签名称
+  color: 标签颜色
+  customColor: 自定义颜色
+  opacity: 透明度
+  preview: 预览
+  sort: 排序
+  deleteConfirm: 确定要删除该标签吗？
+  createSuccess: 创建成功
+  updateSuccess: 更新成功
+  deleteSuccess: 删除成功
