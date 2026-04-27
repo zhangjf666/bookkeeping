@@ -1,0 +1,167 @@
+# Mobile English Translations
+
+# Common
+common:
+  confirm: Confirm
+  cancel: Cancel
+  save: Save
+  delete: Delete
+  edit: Edit
+  add: Add
+  search: Search
+  loading: Loading...
+  noData: No Data
+  success: Success
+  failed: Failed
+  pullDownRefresh: Pull to refresh
+  releaseRefresh: Release to refresh
+  refreshing: Refreshing...
+  networkError: Network connection failed, please check your network
+  serverError: System is busy, please try again later
+
+# Language
+language:
+  zh: 中文
+  en: English
+  switch: Switch Language
+
+# TabBar
+tabBar:
+  home: Home
+  bill: Bills
+  report: Report
+  user: Me
+
+# Login
+login:
+  title: Login
+  usernamePlaceholder: Please enter username
+  passwordPlaceholder: Please enter password
+  captchaPlaceholder: Please enter captcha
+  loginBtn: Login
+  noAccount: No account?
+  goRegister: Register now
+  usernameRequired: Please enter username
+  usernameLength: Username must be 3-20 characters
+  passwordRequired: Please enter password
+  passwordLength: Password must be 6-20 characters
+  captchaRequired: Please enter captcha
+  success: Login successful
+  failed: Login failed, please try again
+  invalidCredentials: Invalid username or password
+
+# Register
+register:
+  title: Create Account
+  usernamePlaceholder: Please enter username
+  nicknamePlaceholder: Please enter nickname
+  passwordPlaceholder: Please enter password
+  confirmPasswordPlaceholder: Please confirm password
+  captchaPlaceholder: Please enter captcha
+  registerBtn: Register
+  hasAccount: Already have an account?
+  goLogin: Login
+  usernameRequired: Please enter username
+  usernameLength: Username must be 3-20 characters
+  usernameFormat: Username can only contain letters, numbers and underscores
+  nicknameRequired: Please enter nickname
+  nicknameLength: Nickname must be 2-20 characters
+  passwordRequired: Please enter password
+  passwordLength: Password must be 6-20 characters
+  confirmPasswordRequired: Please confirm password
+  passwordNotMatch: Passwords do not match
+  captchaRequired: Please enter captcha
+  success: Registration successful
+  failed: Registration failed, please try again
+  usernameExists: Username already exists
+
+# Home
+home:
+  title: Home
+  monthExpense: Monthly Expense
+  monthIncome: Monthly Income
+  monthBalance: Balance
+  recentBills: Recent Bills
+  quickRecord: Add Record
+  expenseLimit: Expense Limit
+  surplus: Remaining
+  records: "{count} records"
+  monthLimit: Monthly Limit
+  yearLimit: Yearly Limit
+  remainingLimit: Remaining
+  selectAccountBook: Select Account Book
+
+# Bill
+bill:
+  title: Bills
+  monthBill: Monthly
+  yearBill: Yearly
+  custom: Custom
+  filter: Filter
+  allExpense: All Expense
+  allIncome: All Income
+  sortByTime: By Time
+  sortByAmount: By Amount
+
+# Record
+record:
+  title: Add Record
+  addTitle: Add Income/Expense Record
+  editTitle: Edit Record
+  expense: Expense
+  income: Income
+  amount: Amount
+  amountPlaceholder: Enter amount
+  accountBook: Account Book
+  accountBookPlaceholder: Select account book
+  classify: Category
+  classifyPlaceholder: Select category
+  date: Date
+  datePlaceholder: Select date
+  remark: Remark
+  remarkPlaceholder: Select or enter remark
+  remarkCustom: Custom remark
+  addToRemark: Add to common remarks
+  tag: Tags
+  tagPlaceholder: Select tags
+  tagSearch: Search tags...
+  isCreditCard: Credit Card
+  save: Save
+  saveSuccess: Saved successfully
+  saveFailed: Save failed
+  validateAmount: Please enter amount
+  validateAccountBook: Please select account book
+  validateClassify: Please select category
+  validateDate: Please select date
+
+# Report
+report:
+  title: Report
+  week: Week
+  month: Month
+  year: Year
+  trend: Trend
+  classify: Categories
+  ranking: Ranking
+
+# Search
+search:
+  title: Search
+  placeholder: Search remarks...
+  amountRange: Amount Range
+  dateRange: Date Range
+  classifyFilter: Category Filter
+  noResult: No results found
+
+# User
+user:
+  title: Me
+  profile: Profile
+  accountBook: Account Books
+  classifyManage: Categories
+  tagManage: Tags
+  remarkManage: Remarks
+  settings: Settings
+  about: About
+  language: Language
+  logout: Logout

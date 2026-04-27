@@ -1,0 +1,43 @@
+// 移动端主题变量
+
+// 主色调
+$color-primary: #d83d34; // 红色 - 支出/强调
+$color-secondary: #00a151; // 绿色 - 收入/成功
+
+// 功能色
+$color-danger: #ee0a24; // 危险/删除
+$color-warning: #ff976a; // 警告
+$color-success: #00a151; // 成功
+$color-info: #1989fa; // 信息
+
+// 中性色
+$color-text-primary: #323233; // 主要文字
+$color-text-secondary: #646566; // 次要文字
+$color-text-placeholder: #c8c9cc; // 占位文字
+$color-border: #ebedf0; // 边框
+$color-background: #f7f8fa; // 页面背景
+$color-card: #fff; // 卡片背景
+
+// 字体规范
+$font-size-xs: 20rpx; // 10px - 辅助信息
+$font-size-sm: 24rpx; // 12px - 次要内容
+$font-size-md: 28rpx; // 14px - 正文
+$font-size-lg: 32rpx; // 16px - 标题
+$font-size-xl: 40rpx; // 20px - 大标题
+$font-size-xxl: 56rpx; // 28px - 金额数字
+
+// 间距
+$spacing-xs: 8rpx;
+$spacing-sm: 16rpx;
+$spacing-md: 24rpx;
+$spacing-lg: 32rpx;
+$spacing-xl: 48rpx;
+
+// 圆角
+$radius-sm: 8rpx;
+$radius-md: 16rpx;
+$radius-lg: 24rpx;
+
+// 安全区域
+$safe-area-inset-top: env(safe-area-inset-top);
+$safe-area-inset-bottom: env(safe-area-inset-bottom);

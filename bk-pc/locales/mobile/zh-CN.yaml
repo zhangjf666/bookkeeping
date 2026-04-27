@@ -1,0 +1,167 @@
+# 移动端中文文案
+
+# 通用文案
+common:
+  confirm: 确认
+  cancel: 取消
+  save: 保存
+  delete: 删除
+  edit: 编辑
+  add: 添加
+  search: 搜索
+  loading: 加载中...
+  noData: 暂无数据
+  success: 操作成功
+  failed: 操作失败
+  pullDownRefresh: 下拉刷新
+  releaseRefresh: 释放刷新
+  refreshing: 刷新中...
+  networkError: 网络连接失败，请检查网络
+  serverError: 系统繁忙，请稍后重试
+
+# 语言切换
+language:
+  zh: 中文
+  en: English
+  switch: 切换语言
+
+# 底部导航栏
+tabBar:
+  home: 首页
+  bill: 账单
+  report: 报表
+  user: 我的
+
+# 登录页
+login:
+  title: 登录
+  usernamePlaceholder: 请输入用户名
+  passwordPlaceholder: 请输入密码
+  captchaPlaceholder: 请输入验证码
+  loginBtn: 登录
+  noAccount: 没有账号？
+  goRegister: 立即注册
+  usernameRequired: 请输入用户名
+  usernameLength: 用户名长度为3-20个字符
+  passwordRequired: 请输入密码
+  passwordLength: 密码长度为6-20个字符
+  captchaRequired: 请输入验证码
+  success: 登录成功
+  failed: 登录失败，请重试
+  invalidCredentials: 用户名或密码错误
+
+# 注册页
+register:
+  title: 注册账号
+  usernamePlaceholder: 请输入用户名
+  nicknamePlaceholder: 请输入昵称
+  passwordPlaceholder: 请输入密码
+  confirmPasswordPlaceholder: 请再次输入密码
+  captchaPlaceholder: 请输入验证码
+  registerBtn: 注册
+  hasAccount: 已有账号？
+  goLogin: 去登录
+  usernameRequired: 请输入用户名
+  usernameLength: 用户名长度为3-20个字符
+  usernameFormat: 用户名只能包含字母、数字和下划线
+  nicknameRequired: 请输入昵称
+  nicknameLength: 昵称长度为2-20个字符
+  passwordRequired: 请输入密码
+  passwordLength: 密码长度为6-20个字符
+  confirmPasswordRequired: 请再次输入密码
+  passwordNotMatch: 两次输入的密码不一致
+  captchaRequired: 请输入验证码
+  success: 注册成功
+  failed: 注册失败，请重试
+  usernameExists: 用户名已被注册
+
+# 首页
+home:
+  title: 首页
+  monthExpense: 本月支出
+  monthIncome: 本月收入
+  monthBalance: 本月结余
+  recentBills: 近三日账单
+  quickRecord: 记一笔
+  expenseLimit: 支出限额
+  surplus: 剩余限额
+  records: "{count} 笔"
+  monthLimit: 月支出限额
+  yearLimit: 年支出限额
+  remainingLimit: 剩余限额
+  selectAccountBook: 选择账本
+
+# 账单页
+bill:
+  title: 账单
+  monthBill: 月账单
+  yearBill: 年账单
+  custom: 自定义
+  filter: 筛选
+  allExpense: 全部支出
+  allIncome: 全部收入
+  sortByTime: 按时间
+  sortByAmount: 按金额
+
+# 记账页
+record:
+  title: 记账
+  addTitle: 新增账单
+  editTitle: 编辑账单
+  expense: 支出
+  income: 收入
+  amount: 金额
+  amountPlaceholder: 请输入金额
+  accountBook: 账本
+  accountBookPlaceholder: 请选择账本
+  classify: 分类
+  classifyPlaceholder: 请选择分类
+  date: 日期
+  datePlaceholder: 请选择日期
+  remark: 备注
+  remarkPlaceholder: 请选择或输入备注
+  remarkCustom: 自定义备注
+  addToRemark: 加入常用备注
+  tag: 标签
+  tagPlaceholder: 请选择标签
+  tagSearch: 搜索标签...
+  isCreditCard: 信用卡消费
+  save: 保存
+  saveSuccess: 保存成功
+  saveFailed: 保存失败
+  validateAmount: 请输入金额
+  validateAccountBook: 请选择账本
+  validateClassify: 请选择分类
+  validateDate: 请选择日期
+
+# 报表页
+report:
+  title: 报表
+  week: 周
+  month: 月
+  year: 年
+  trend: 趋势
+  classify: 分类占比
+  ranking: 排行榜
+
+# 搜索页
+search:
+  title: 搜索
+  placeholder: 搜索备注...
+  amountRange: 金额范围
+  dateRange: 日期范围
+  classifyFilter: 分类筛选
+  noResult: 未找到相关记录
+
+# 我的页
+user:
+  title: 我的
+  profile: 个人信息
+  accountBook: 账本管理
+  classifyManage: 分类管理
+  tagManage: 标签管理
+  remarkManage: 备注管理
+  settings: 设置
+  about: 关于
+  language: 语言
+  logout: 退出登录
