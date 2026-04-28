@@ -18,6 +18,8 @@ common:
   refreshing: 刷新中...
   networkError: 网络连接失败，请检查网络
   serverError: 系统繁忙，请稍后重试
+  selected: 已选择
+  selectMode: 已进入多选模式
 
 # 语言切换
 language:
@@ -237,6 +239,7 @@ classify:
   edit: 编辑分类
   type: 类型
   parentClassify: 父分类
+  none: 无
   topLevel: 顶级分类
   name: 分类名称
   namePlaceholder: 请输入分类名称
@@ -273,7 +276,6 @@ tag:
   namePlaceholder: 请输入标签名称
   color: 标签颜色
   customColor: 自定义颜色
-  opacity: 透明度
   preview: 预览
   sort: 排序
   deleteConfirm: 确定要删除该标签吗？

@@ -48,6 +48,13 @@ const showEditor = ref(false);
 const isEdit = ref(false);
 const saving = ref(false);
 
+// 多选模式
+const selectMode = ref(false);
+const selectedIds = ref<number[]>([]);
+
+// 长按计时器
+let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
 // 表单数据
 const formData = ref<UserTagForm>({
   userId: 0,
@@ -56,28 +63,40 @@ const formData = ref<UserTagForm>({
   sort: 1
 });
 
-// 预设颜色列表
+// 预设颜色列表 (7列 * 4行 = 28种颜色)
 const presetColors = [
+  // 第一行 - 红色系
   "#d83d34",
   "#e91e63",
-  "#9c27b0",
-  "#673ab7",
-  "#3f51b5",
-  "#2196f3",
-  "#03a9f4",
-  "#00bcd4",
-  "#009688",
+  "#f44336",
+  "#ff5722",
+  "#ff9800",
+  "#ffc107",
+  "#ffeb3b",
+  // 第二行 - 绿色系
   "#4caf50",
   "#8bc34a",
   "#cddc39",
-  "#ffeb3b",
-  "#ffc107",
-  "#ff9800",
-  "#ff5722",
+  "#009688",
+  "#00bcd4",
+  "#03a9f4",
+  "#2196f3",
+  // 第三行 - 蓝紫色系
+  "#3f51b5",
+  "#673ab7",
+  "#9c27b0",
+  "#673ab7",
   "#795548",
   "#9e9e9e",
   "#607d8b",
-  "#000000"
+  // 第四行 - 深色系
+  "#000000",
+  "#37474f",
+  "#455a64",
+  "#546e7a",
+  "#607d8b",
+  "#78909c",
+  "#90a4ae"
 ];
 
 // 加载标签列表
@@ -96,17 +115,22 @@ const loadData = async () => {
 // 打开新增弹窗
 const handleAdd = () => {
   isEdit.value = false;
+  const maxSort =
+    tagList.value.length > 0
+      ? Math.max(...tagList.value.map(tg => tg.sort || 0))
+      : 0;
   formData.value = {
     userId: userStore.id,
     name: "",
     color: "#d83d34",
-    sort: 1
+    sort: maxSort + 1
   };
   showEditor.value = true;
 };
 
 // 打开编辑弹窗
 const handleEdit = (tag: UserTag) => {
+  if (selectMode.value) return;
   isEdit.value = true;
   formData.value = {
     id: tag.id,
@@ -157,8 +181,55 @@ const handleSubmit = async () => {
   }
 };
 
-// 删除标签
-const handleDelete = async (tag: UserTag) => {
+// 长按开始
+const handleTouchStart = (tag: UserTag) => {
+  if (selectMode.value) return;
+
+  longPressTimer = setTimeout(() => {
+    // 进入多选模式
+    selectMode.value = true;
+    selectedIds.value = [tag.id];
+  }, 500);
+};
+
+// 长按结束
+const handleTouchEnd = () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+};
+
+// 点击网格项
+const handleItemClick = (tag: UserTag) => {
+  if (selectMode.value) {
+    // 多选模式下切换选中状态
+    const index = selectedIds.value.indexOf(tag.id);
+    if (index > -1) {
+      selectedIds.value.splice(index, 1);
+      // 如果没有选中项，退出多选模式
+      if (selectedIds.value.length === 0) {
+        selectMode.value = false;
+      }
+    } else {
+      selectedIds.value.push(tag.id);
+    }
+  } else {
+    // 非多选模式下编辑
+    handleEdit(tag);
+  }
+};
+
+// 退出多选模式
+const exitSelectMode = () => {
+  selectMode.value = false;
+  selectedIds.value = [];
+};
+
+// 批量删除
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0) return;
+
   try {
     await showConfirmDialog({
       message: t("mobile.tag.deleteConfirm"),
@@ -166,10 +237,13 @@ const handleDelete = async (tag: UserTag) => {
     });
 
     showLoading(t("mobile.common.loading"));
-    await deleteUserTag([tag.id]);
+    await deleteUserTag(selectedIds.value);
     hideLoading();
 
     showSuccess(t("mobile.tag.deleteSuccess"));
+
+    // 退出多选模式
+    exitSelectMode();
 
     // 刷新列表
     await loadData();
@@ -177,7 +251,6 @@ const handleDelete = async (tag: UserTag) => {
     // 同步更新 store
     await userTagStore.fetchList(userStore.id);
   } catch {
-    // 取消或失败
     hideLoading();
   }
 };
@@ -196,46 +269,70 @@ onMounted(() => {
       :placeholder="t('mobile.tag.searchPlaceholder')"
     />
 
-    <!-- 新增按钮 -->
-    <div class="add-btn-wrapper">
-      <van-button type="danger" size="small" icon="plus" @click="handleAdd">
-        {{ t("mobile.common.add") }}
+    <!-- 多选模式工具栏 -->
+    <div v-if="selectMode" class="select-toolbar">
+      <span class="select-info">
+        {{ t("mobile.common.selected") }}: {{ selectedIds.length }}
+      </span>
+      <van-button size="small" @click="exitSelectMode">
+        {{ t("mobile.common.cancel") }}
+      </van-button>
+      <van-button
+        type="danger"
+        size="small"
+        :disabled="selectedIds.length === 0"
+        @click="handleBatchDelete"
+      >
+        {{ t("mobile.common.delete") }}
       </van-button>
     </div>
 
-    <!-- 标签列表 -->
-    <van-cell-group inset>
-      <van-swipe-cell v-for="tag in filteredList" :key="tag.id">
-        <van-cell is-link @click="handleEdit(tag)">
-          <template #title>
-            <van-tag :color="tag.color" text-color="#fff">
-              {{ tag.name }}
-            </van-tag>
-          </template>
-        </van-cell>
-
-        <template #right>
-          <van-button
-            square
-            type="danger"
-            :text="t('mobile.common.delete')"
-            @click="handleDelete(tag)"
-          />
-        </template>
-      </van-swipe-cell>
-    </van-cell-group>
+    <!-- 标签网格 -->
+    <div class="grid-container">
+      <div
+        v-for="tag in filteredList"
+        :key="tag.id"
+        class="grid-item"
+        :class="{ selected: selectedIds.includes(tag.id) }"
+        :style="{
+          borderColor: selectedIds.includes(tag.id) ? tag.color : undefined
+        }"
+        @touchstart="handleTouchStart(tag)"
+        @touchend="handleTouchEnd"
+        @touchcancel="handleTouchEnd"
+        @click="handleItemClick(tag)"
+      >
+        <!-- 选中标记 -->
+        <div
+          v-if="selectMode"
+          class="select-checkbox"
+          :style="{ backgroundColor: tag.color }"
+        >
+          <van-icon v-if="selectedIds.includes(tag.id)" name="success" />
+        </div>
+        <!-- 标签名称 -->
+        <van-tag :color="tag.color" text-color="#fff" size="large">
+          {{ tag.name }}
+        </van-tag>
+      </div>
+    </div>
 
     <van-empty
       v-if="filteredList.length === 0"
       :description="t('mobile.common.noData')"
     />
 
+    <!-- 悬浮添加按钮 -->
+    <div v-if="!selectMode" class="floating-btn" @click="handleAdd">
+      <van-icon name="plus" size="24" />
+    </div>
+
     <!-- 新增/编辑弹窗 -->
     <van-popup
       v-model:show="showEditor"
       position="bottom"
       round
-      :style="{ height: '60%' }"
+      :style="{ height: '55%' }"
     >
       <div class="tag-editor">
         <div class="editor-header">
@@ -316,13 +413,88 @@ onMounted(() => {
 
 .tag-page {
   min-height: 100vh;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
   background-color: $color-background;
 }
 
-.add-btn-wrapper {
+.select-toolbar {
   display: flex;
-  justify-content: flex-end;
-  padding: 0 16px 12px;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: $color-card;
+  border-bottom: 1px solid $color-border;
+
+  .select-info {
+    font-size: 14px;
+    color: $color-text-primary;
+  }
+}
+
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px;
+}
+
+.grid-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 80px;
+  padding: 16px 8px;
+  cursor: pointer;
+  background-color: $color-card;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.selected {
+    background-color: rgba($color-primary, 0.1);
+  }
+
+  .select-checkbox {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    color: #fff;
+    border-radius: 50%;
+  }
+}
+
+.floating-btn {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: #fff;
+  background-color: $color-primary;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .tag-editor {
@@ -358,22 +530,22 @@ onMounted(() => {
 
   .color-grid {
     display: grid;
-    grid-template-columns: repeat(10, 1fr);
-    gap: 8px;
+    grid-template-columns: repeat(7, 1fr);
+    gap: 10px;
   }
 
   .color-item {
     display: flex;
     align-items: center;
     justify-content: center;
-    width: 28px;
-    height: 28px;
+    width: 36px;
+    height: 36px;
     cursor: pointer;
-    border-radius: 4px;
+    border-radius: 6px;
     transition: transform 0.2s;
 
     &.active {
-      box-shadow: 0 2px 8px rgb(0 0 0 / 20%);
+      box-shadow: 0 2px 8px rgb(0 0 0 / 30%);
       transform: scale(1.1);
     }
   }

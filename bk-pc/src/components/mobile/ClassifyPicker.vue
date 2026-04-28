@@ -11,7 +11,7 @@ defineOptions({
 const props = defineProps<{
   modelValue: boolean;
   classifyList: Classify[];
-  type: "EXPENSE" | "INCOME";
+  type?: "EXPENSE" | "INCOME";
   mainClassifyId: number | null;
   subClassifyId: number | null;
 }>();
@@ -31,11 +31,20 @@ const show = computed({
 // 当前展开的顶级分类ID
 const expandedMainId = ref<number | null>(null);
 
+// 当前选中的类型（仅当未指定 type 时使用）
+const currentType = ref<"EXPENSE" | "INCOME">("EXPENSE");
+
+// 是否显示类型切换（当未指定 type 时显示）
+const showTypeSwitch = computed(() => !props.type);
+
+// 实际过滤类型
+const filterType = computed(() => props.type || currentType.value);
+
 // 顶级分类列表（根据类型过滤）
 const mainClassifyList = computed(() => {
   return props.classifyList.filter(
     item =>
-      item.type === props.type &&
+      item.type === filterType.value &&
       item.enable === "YES" &&
       (item.pid === 0 || item.pid === -1 || item.pid === null || !item.pid)
   );
@@ -117,9 +126,25 @@ const handleClose = () => {
   }
 };
 
+// 类型切换
+const handleTypeChange = (type: "EXPENSE" | "INCOME") => {
+  currentType.value = type;
+  expandedMainId.value = null;
+};
+
 // 弹窗打开时，根据已选中的分类初始化展开状态
 watch(show, val => {
   if (val) {
+    // 如果有选中的分类，根据分类类型初始化 currentType
+    if (props.mainClassifyId) {
+      const mainClassify = props.classifyList.find(
+        item => item.id === props.mainClassifyId
+      );
+      if (mainClassify && showTypeSwitch.value) {
+        currentType.value = mainClassify.type as "EXPENSE" | "INCOME";
+      }
+    }
+
     // 如果有选中的子分类，展开对应的顶级分类
     if (props.subClassifyId) {
       const subClassify = props.classifyList.find(
@@ -158,6 +183,24 @@ watch(show, val => {
       <div class="picker-header">
         <span class="title">{{ t("mobile.record.classify") }}</span>
         <van-icon name="cross" @click="show = false" />
+      </div>
+
+      <!-- 类型切换（仅当未指定 type 时显示） -->
+      <div v-if="showTypeSwitch" class="type-switch">
+        <div
+          class="type-btn expense"
+          :class="{ active: currentType === 'EXPENSE' }"
+          @click="handleTypeChange('EXPENSE')"
+        >
+          {{ t("mobile.record.expense") }}
+        </div>
+        <div
+          class="type-btn income"
+          :class="{ active: currentType === 'INCOME' }"
+          @click="handleTypeChange('INCOME')"
+        >
+          {{ t("mobile.record.income") }}
+        </div>
       </div>
 
       <!-- 分类内容 -->
@@ -244,6 +287,45 @@ watch(show, val => {
     font-size: 16px;
     font-weight: 500;
     color: $color-text-primary;
+  }
+}
+
+.type-switch {
+  display: flex;
+  gap: 12px;
+  padding: 12px 16px;
+  background-color: $color-card;
+
+  .type-btn {
+    flex: 1;
+    padding: 10px 0;
+    font-size: 14px;
+    font-weight: 500;
+    text-align: center;
+    cursor: pointer;
+    border: 1px solid $color-border;
+    border-radius: 8px;
+    transition: all 0.2s;
+
+    &.expense {
+      color: $color-text-secondary;
+
+      &.active {
+        color: #fff;
+        background-color: $color-primary;
+        border-color: $color-primary;
+      }
+    }
+
+    &.income {
+      color: $color-text-secondary;
+
+      &.active {
+        color: #fff;
+        background-color: $color-secondary;
+        border-color: $color-secondary;
+      }
+    }
   }
 }
 

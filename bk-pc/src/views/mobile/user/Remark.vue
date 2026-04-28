@@ -20,7 +20,7 @@ import {
   showSuccess,
   showError
 } from "@/utils/mobile/message";
-import { getClassifyIcon } from "@/utils/classifyIcons";
+import ClassifyPicker from "@/components/mobile/ClassifyPicker.vue";
 
 defineOptions({
   name: "MobileRemark"
@@ -57,6 +57,13 @@ const showClassifyPicker = ref(false);
 const isEdit = ref(false);
 const saving = ref(false);
 
+// 多选模式
+const selectMode = ref(false);
+const selectedIds = ref<number[]>([]);
+
+// 长按计时器
+let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
 // 表单数据
 const formData = ref<UserRemarkForm>({
   userId: 0,
@@ -64,23 +71,43 @@ const formData = ref<UserRemarkForm>({
   classifyId: 0
 });
 
-// 选中的分类
-const selectedClassify = ref<Classify | null>(null);
+// 选中的顶级分类ID和子分类ID
+const mainClassifyId = ref<number | null>(null);
+const subClassifyId = ref<number | null>(null);
 
-// 选中的分类名称
-const selectedClassifyName = computed(() => {
-  if (!formData.value.classifyId) return "";
-  const classify = classifyList.value.find(
-    item => item.id === formData.value.classifyId
-  );
-  return classify?.name || "";
-});
-
-// 获取分类名称
-const getClassifyName = (classifyId: number): string => {
+// 根据分类ID获取顶级分类和子分类
+const getClassifyInfo = (classifyId: number) => {
   const classify = classifyList.value.find(item => item.id === classifyId);
-  return classify?.name || "";
+  if (!classify) return { mainId: null, subId: null };
+
+  // 如果是顶级分类
+  if (!classify.pid || classify.pid === 0 || classify.pid === -1) {
+    return { mainId: classify.id, subId: null };
+  }
+  // 如果是子分类
+  return { mainId: classify.pid, subId: classify.id };
 };
+
+// 选中的分类名称（显示为"顶级分类-子分类"格式）
+const selectedClassifyName = computed(() => {
+  if (!mainClassifyId.value) return "";
+
+  const mainClassify = classifyList.value.find(
+    item => item.id === mainClassifyId.value
+  );
+  if (!mainClassify) return "";
+
+  if (subClassifyId.value) {
+    const subClassify = classifyList.value.find(
+      item => item.id === subClassifyId.value
+    );
+    if (subClassify) {
+      return `${mainClassify.name}-${subClassify.name}`;
+    }
+  }
+
+  return mainClassify.name;
+});
 
 // 加载备注列表
 const loadData = async () => {
@@ -103,12 +130,14 @@ const handleAdd = () => {
     remark: "",
     classifyId: 0
   };
-  selectedClassify.value = null;
+  mainClassifyId.value = null;
+  subClassifyId.value = null;
   showEditor.value = true;
 };
 
 // 打开编辑弹窗
 const handleEdit = (remark: UserRemark) => {
+  if (selectMode.value) return;
   isEdit.value = true;
   formData.value = {
     id: remark.id,
@@ -116,15 +145,23 @@ const handleEdit = (remark: UserRemark) => {
     remark: remark.remark,
     classifyId: remark.classifyId
   };
-  selectedClassify.value =
-    classifyList.value.find(item => item.id === remark.classifyId) || null;
+  // 根据分类ID获取顶级和子分类
+  const { mainId, subId } = getClassifyInfo(remark.classifyId);
+  mainClassifyId.value = mainId;
+  subClassifyId.value = subId;
   showEditor.value = true;
 };
 
 // 选择分类
-const handleSelectClassify = (classify: Classify) => {
-  formData.value.classifyId = classify.id;
-  selectedClassify.value = classify;
+const handleClassifySelect = (
+  selectedMainClassify: Classify,
+  selectedSubClassify?: Classify
+) => {
+  mainClassifyId.value = selectedMainClassify.id;
+  subClassifyId.value = selectedSubClassify?.id || null;
+  // 设置实际的分类ID
+  formData.value.classifyId =
+    selectedSubClassify?.id || selectedMainClassify.id;
   showClassifyPicker.value = false;
 };
 
@@ -162,8 +199,55 @@ const handleSubmit = async () => {
   }
 };
 
-// 删除备注
-const handleDelete = async (remark: UserRemark) => {
+// 长按开始
+const handleTouchStart = (remark: UserRemark) => {
+  if (selectMode.value) return;
+
+  longPressTimer = setTimeout(() => {
+    // 进入多选模式
+    selectMode.value = true;
+    selectedIds.value = [remark.id];
+  }, 500);
+};
+
+// 长按结束
+const handleTouchEnd = () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+};
+
+// 点击网格项
+const handleItemClick = (remark: UserRemark) => {
+  if (selectMode.value) {
+    // 多选模式下切换选中状态
+    const index = selectedIds.value.indexOf(remark.id);
+    if (index > -1) {
+      selectedIds.value.splice(index, 1);
+      // 如果没有选中项，退出多选模式
+      if (selectedIds.value.length === 0) {
+        selectMode.value = false;
+      }
+    } else {
+      selectedIds.value.push(remark.id);
+    }
+  } else {
+    // 非多选模式下编辑
+    handleEdit(remark);
+  }
+};
+
+// 退出多选模式
+const exitSelectMode = () => {
+  selectMode.value = false;
+  selectedIds.value = [];
+};
+
+// 批量删除
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0) return;
+
   try {
     await showConfirmDialog({
       message: t("mobile.remark.deleteConfirm"),
@@ -171,10 +255,13 @@ const handleDelete = async (remark: UserRemark) => {
     });
 
     showLoading(t("mobile.common.loading"));
-    await deleteUserRemark([remark.id]);
+    await deleteUserRemark(selectedIds.value);
     hideLoading();
 
     showSuccess(t("mobile.remark.deleteSuccess"));
+
+    // 退出多选模式
+    exitSelectMode();
 
     // 刷新列表
     await loadData();
@@ -182,7 +269,6 @@ const handleDelete = async (remark: UserRemark) => {
     // 同步更新 store
     await remarkStore.fetchList(userStore.id);
   } catch {
-    // 取消或失败
     hideLoading();
   }
 };
@@ -217,46 +303,61 @@ onMounted(() => {
       :placeholder="t('mobile.remark.searchPlaceholder')"
     />
 
-    <!-- 新增按钮 -->
-    <div class="add-btn-wrapper">
-      <van-button type="danger" size="small" icon="plus" @click="handleAdd">
-        {{ t("mobile.common.add") }}
+    <!-- 多选模式工具栏 -->
+    <div v-if="selectMode" class="select-toolbar">
+      <span class="select-info">
+        {{ t("mobile.common.selected") }}: {{ selectedIds.length }}
+      </span>
+      <van-button size="small" @click="exitSelectMode">
+        {{ t("mobile.common.cancel") }}
+      </van-button>
+      <van-button
+        type="danger"
+        size="small"
+        :disabled="selectedIds.length === 0"
+        @click="handleBatchDelete"
+      >
+        {{ t("mobile.common.delete") }}
       </van-button>
     </div>
 
-    <!-- 备注列表 -->
-    <van-cell-group inset>
-      <van-swipe-cell v-for="remark in filteredList" :key="remark.id">
-        <van-cell :title="remark.remark" is-link @click="handleEdit(remark)">
-          <template #value>
-            <span class="classify-name">{{
-              getClassifyName(remark.classifyId)
-            }}</span>
-          </template>
-        </van-cell>
-
-        <template #right>
-          <van-button
-            square
-            type="danger"
-            :text="t('mobile.common.delete')"
-            @click="handleDelete(remark)"
-          />
-        </template>
-      </van-swipe-cell>
-    </van-cell-group>
+    <!-- 备注网格 -->
+    <div class="grid-container">
+      <div
+        v-for="remark in filteredList"
+        :key="remark.id"
+        class="grid-item"
+        :class="{ selected: selectedIds.includes(remark.id) }"
+        @touchstart="handleTouchStart(remark)"
+        @touchend="handleTouchEnd"
+        @touchcancel="handleTouchEnd"
+        @click="handleItemClick(remark)"
+      >
+        <!-- 选中标记 -->
+        <div v-if="selectMode" class="select-checkbox">
+          <van-icon v-if="selectedIds.includes(remark.id)" name="success" />
+        </div>
+        <!-- 备注名称 -->
+        <div class="item-name">{{ remark.remark }}</div>
+      </div>
+    </div>
 
     <van-empty
       v-if="filteredList.length === 0"
       :description="t('mobile.common.noData')"
     />
 
+    <!-- 悬浮添加按钮 -->
+    <div v-if="!selectMode" class="floating-btn" @click="handleAdd">
+      <van-icon name="plus" size="24" />
+    </div>
+
     <!-- 新增/编辑弹窗 -->
     <van-popup
       v-model:show="showEditor"
       position="bottom"
       round
-      :style="{ height: '50%' }"
+      :style="{ height: '40%' }"
     >
       <div class="remark-editor">
         <div class="editor-header">
@@ -301,34 +402,14 @@ onMounted(() => {
       </div>
     </van-popup>
 
-    <!-- 分类选择弹窗 -->
-    <van-action-sheet
-      v-model:show="showClassifyPicker"
-      :title="t('mobile.remark.classify')"
-    >
-      <div class="classify-list">
-        <van-cell
-          v-for="classify in classifyList"
-          :key="classify.id"
-          :title="classify.name"
-          clickable
-          @click="handleSelectClassify(classify)"
-        >
-          <template #icon>
-            <span class="classify-icon">{{
-              getClassifyIcon(classify.image)
-            }}</span>
-          </template>
-          <template #right-icon>
-            <van-icon
-              v-if="formData.classifyId === classify.id"
-              name="success"
-              color="#d83d34"
-            />
-          </template>
-        </van-cell>
-      </div>
-    </van-action-sheet>
+    <!-- 分类选择器 -->
+    <ClassifyPicker
+      v-model="showClassifyPicker"
+      :classify-list="classifyList"
+      :main-classify-id="mainClassifyId"
+      :sub-classify-id="subClassifyId"
+      @select="handleClassifySelect"
+    />
   </div>
 </template>
 
@@ -337,18 +418,101 @@ onMounted(() => {
 
 .remark-page {
   min-height: 100vh;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
   background-color: $color-background;
 }
 
-.add-btn-wrapper {
+.select-toolbar {
   display: flex;
-  justify-content: flex-end;
-  padding: 0 16px 12px;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: $color-card;
+  border-bottom: 1px solid $color-border;
+
+  .select-info {
+    font-size: 14px;
+    color: $color-text-primary;
+  }
 }
 
-.classify-name {
-  font-size: 12px;
-  color: $color-text-secondary;
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px;
+}
+
+.grid-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  min-height: 60px;
+  padding: 16px 8px;
+  cursor: pointer;
+  background-color: $color-card;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.selected {
+    background-color: rgba($color-primary, 0.1);
+    border-color: $color-primary;
+  }
+
+  .select-checkbox {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    color: #fff;
+    background-color: $color-primary;
+    border-radius: 50%;
+  }
+
+  .item-name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-text-primary;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}
+
+.floating-btn {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: #fff;
+  background-color: $color-primary;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .remark-editor {
@@ -375,16 +539,5 @@ onMounted(() => {
 .editor-footer {
   padding-top: 16px;
   margin-top: auto;
-}
-
-.classify-list {
-  max-height: 300px;
-  padding-bottom: env(safe-area-inset-bottom);
-  overflow-y: auto;
-}
-
-.classify-icon {
-  margin-right: 8px;
-  font-size: 20px;
 }
 </style>

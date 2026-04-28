@@ -18,6 +18,8 @@ common:
   refreshing: Refreshing...
   networkError: Network connection failed, please check your network
   serverError: System is busy, please try again later
+  selected: Selected
+  selectMode: Multi-select mode enabled
 
 # Language
 language:
@@ -237,6 +239,7 @@ classify:
   edit: Edit Category
   type: Type
   parentClassify: Parent Category
+  none: None
   topLevel: Top Level
   name: Name
   namePlaceholder: Enter category name

@@ -48,6 +48,13 @@ const showEditor = ref(false);
 const isEdit = ref(false);
 const saving = ref(false);
 
+// 多选模式
+const selectMode = ref(false);
+const selectedIds = ref<number[]>([]);
+
+// 长按计时器
+let longPressTimer: ReturnType<typeof setTimeout> | null = null;
+
 // 表单数据
 const formData = ref<AccountBookForm>({
   userId: 0,
@@ -110,6 +117,7 @@ const handleAdd = () => {
 
 // 打开编辑弹窗
 const handleEdit = (book: AccountBook) => {
+  if (selectMode.value) return;
   isEdit.value = true;
   formData.value = {
     id: book.id,
@@ -155,7 +163,7 @@ const handleSubmit = async () => {
   }
 };
 
-// 删除账本
+// 删除单个账本
 const handleDelete = async (book: AccountBook) => {
   if (book.isDefault === "YES") {
     showError(t("mobile.accountBook.cannotDeleteDefault"));
@@ -180,7 +188,89 @@ const handleDelete = async (book: AccountBook) => {
     // 同步更新 store
     await accountBookStore.fetchList(userStore.id);
   } catch {
-    // 取消或失败
+    hideLoading();
+  }
+};
+
+// 长按开始
+const handleTouchStart = (book: AccountBook) => {
+  if (selectMode.value) return;
+
+  longPressTimer = setTimeout(() => {
+    // 进入多选模式
+    selectMode.value = true;
+    selectedIds.value = [book.id];
+  }, 500);
+};
+
+// 长按结束
+const handleTouchEnd = () => {
+  if (longPressTimer) {
+    clearTimeout(longPressTimer);
+    longPressTimer = null;
+  }
+};
+
+// 点击网格项
+const handleItemClick = (book: AccountBook) => {
+  if (selectMode.value) {
+    // 多选模式下切换选中状态
+    const index = selectedIds.value.indexOf(book.id);
+    if (index > -1) {
+      selectedIds.value.splice(index, 1);
+      // 如果没有选中项，退出多选模式
+      if (selectedIds.value.length === 0) {
+        selectMode.value = false;
+      }
+    } else {
+      selectedIds.value.push(book.id);
+    }
+  } else {
+    // 非多选模式下编辑
+    handleEdit(book);
+  }
+};
+
+// 退出多选模式
+const exitSelectMode = () => {
+  selectMode.value = false;
+  selectedIds.value = [];
+};
+
+// 批量删除
+const handleBatchDelete = async () => {
+  if (selectedIds.value.length === 0) return;
+
+  // 检查是否包含默认账本
+  const hasDefault = accountBookList.value.some(
+    book => selectedIds.value.includes(book.id) && book.isDefault === "YES"
+  );
+  if (hasDefault) {
+    showError(t("mobile.accountBook.cannotDeleteDefault"));
+    return;
+  }
+
+  try {
+    await showConfirmDialog({
+      message: t("mobile.accountBook.deleteConfirm"),
+      confirmButtonColor: "#d83d34"
+    });
+
+    showLoading(t("mobile.common.loading"));
+    await deleteAccountBook(selectedIds.value);
+    hideLoading();
+
+    showSuccess(t("mobile.accountBook.deleteSuccess"));
+
+    // 退出多选模式
+    exitSelectMode();
+
+    // 刷新列表
+    await loadData();
+
+    // 同步更新 store
+    await accountBookStore.fetchList(userStore.id);
+  } catch {
     hideLoading();
   }
 };
@@ -199,46 +289,65 @@ onMounted(() => {
       :placeholder="t('mobile.accountBook.searchPlaceholder')"
     />
 
-    <!-- 新增按钮 -->
-    <div class="add-btn-wrapper">
-      <van-button type="danger" size="small" icon="plus" @click="handleAdd">
-        {{ t("mobile.common.add") }}
+    <!-- 多选模式工具栏 -->
+    <div v-if="selectMode" class="select-toolbar">
+      <span class="select-info">
+        {{ t("mobile.common.selected") }}: {{ selectedIds.length }}
+      </span>
+      <van-button size="small" @click="exitSelectMode">
+        {{ t("mobile.common.cancel") }}
+      </van-button>
+      <van-button
+        type="danger"
+        size="small"
+        :disabled="selectedIds.length === 0"
+        @click="handleBatchDelete"
+      >
+        {{ t("mobile.common.delete") }}
       </van-button>
     </div>
 
-    <!-- 账本列表 -->
-    <van-cell-group inset>
-      <van-swipe-cell v-for="book in filteredList" :key="book.id">
-        <van-cell :title="book.name" is-link @click="handleEdit(book)">
-          <template #icon>
-            <span class="book-icon">{{ getAccountBookIcon(book.image) }}</span>
-          </template>
-          <template #value>
-            <van-tag
-              v-if="book.isDefault === 'YES'"
-              type="success"
-              size="small"
-            >
-              {{ t("mobile.accountBook.default") }}
-            </van-tag>
-          </template>
-        </van-cell>
-
-        <template #right>
-          <van-button
-            square
-            type="danger"
-            :text="t('mobile.common.delete')"
-            @click="handleDelete(book)"
-          />
-        </template>
-      </van-swipe-cell>
-    </van-cell-group>
+    <!-- 账本网格 -->
+    <div class="grid-container">
+      <div
+        v-for="book in filteredList"
+        :key="book.id"
+        class="grid-item"
+        :class="{ selected: selectedIds.includes(book.id) }"
+        @touchstart="handleTouchStart(book)"
+        @touchend="handleTouchEnd"
+        @touchcancel="handleTouchEnd"
+        @click="handleItemClick(book)"
+      >
+        <!-- 选中标记 -->
+        <div v-if="selectMode" class="select-checkbox">
+          <van-icon v-if="selectedIds.includes(book.id)" name="success" />
+        </div>
+        <!-- 图标 -->
+        <div class="item-icon">{{ getAccountBookIcon(book.image) }}</div>
+        <!-- 名称 -->
+        <div class="item-name">{{ book.name }}</div>
+        <!-- 默认标签 -->
+        <van-tag
+          v-if="book.isDefault === 'YES'"
+          type="success"
+          size="small"
+          class="default-tag"
+        >
+          {{ t("mobile.accountBook.default") }}
+        </van-tag>
+      </div>
+    </div>
 
     <van-empty
       v-if="filteredList.length === 0"
       :description="t('mobile.common.noData')"
     />
+
+    <!-- 悬浮添加按钮 -->
+    <div v-if="!selectMode" class="floating-btn" @click="handleAdd">
+      <van-icon name="plus" size="24" />
+    </div>
 
     <!-- 新增/编辑弹窗 -->
     <van-popup
@@ -319,18 +428,108 @@ onMounted(() => {
 
 .account-book-page {
   min-height: 100vh;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
   background-color: $color-background;
 }
 
-.add-btn-wrapper {
+.select-toolbar {
   display: flex;
-  justify-content: flex-end;
-  padding: 0 16px 12px;
+  gap: 12px;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 16px;
+  background-color: $color-card;
+  border-bottom: 1px solid $color-border;
+
+  .select-info {
+    font-size: 14px;
+    color: $color-text-primary;
+  }
 }
 
-.book-icon {
-  margin-right: 8px;
-  font-size: 20px;
+.grid-container {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 12px;
+  padding: 12px;
+}
+
+.grid-item {
+  position: relative;
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  align-items: center;
+  justify-content: center;
+  padding: 16px 8px;
+  cursor: pointer;
+  background-color: $color-card;
+  border: 2px solid transparent;
+  border-radius: 12px;
+  transition: all 0.2s;
+
+  &:active {
+    transform: scale(0.98);
+  }
+
+  &.selected {
+    background-color: rgba($color-primary, 0.1);
+    border-color: $color-primary;
+  }
+
+  .select-checkbox {
+    position: absolute;
+    top: 8px;
+    right: 8px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 20px;
+    height: 20px;
+    font-size: 12px;
+    color: #fff;
+    background-color: $color-primary;
+    border-radius: 50%;
+  }
+
+  .item-icon {
+    font-size: 32px;
+  }
+
+  .item-name {
+    max-width: 100%;
+    overflow: hidden;
+    font-size: 14px;
+    font-weight: 500;
+    color: $color-text-primary;
+    text-align: center;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  .default-tag {
+    margin-top: 4px;
+  }
+}
+
+.floating-btn {
+  position: fixed;
+  right: 16px;
+  bottom: calc(16px + env(safe-area-inset-bottom));
+  z-index: 100;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 56px;
+  height: 56px;
+  color: #fff;
+  background-color: $color-primary;
+  border-radius: 50%;
+  box-shadow: 0 4px 12px rgb(0 0 0 / 15%);
+
+  &:active {
+    transform: scale(0.95);
+  }
 }
 
 .account-book-editor {
