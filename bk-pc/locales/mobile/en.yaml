@@ -96,14 +96,41 @@ home:
 # Bill
 bill:
   title: Bills
-  monthBill: Monthly
-  yearBill: Yearly
+  thisMonth: This Month
+  thisYear: This Year
   custom: Custom
   filter: Filter
+  reset: Reset
+  confirm: Confirm
+  expense: Expense
+  income: Income
   allExpense: All Expense
   allIncome: All Income
   sortByTime: By Time
   sortByAmount: By Amount
+  dateRange: Date Range
+  startDate: Start Date
+  endDate: End Date
+  amountRange: Amount Range
+  minAmount: Min Amount
+  maxAmount: Max Amount
+  classifyFilter: Category Filter
+  remarkFilter: Remark Search
+  remarkPlaceholder: Enter remark keyword
+  tagFilter: Tag Filter
+  noData: No bills yet
+  deleteConfirm: Are you sure to delete this bill?
+  deleteSuccess: Deleted successfully
+  deleteFailed: Delete failed
+  loadFailed: Load failed
+  selectedClassify: "{count} categories selected"
+  noRemark: No remark
+  selectDate: Select Date
+  selectClassify: Select Category
+  selectTag: Select Tag
+  totalExpense: Expense
+  totalIncome: Income
+  noFilter: No filters
 
 # Record
 record:

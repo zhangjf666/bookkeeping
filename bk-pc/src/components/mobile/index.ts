@@ -8,3 +8,4 @@ export { default as MobilePage } from "./MobilePage.vue";
 export { default as PullRefreshList } from "./PullRefreshList.vue";
 export { default as TagPicker } from "./TagPicker.vue";
 export { default as RemarkPicker } from "./RemarkPicker.vue";
+export { default as BillFilter } from "./BillFilter.vue";

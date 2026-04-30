@@ -96,14 +96,41 @@ home:
 # 账单页
 bill:
   title: 账单
-  monthBill: 月账单
-  yearBill: 年账单
+  thisMonth: 本月
+  thisYear: 本年
   custom: 自定义
   filter: 筛选
+  reset: 重置
+  confirm: 确定
+  expense: 支出
+  income: 收入
   allExpense: 全部支出
   allIncome: 全部收入
   sortByTime: 按时间
   sortByAmount: 按金额
+  dateRange: 日期范围
+  startDate: 开始日期
+  endDate: 结束日期
+  amountRange: 金额范围
+  minAmount: 最小金额
+  maxAmount: 最大金额
+  classifyFilter: 分类筛选
+  remarkFilter: 备注搜索
+  remarkPlaceholder: 请输入备注关键词
+  tagFilter: 标签筛选
+  noData: 暂无账单记录
+  deleteConfirm: 确定要删除这条账单吗？
+  deleteSuccess: 删除成功
+  deleteFailed: 删除失败
+  loadFailed: 加载失败
+  selectedClassify: 已选择 {count} 个分类
+  noRemark: 无备注
+  selectDate: 选择日期
+  selectClassify: 选择分类
+  selectTag: 选择标签
+  totalExpense: 支出
+  totalIncome: 收入
+  noFilter: 无筛选条件
 
 # 记账页
 record:

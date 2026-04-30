@@ -29,12 +29,14 @@ export const useBillStore = defineStore("pure-bill", {
       pageNo: 1,
       pageSize: 20,
       accountBookId: undefined as number | undefined,
-      date: undefined as string | undefined,
-      amount: undefined as number | undefined,
-      classifyList: [] as (number | string)[],
+      date: undefined as string[] | undefined,
+      amount: undefined as number[] | undefined,
+      classifyList: undefined as
+        | { mainClassifyId: number; subClassifyId: number | null }[]
+        | undefined,
       remark: undefined as string | undefined,
-      tagCodes: undefined as number[] | undefined
-    },
+      tagCodes: undefined as string[] | undefined
+    } as IncomeExpenseQuery,
     listLoading: false,
     classifyList: [] as Classify[],
     classifyTree: [] as Classify[],
@@ -143,11 +145,11 @@ export const useBillStore = defineStore("pure-bill", {
     resetQueryParams() {
       this.queryParams = {
         pageNo: 1,
-        pageSize: 10,
+        pageSize: 20,
         accountBookId: this.queryParams.accountBookId,
         date: undefined,
         amount: undefined,
-        classifyList: [],
+        classifyList: undefined,
         remark: undefined,
         tagCodes: undefined
       };

@@ -564,7 +564,11 @@ onMounted(() => {
           >
             <div class="item-icon">{{ getClassifyIcon("other") }}</div>
             <div class="item-name">{{ t("mobile.classify.none") }}</div>
-            <van-icon v-if="formData.pid === 0" name="success" class="check-icon" />
+            <van-icon
+              v-if="formData.pid === 0"
+              name="success"
+              class="check-icon"
+            />
           </div>
           <!-- 父分类选项 -->
           <div
@@ -576,7 +580,11 @@ onMounted(() => {
           >
             <div class="item-icon">{{ getClassifyIcon(option.image) }}</div>
             <div class="item-name">{{ option.name }}</div>
-            <van-icon v-if="formData.pid === option.id" name="success" class="check-icon" />
+            <van-icon
+              v-if="formData.pid === option.id"
+              name="success"
+              class="check-icon"
+            />
           </div>
         </div>
       </div>
