@@ -1,11 +1,15 @@
 <script setup lang="ts">
-import { ref, computed } from "vue";
+import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
+import { showToast } from "vant";
 import dayjs from "dayjs";
 import type { Classify } from "@/types/classify";
 import type { UserTag } from "@/types/userTag";
 import type { UserRemark } from "@/types/remark";
-import { getClassifyIcon } from "@/utils/classifyIcons";
+import AmountKeyboardInput from "@/components/mobile/AmountKeyboardInput.vue";
+import RemarkPicker from "@/components/mobile/RemarkPicker.vue";
+import TagPicker from "@/components/mobile/TagPicker.vue";
+import ClassifyFilterPicker from "@/components/mobile/ClassifyFilterPicker.vue";
 
 defineOptions({
   name: "BillFilter"
@@ -15,6 +19,9 @@ const props = defineProps<{
   classifyList: Classify[];
   tagList: UserTag[];
   remarkList: UserRemark[];
+  initialDate?: string[]; // 外部传入的初始日期
+  initialRemark?: string; // 外部传入的初始备注
+  initialTagIds?: number[]; // 外部传入的初始标签ID
 }>();
 
 const emit = defineEmits<{
@@ -38,61 +45,30 @@ const minAmount = ref<number | null>(null);
 const maxAmount = ref<number | null>(null);
 const selectedClassifies = ref<Map<number, Set<number | null>>>(new Map());
 const remark = ref("");
-const selectedTagCodes = ref<Set<string>>(new Set());
+const selectedTagIds = ref<number[]>([]);
 
 // 日期选择器
 const showDatePicker = ref(false);
+const startDate = ref<string[]>([
+  String(new Date().getFullYear()),
+  String(new Date().getMonth() + 1),
+  String(new Date().getDate())
+]);
+const endDate = ref<string[]>([
+  String(new Date().getFullYear()),
+  String(new Date().getMonth() + 1),
+  String(new Date().getDate())
+]);
+const activePicker = ref<"start" | "end">("start");
 
-// 分类选择相关
-const selectAllExpense = ref(false);
-const selectAllIncome = ref(false);
+// 分类选择器
+const showClassifyPicker = ref(false);
 
-// 备注搜索
-const remarkSearch = ref("");
+// 备注选择器
+const showRemarkPicker = ref(false);
 
-// 标签搜索
-const tagSearch = ref("");
-
-// 支出顶级分类
-const expenseParents = computed(() => {
-  return props.classifyList.filter(
-    item =>
-      (item.pid === -1 || item.pid === 0 || item.pid === null) &&
-      item.type === "EXPENSE"
-  );
-});
-
-// 收入顶级分类
-const incomeParents = computed(() => {
-  return props.classifyList.filter(
-    item =>
-      (item.pid === -1 || item.pid === 0 || item.pid === null) &&
-      item.type === "INCOME"
-  );
-});
-
-// 获取子分类
-const getChildren = (parentId: number) => {
-  return props.classifyList.filter(item => item.pid === parentId);
-};
-
-// 过滤后的备注列表
-const filteredRemarks = computed(() => {
-  if (!remarkSearch.value) return props.remarkList;
-  const keyword = remarkSearch.value.toLowerCase();
-  return props.remarkList.filter(item =>
-    item.remark.toLowerCase().includes(keyword)
-  );
-});
-
-// 过滤后的标签列表
-const filteredTags = computed(() => {
-  if (!tagSearch.value) return props.tagList;
-  const keyword = tagSearch.value.toLowerCase();
-  return props.tagList.filter(item =>
-    item.name.toLowerCase().includes(keyword)
-  );
-});
+// 标签选择器
+const showTagPicker = ref(false);
 
 // 日期显示文本
 const dateDisplay = computed(() => {
@@ -117,6 +93,11 @@ const classifyCount = computed(() => {
   return count;
 });
 
+// 选中的标签列表
+const selectedTags = computed(() => {
+  return props.tagList.filter(tag => selectedTagIds.value.includes(tag.id));
+});
+
 // 是否有筛选条件
 const hasFilter = computed(() => {
   return (
@@ -125,124 +106,97 @@ const hasFilter = computed(() => {
     maxAmount.value !== null ||
     classifyCount.value > 0 ||
     remark.value !== "" ||
-    selectedTagCodes.value.size > 0
+    selectedTagIds.value.length > 0
   );
 });
 
-// 日期确认
-const handleDateConfirm = (values: Date[]) => {
-  dateRange.value = [
-    dayjs(values[0]).format("YYYY-MM-DD"),
-    dayjs(values[1]).format("YYYY-MM-DD")
-  ];
+// 监听外部传入的初始日期
+watch(
+  () => props.initialDate,
+  (newDate) => {
+    if (newDate && newDate.length === 2) {
+      dateRange.value = [newDate[0], newDate[1]];
+      startDate.value = newDate[0].split("-");
+      endDate.value = newDate[1].split("-");
+    }
+  },
+  { immediate: true }
+);
+
+// 监听外部传入的初始备注
+watch(
+  () => props.initialRemark,
+  (newRemark) => {
+    remark.value = newRemark || "";
+  },
+  { immediate: true }
+);
+
+// 监听外部传入的初始标签ID
+watch(
+  () => props.initialTagIds,
+  (newTagIds) => {
+    selectedTagIds.value = newTagIds || [];
+  },
+  { immediate: true }
+);
+
+// 打开日期选择器
+const openDatePicker = () => {
+  if (dateRange.value) {
+    const startDateParts = dateRange.value[0].split("-");
+    startDate.value = startDateParts;
+    const endDateParts = dateRange.value[1].split("-");
+    endDate.value = endDateParts;
+  } else {
+    const now = new Date();
+    startDate.value = [
+      String(now.getFullYear()),
+      String(now.getMonth() + 1),
+      String(now.getDate())
+    ];
+    endDate.value = [
+      String(now.getFullYear()),
+      String(now.getMonth() + 1),
+      String(now.getDate())
+    ];
+  }
+  activePicker.value = "start";
+  showDatePicker.value = true;
+};
+
+// 切换当前选择的日期
+const switchPicker = (type: "start" | "end") => {
+  activePicker.value = type;
+};
+
+// 格式化日期数组为字符串
+const formatDateString = (dateArr: string[]) => {
+  if (!dateArr || dateArr.length < 3) return "";
+  const year = String(dateArr[0]);
+  const month = String(dateArr[1]).padStart(2, "0");
+  const day = String(dateArr[2]).padStart(2, "0");
+  return `${year}-${month}-${day}`;
+};
+
+// 确认日期选择
+const confirmDatePicker = () => {
+  const start = formatDateString(startDate.value);
+  const end = formatDateString(endDate.value);
+
+  // 校验结束日期不能小于开始日期
+  if (dayjs(end).isBefore(dayjs(start))) {
+    showToast(t("mobile.bill.endDateBeforeStart"));
+    return;
+  }
+
+  dateRange.value = [start, end];
   showDatePicker.value = false;
 };
 
-// 切换全选支出
-const toggleAllExpense = () => {
-  if (selectAllExpense.value) {
-    // 取消全选
-    expenseParents.value.forEach(parent => {
-      selectedClassifies.value.delete(parent.id);
-    });
-    selectAllExpense.value = false;
-  } else {
-    // 全选
-    expenseParents.value.forEach(parent => {
-      const subSet = new Set<number | null>();
-      subSet.add(null); // null 表示选中顶级分类本身
-      getChildren(parent.id).forEach(child => {
-        subSet.add(child.id);
-      });
-      selectedClassifies.value.set(parent.id, subSet);
-    });
-    selectAllExpense.value = true;
-  }
-};
-
-// 切换全选收入
-const toggleAllIncome = () => {
-  if (selectAllIncome.value) {
-    incomeParents.value.forEach(parent => {
-      selectedClassifies.value.delete(parent.id);
-    });
-    selectAllIncome.value = false;
-  } else {
-    incomeParents.value.forEach(parent => {
-      const subSet = new Set<number | null>();
-      subSet.add(null);
-      getChildren(parent.id).forEach(child => {
-        subSet.add(child.id);
-      });
-      selectedClassifies.value.set(parent.id, subSet);
-    });
-    selectAllIncome.value = true;
-  }
-};
-
-// 切换分类选中
-const toggleClassify = (parent: Classify, childId: number | null = null) => {
-  let subSet = selectedClassifies.value.get(parent.id);
-  if (!subSet) {
-    subSet = new Set();
-    selectedClassifies.value.set(parent.id, subSet);
-  }
-
-  if (subSet.has(childId)) {
-    subSet.delete(childId);
-    if (subSet.size === 0) {
-      selectedClassifies.value.delete(parent.id);
-    }
-  } else {
-    subSet.add(childId);
-  }
-
-  // 更新全选状态
-  updateSelectAllState();
-};
-
-// 检查分类是否选中
-const isClassifySelected = (
-  parentId: number,
-  childId: number | null = null
-) => {
-  const subSet = selectedClassifies.value.get(parentId);
-  return subSet?.has(childId) ?? false;
-};
-
-// 更新全选状态
-const updateSelectAllState = () => {
-  // 检查支出是否全选
-  const expenseSelected = expenseParents.value.every(parent => {
-    const subSet = selectedClassifies.value.get(parent.id);
-    if (!subSet) return false;
-    const children = getChildren(parent.id);
-    return subSet.has(null) && children.every(child => subSet.has(child.id));
-  });
-  selectAllExpense.value = expenseSelected;
-
-  // 检查收入是否全选
-  const incomeSelected = incomeParents.value.every(parent => {
-    const subSet = selectedClassifies.value.get(parent.id);
-    if (!subSet) return false;
-    const children = getChildren(parent.id);
-    return subSet.has(null) && children.every(child => subSet.has(child.id));
-  });
-  selectAllIncome.value = incomeSelected;
-};
-
-// 切换标签选中
-const toggleTag = (code: string) => {
-  if (selectedTagCodes.value.has(code)) {
-    selectedTagCodes.value.delete(code);
-  } else {
-    selectedTagCodes.value.add(code);
-  }
-};
-
-// 选择备注
-const selectRemark = (text: string) => {
-  remark.value = text;
+// 备注选择
+const handleRemarkSelect = (selectedRemark: UserRemark) => {
+  remark.value = selectedRemark.remark || "";
 };
 
 // 重置
@@ -252,11 +206,7 @@ const handleReset = () => {
   maxAmount.value = null;
   selectedClassifies.value = new Map();
   remark.value = "";
-  selectedTagCodes.value = new Set();
-  selectAllExpense.value = false;
-  selectAllIncome.value = false;
-  remarkSearch.value = "";
-  tagSearch.value = "";
+  selectedTagIds.value = [];
   emit("reset");
 };
 
@@ -264,17 +214,18 @@ const handleReset = () => {
 const handleConfirm = () => {
   const params: FilterParams = {};
 
-  // 日期范围
+  // 日期范围 - 直接使用 dateRange
   if (dateRange.value) {
-    params.date = [
-      dayjs(dateRange.value[0]).startOf("day").format("YYYY-MM-DD HH:mm:ss"),
-      dayjs(dateRange.value[1]).endOf("day").format("YYYY-MM-DD HH:mm:ss")
-    ];
+    params.date = [dateRange.value[0], dateRange.value[1]];
+  } else {
+    params.date = undefined;
   }
 
   // 金额范围
   if (minAmount.value !== null || maxAmount.value !== null) {
     params.amount = [minAmount.value ?? 0, maxAmount.value ?? 999999999];
+  } else {
+    params.amount = undefined;
   }
 
   // 分类
@@ -292,16 +243,22 @@ const handleConfirm = () => {
       });
     });
     params.classifyList = classifyArr;
+  } else {
+    params.classifyList = undefined;
   }
 
   // 备注
   if (remark.value) {
     params.remark = remark.value;
+  } else {
+    params.remark = undefined;
   }
 
   // 标签
-  if (selectedTagCodes.value.size > 0) {
-    params.tagCodes = Array.from(selectedTagCodes.value);
+  if (selectedTagIds.value.length > 0) {
+    params.tagCodes = selectedTagIds.value.map(String);
+  } else {
+    params.tagCodes = undefined;
   }
 
   emit("confirm", params);
@@ -313,7 +270,7 @@ const handleConfirm = () => {
     <!-- 日期范围 -->
     <div class="filter-section">
       <div class="section-label">{{ t("mobile.bill.dateRange") }}</div>
-      <div class="date-picker" @click="showDatePicker = true">
+      <div class="date-picker" @click="openDatePicker">
         <span v-if="dateDisplay" class="date-text">{{ dateDisplay }}</span>
         <span v-else class="placeholder">{{
           t("mobile.bill.selectDate")
@@ -326,18 +283,14 @@ const handleConfirm = () => {
     <div class="filter-section">
       <div class="section-label">{{ t("mobile.bill.amountRange") }}</div>
       <div class="amount-range">
-        <van-field
+        <AmountKeyboardInput
           v-model="minAmount"
-          type="number"
           :placeholder="t('mobile.bill.minAmount')"
-          class="amount-input"
         />
         <span class="separator">-</span>
-        <van-field
+        <AmountKeyboardInput
           v-model="maxAmount"
-          type="number"
           :placeholder="t('mobile.bill.maxAmount')"
-          class="amount-input"
         />
       </div>
     </div>
@@ -345,131 +298,49 @@ const handleConfirm = () => {
     <!-- 分类筛选 -->
     <div class="filter-section">
       <div class="section-label">{{ t("mobile.bill.classifyFilter") }}</div>
-
-      <!-- 全选按钮 -->
-      <div class="select-all-row">
-        <div
-          class="select-all-btn"
-          :class="{ active: selectAllExpense }"
-          @click="toggleAllExpense"
-        >
-          <span class="icon">{{ getClassifyIcon("other") }}</span>
-          <span class="text">{{ t("mobile.bill.allExpense") }}</span>
-          <van-icon v-if="selectAllExpense" name="success" class="check" />
-        </div>
-        <div
-          class="select-all-btn"
-          :class="{ active: selectAllIncome }"
-          @click="toggleAllIncome"
-        >
-          <span class="icon">{{ getClassifyIcon("other") }}</span>
-          <span class="text">{{ t("mobile.bill.allIncome") }}</span>
-          <van-icon v-if="selectAllIncome" name="success" class="check" />
-        </div>
-      </div>
-
-      <!-- 支出分类 -->
-      <div v-if="expenseParents.length > 0" class="classify-group">
-        <div class="group-title">{{ t("mobile.bill.expense") }}</div>
-        <div class="classify-grid">
-          <div
-            v-for="parent in expenseParents"
-            :key="parent.id"
-            class="classify-item"
-            :class="{ active: isClassifySelected(parent.id, null) }"
-            @click="toggleClassify(parent, null)"
-          >
-            <span class="icon">{{ getClassifyIcon(parent.image) }}</span>
-            <span class="name">{{ parent.name }}</span>
-            <van-icon
-              v-if="isClassifySelected(parent.id, null)"
-              name="success"
-              class="check"
-            />
-          </div>
-        </div>
-      </div>
-
-      <!-- 收入分类 -->
-      <div v-if="incomeParents.length > 0" class="classify-group">
-        <div class="group-title">{{ t("mobile.bill.income") }}</div>
-        <div class="classify-grid">
-          <div
-            v-for="parent in incomeParents"
-            :key="parent.id"
-            class="classify-item"
-            :class="{ active: isClassifySelected(parent.id, null) }"
-            @click="toggleClassify(parent, null)"
-          >
-            <span class="icon">{{ getClassifyIcon(parent.image) }}</span>
-            <span class="name">{{ parent.name }}</span>
-            <van-icon
-              v-if="isClassifySelected(parent.id, null)"
-              name="success"
-              class="check"
-            />
-          </div>
-        </div>
-      </div>
+      <van-cell is-link @click="showClassifyPicker = true">
+        <template #title>
+          <span v-if="classifyCount > 0">{{ t("mobile.bill.selectedClassify", { count: classifyCount }) }}</span>
+          <span v-else class="placeholder">{{ t("mobile.bill.selectClassify") }}</span>
+        </template>
+      </van-cell>
     </div>
 
-    <!-- 备注搜索 -->
+    <!-- 备注筛选 -->
     <div class="filter-section">
       <div class="section-label">{{ t("mobile.bill.remarkFilter") }}</div>
-      <van-search
-        v-model="remarkSearch"
-        shape="round"
-        :placeholder="t('mobile.bill.remarkPlaceholder')"
-      />
-      <div v-if="filteredRemarks.length > 0" class="remark-grid">
-        <div
-          v-for="item in filteredRemarks"
-          :key="item.id"
-          class="remark-item"
-          :class="{ active: remark === item.remark }"
-          @click="selectRemark(item.remark)"
-        >
-          {{ item.remark }}
-        </div>
-      </div>
-      <van-empty
-        v-else-if="remarkSearch"
-        :description="t('mobile.common.noData')"
-        image-size="40"
-      />
+      <van-cell
+        is-link
+        @click="showRemarkPicker = true"
+      >
+        <template #title>
+          <span v-if="remark">{{ remark }}</span>
+          <span v-else class="placeholder">{{ t("mobile.bill.remarkPlaceholder") }}</span>
+        </template>
+      </van-cell>
     </div>
 
     <!-- 标签筛选 -->
     <div class="filter-section">
       <div class="section-label">{{ t("mobile.bill.tagFilter") }}</div>
-      <van-search
-        v-model="tagSearch"
-        shape="round"
-        :placeholder="t('mobile.record.tagSearch')"
-      />
-      <div v-if="filteredTags.length > 0" class="tag-grid">
-        <div
-          v-for="tag in filteredTags"
-          :key="tag.id"
-          class="tag-item"
-          :class="{ active: selectedTagCodes.has(String(tag.id)) }"
-          @click="toggleTag(String(tag.id))"
-        >
-          <van-tag :color="tag.color" text-color="#fff">
-            {{ tag.name }}
-          </van-tag>
-          <van-icon
-            v-if="selectedTagCodes.has(String(tag.id))"
-            name="success"
-            class="check"
-          />
-        </div>
-      </div>
-      <van-empty
-        v-else-if="tagSearch"
-        :description="t('mobile.common.noData')"
-        image-size="40"
-      />
+      <van-cell
+        is-link
+        @click="showTagPicker = true"
+      >
+        <template #title>
+          <div v-if="selectedTags.length > 0" class="selected-tags-cell">
+            <van-tag
+              v-for="tag in selectedTags"
+              :key="tag.id"
+              :color="tag.color"
+              text-color="#fff"
+            >
+              {{ tag.name }}
+            </van-tag>
+          </div>
+          <span v-else class="placeholder">{{ t("mobile.record.tagPlaceholder") }}</span>
+        </template>
+      </van-cell>
     </div>
 
     <!-- 底部按钮 -->
@@ -482,16 +353,78 @@ const handleConfirm = () => {
       </van-button>
     </div>
 
-    <!-- 日期选择器 -->
-    <van-calendar
+    <!-- 日期选择器弹窗 -->
+    <van-popup
       v-model:show="showDatePicker"
-      type="range"
-      :min-date="new Date(2020, 0, 1)"
-      :max-date="new Date()"
-      show-confirm
       position="bottom"
       round
-      @confirm="handleDateConfirm"
+      :style="{ height: '50%' }"
+    >
+      <div class="date-picker-popup">
+        <div class="picker-header">
+          <div
+            class="picker-tab"
+            :class="{ active: activePicker === 'start' }"
+            @click="switchPicker('start')"
+          >
+            {{ t("mobile.bill.startDate") }}
+          </div>
+          <div
+            class="picker-tab"
+            :class="{ active: activePicker === 'end' }"
+            @click="switchPicker('end')"
+          >
+            {{ t("mobile.bill.endDate") }}
+          </div>
+        </div>
+        <div class="picker-content">
+          <van-date-picker
+            v-if="activePicker === 'start'"
+            v-model="startDate"
+            title=""
+            :min-date="new Date(2020, 0, 1)"
+            :max-date="new Date()"
+            :show-toolbar="false"
+          />
+          <van-date-picker
+            v-if="activePicker === 'end'"
+            v-model="endDate"
+            title=""
+            :min-date="new Date(2020, 0, 1)"
+            :max-date="new Date()"
+            :show-toolbar="false"
+          />
+        </div>
+        <div class="picker-footer">
+          <van-button block type="danger" @click="confirmDatePicker">
+            {{ t("mobile.common.confirm") }}
+          </van-button>
+        </div>
+      </div>
+    </van-popup>
+
+    <!-- 分类选择器 -->
+    <ClassifyFilterPicker
+      v-model="showClassifyPicker"
+      :classify-list="classifyList"
+      :selected-classifies="selectedClassifies"
+      @update:selected-classifies="selectedClassifies = $event"
+    />
+
+    <!-- 备注选择器 -->
+    <RemarkPicker
+      v-model="showRemarkPicker"
+      :remark-list="remarkList"
+      :current-remark="remark"
+      @select="handleRemarkSelect"
+    />
+
+    <!-- 标签选择器 -->
+    <TagPicker
+      v-model="showTagPicker"
+      :tag-list="tagList"
+      :selected-ids="selectedTagIds"
+      @update:selected-ids="selectedTagIds = $event"
     />
   </div>
 </template>
@@ -542,159 +475,20 @@ const handleConfirm = () => {
   gap: 8px;
   align-items: center;
 
-  .amount-input {
-    flex: 1;
-  }
-
   .separator {
     font-size: 14px;
     color: $color-text-secondary;
   }
 }
 
-.select-all-row {
+.selected-tags-cell {
   display: flex;
-  gap: 12px;
-  margin-bottom: 12px;
-}
-
-.select-all-btn {
-  position: relative;
-  display: flex;
-  flex: 1;
-  flex-direction: column;
+  flex-wrap: wrap;
   gap: 4px;
-  align-items: center;
-  padding: 12px 8px;
-  background-color: $color-background;
-  border: 2px solid transparent;
-  border-radius: 8px;
-
-  &.active {
-    background-color: rgba($color-primary, 0.1);
-    border-color: $color-primary;
-  }
-
-  .icon {
-    font-size: 20px;
-  }
-
-  .text {
-    font-size: 12px;
-    color: $color-text-primary;
-  }
-
-  .check {
-    position: absolute;
-    top: 4px;
-    right: 4px;
-    font-size: 14px;
-    color: $color-primary;
-  }
 }
 
-.classify-group {
-  margin-bottom: 12px;
-
-  .group-title {
-    margin-bottom: 8px;
-    font-size: 12px;
-    color: $color-text-secondary;
-  }
-}
-
-.classify-grid {
-  display: grid;
-  grid-template-columns: repeat(4, 1fr);
-  gap: 8px;
-}
-
-.classify-item {
-  position: relative;
-  display: flex;
-  flex-direction: column;
-  gap: 4px;
-  align-items: center;
-  padding: 8px 4px;
-  background-color: $color-background;
-  border: 2px solid transparent;
-  border-radius: 8px;
-
-  &.active {
-    background-color: rgba($color-primary, 0.1);
-    border-color: $color-primary;
-  }
-
-  .icon {
-    font-size: 18px;
-  }
-
-  .name {
-    max-width: 100%;
-    overflow: hidden;
-    font-size: 11px;
-    color: $color-text-primary;
-    text-align: center;
-    text-overflow: ellipsis;
-    white-space: nowrap;
-  }
-
-  .check {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    font-size: 12px;
-    color: $color-primary;
-  }
-}
-
-.remark-grid,
-.tag-grid {
-  display: grid;
-  grid-template-columns: repeat(3, 1fr);
-  gap: 8px;
-  margin-top: 8px;
-}
-
-.remark-item {
-  padding: 8px;
-  overflow: hidden;
-  font-size: 12px;
-  text-align: center;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  background-color: $color-background;
-  border: 2px solid transparent;
-  border-radius: 8px;
-
-  &.active {
-    background-color: rgba($color-primary, 0.1);
-    border-color: $color-primary;
-  }
-}
-
-.tag-item {
-  position: relative;
-  display: flex;
-  align-items: center;
-  justify-content: center;
-  padding: 8px;
-  background-color: $color-background;
-  border: 2px solid transparent;
-  border-radius: 8px;
-
-  &.active {
-    background-color: rgba($color-primary, 0.1);
-    border-color: $color-primary;
-  }
-
-  .check {
-    position: absolute;
-    top: 2px;
-    right: 2px;
-    font-size: 12px;
-    color: $color-primary;
-  }
+.placeholder {
+  color: $color-text-placeholder;
 }
 
 .filter-footer {
@@ -702,5 +496,41 @@ const handleConfirm = () => {
   gap: 12px;
   padding-top: 16px;
   margin-top: auto;
+}
+
+.date-picker-popup {
+  display: flex;
+  flex-direction: column;
+  height: 100%;
+}
+
+.picker-header {
+  display: flex;
+  border-bottom: 1px solid $color-border;
+}
+
+.picker-tab {
+  flex: 1;
+  padding: 12px;
+  font-size: 14px;
+  text-align: center;
+  color: $color-text-secondary;
+  cursor: pointer;
+
+  &.active {
+    font-weight: 500;
+    color: $color-primary;
+    border-bottom: 2px solid $color-primary;
+  }
+}
+
+.picker-content {
+  flex: 1;
+  overflow: hidden;
+}
+
+.picker-footer {
+  padding: 12px 16px;
+  padding-bottom: calc(12px + env(safe-area-inset-bottom));
 }
 </style>

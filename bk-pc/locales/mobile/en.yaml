@@ -11,6 +11,7 @@ common:
   search: Search
   loading: Loading...
   noData: No Data
+  noMore: No more data
   success: Success
   failed: Failed
   pullDownRefresh: Pull to refresh
@@ -97,6 +98,7 @@ home:
 bill:
   title: Bills
   thisMonth: This Month
+  thisQuarter: This Quarter
   thisYear: This Year
   custom: Custom
   filter: Filter
@@ -111,6 +113,7 @@ bill:
   dateRange: Date Range
   startDate: Start Date
   endDate: End Date
+  endDateBeforeStart: End date cannot be earlier than start date
   amountRange: Amount Range
   minAmount: Min Amount
   maxAmount: Max Amount

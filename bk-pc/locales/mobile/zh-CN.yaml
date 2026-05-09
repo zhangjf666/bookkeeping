@@ -11,6 +11,7 @@ common:
   search: 搜索
   loading: 加载中...
   noData: 暂无数据
+  noMore: 没有更多数据了
   success: 操作成功
   failed: 操作失败
   pullDownRefresh: 下拉刷新
@@ -97,6 +98,7 @@ home:
 bill:
   title: 账单
   thisMonth: 本月
+  thisQuarter: 本季度
   thisYear: 本年
   custom: 自定义
   filter: 筛选
@@ -111,12 +113,13 @@ bill:
   dateRange: 日期范围
   startDate: 开始日期
   endDate: 结束日期
+  endDateBeforeStart: 结束日期不能小于开始日期
   amountRange: 金额范围
   minAmount: 最小金额
   maxAmount: 最大金额
   classifyFilter: 分类筛选
   remarkFilter: 备注搜索
-  remarkPlaceholder: 请输入备注关键词
+  remarkPlaceholder: 请输入备注
   tagFilter: 标签筛选
   noData: 暂无账单记录
   deleteConfirm: 确定要删除这条账单吗？

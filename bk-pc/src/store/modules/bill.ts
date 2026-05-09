@@ -42,7 +42,14 @@ export const useBillStore = defineStore("pure-bill", {
     classifyTree: [] as Classify[],
     tagList: [] as Tag[],
     remarkList: [] as { id: number; remark: string; classifyId: number }[],
-    userConfigList: [] as { name: string; value: string }[]
+    userConfigList: [] as { name: string; value: string }[],
+    // 标记是否需要刷新列表（保存账单后设置）
+    needRefresh: false,
+    // 日期模式（用于保持页面状态）
+    dateMode: "month" as "month" | "year" | "custom",
+    // 日期选择器状态
+    startDate: [] as string[],
+    endDate: [] as string[]
   }),
   getters: {
     isCreditCardEnabled(): boolean {
@@ -53,6 +60,10 @@ export const useBillStore = defineStore("pure-bill", {
   actions: {
     setUserConfigList(configs: { name: string; value: string }[]) {
       this.userConfigList = configs;
+    },
+    // 设置需要刷新标记
+    setNeedRefresh(value: boolean) {
+      this.needRefresh = value;
     },
     async loadAccountBooks(userId: number) {
       try {
@@ -133,10 +144,15 @@ export const useBillStore = defineStore("pure-bill", {
     setQueryParams(params: Partial<IncomeExpenseQuery>) {
       const newParams: any = { ...this.queryParams };
       Object.entries(params).forEach(([key, value]) => {
-        if (value !== undefined && value !== null && value !== "") {
-          if (Array.isArray(value) && value.length === 0) {
-            return;
-          }
+        // 如果值为空（undefined、null、空字符串、空数组），则删除该参数
+        if (
+          value === undefined ||
+          value === null ||
+          value === "" ||
+          (Array.isArray(value) && value.length === 0)
+        ) {
+          delete newParams[key];
+        } else {
           newParams[key] = value;
         }
       });

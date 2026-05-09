@@ -56,16 +56,13 @@ const isSelected = (tagId: number) => {
   return localSelectedIds.value.includes(tagId);
 };
 
-// 关闭弹窗时自动保存选择
-const handleClose = () => {
-  emit("update:selectedIds", [...localSelectedIds.value]);
-};
-
 // 弹窗打开时初始化选中状态，关闭后重置搜索
 watch(show, val => {
   if (val) {
     localSelectedIds.value = [...props.selectedIds];
   } else {
+    // 关闭时同步数据到父组件
+    emit("update:selectedIds", [...localSelectedIds.value]);
     keyword.value = "";
   }
 });
@@ -77,7 +74,6 @@ watch(show, val => {
     position="bottom"
     round
     style="height: 50%"
-    @close="handleClose"
   >
     <div class="tag-picker">
       <!-- 头部 -->

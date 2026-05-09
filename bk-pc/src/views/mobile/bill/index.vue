@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch } from "vue";
+import { ref, computed, onMounted, watch, onActivated } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter } from "vue-router";
+import { useRouter, useRoute } from "vue-router";
 import { showConfirmDialog } from "vant";
 import dayjs from "dayjs";
 import { useUserStoreHook } from "@/store/modules/user";
@@ -21,6 +21,7 @@ import {
 import { formatNumber } from "@/utils/format";
 import { getClassifyIcon } from "@/utils/classifyIcons";
 import BillFilter from "@/components/mobile/BillFilter.vue";
+import { useInfiniteScroll } from "@/composables/useInfiniteScroll";
 
 defineOptions({
   name: "MobileBill"
@@ -28,6 +29,7 @@ defineOptions({
 
 const { t } = useI18n();
 const router = useRouter();
+const route = useRoute();
 const userStore = useUserStoreHook();
 const billStore = useBillStoreHook();
 const classifyStore = useClassifyStoreHook();
@@ -35,19 +37,26 @@ const accountBookStore = useAccountBookStoreHook();
 const userTagStore = useUserTagStoreHook();
 const remarkStore = useRemarkStoreHook();
 
-// 日期快捷选择
-const dateMode = ref<"month" | "year" | "custom">("month");
+// 是否已初始化过（用于区分从tabbar进入还是从子页面返回）
+const isInitialized = ref(false);
+
+// 日期快捷选择 - 从 store 读取状态
+const dateMode = computed({
+  get: () => billStore.dateMode,
+  set: (val) => {
+    billStore.dateMode = val;
+  }
+});
 const showDateAction = ref(false);
-const showCalendar = ref(false);
 
 // 筛选弹窗
 const showFilter = ref(false);
 
-// 加载更多状态
-const loading = ref(true); // 初始为 true，防止 van-list 自动触发
-const finished = ref(false);
-const pageSize = 20;
-const isFirstLoad = ref(true); // 是否首次加载
+// 使用无限滚动 composable
+const { loading, finished, onLoadMore, reset, resetAndLoad } =
+  useInfiniteScroll({
+    pageSize: 20
+  });
 
 // 当前日期范围
 const currentDateRange = computed(() => {
@@ -56,6 +65,16 @@ const currentDateRange = computed(() => {
     return [
       now.startOf("month").format("YYYY-MM-DD"),
       now.endOf("month").format("YYYY-MM-DD")
+    ];
+  } else if (dateMode.value === "quarter") {
+    // 计算当前季度的开始和结束日期
+    const month = now.month(); // 0-11
+    const quarterStartMonth = Math.floor(month / 3) * 3; // 0, 3, 6, 9
+    const quarterStart = now.month(quarterStartMonth).startOf("month");
+    const quarterEnd = now.month(quarterStartMonth + 2).endOf("month");
+    return [
+      quarterStart.format("YYYY-MM-DD"),
+      quarterEnd.format("YYYY-MM-DD")
     ];
   } else if (dateMode.value === "year") {
     return [
@@ -70,25 +89,24 @@ const currentDateRange = computed(() => {
 const dateDisplayText = computed(() => {
   if (dateMode.value === "month") {
     return t("mobile.bill.thisMonth");
+  } else if (dateMode.value === "quarter") {
+    return t("mobile.bill.thisQuarter");
   } else if (dateMode.value === "year") {
     return t("mobile.bill.thisYear");
   }
-  // 自定义模式下显示日期范围
-  if (dateMode.value === "custom") {
-    // 从 billStore 的查询参数中获取日期
-    const dateParam = billStore.queryParams.date;
-    if (dateParam && dateParam.length === 2) {
-      return `${dateParam[0].slice(0, 10)} ~ ${dateParam[1].slice(0, 10)}`;
-    }
+  // 自定义模式下显示日期范围（通过筛选设置）
+  const dateParam = billStore.queryParams.date;
+  if (dateParam && dateParam.length === 2) {
+    return `${dateParam[0].slice(0, 10)} ~ ${dateParam[1].slice(0, 10)}`;
   }
-  return t("mobile.bill.custom");
+  return t("mobile.bill.thisMonth");
 });
 
 // 日期快捷选择选项
 const dateActions = computed(() => [
   { name: t("mobile.bill.thisMonth") },
-  { name: t("mobile.bill.thisYear") },
-  { name: t("mobile.bill.custom") }
+  { name: t("mobile.bill.thisQuarter") },
+  { name: t("mobile.bill.thisYear") }
 ]);
 
 // 按日期分组的账单数据
@@ -147,66 +165,42 @@ const groupedBills = computed<DayGroup[]>(() => {
   );
 });
 
-// 加载账单数据
-const loadBills = async (append = false) => {
+// 实际加载账单数据的函数
+const fetchBills = async (
+  pageNo: number,
+  pageSize: number
+): Promise<boolean> => {
   const userId = userStore.id;
-  if (!userId) return;
+  if (!userId) return false;
 
-  if (!append) {
-    showLoading(t("mobile.common.loading"));
-    // 设置日期范围（仅在非追加模式下设置）
-    if (currentDateRange.value) {
-      billStore.setQueryParams({
-        date: currentDateRange.value
-      });
-    }
+  // 设置查询参数
+  billStore.queryParams.pageNo = pageNo;
+  billStore.queryParams.pageSize = pageSize;
+
+  // 设置日期范围
+  if (currentDateRange.value) {
+    billStore.setQueryParams({
+      date: currentDateRange.value
+    });
   }
-  try {
-    const prevLength = billStore.list.length;
-    await billStore.loadList(userId, append);
-    const newLength = billStore.list.length;
 
-    // 本次加载的数据量
-    const loadedCount = newLength - prevLength;
-    // 如果本次加载的数据量小于页大小，说明没有更多数据了
-    if (loadedCount < pageSize) {
-      finished.value = true;
-    }
-  } catch (error: any) {
-    showError(error?.message || t("mobile.bill.loadFailed"));
-    finished.value = true;
-  } finally {
-    if (!append) {
-      hideLoading();
-    }
-    loading.value = false;
-  }
-};
+  const prevLength = billStore.list.length;
+  await billStore.loadList(userId, pageNo > 1);
+  const newLength = billStore.list.length;
 
-// 加载更多
-const onLoadMore = async () => {
-  // 首次加载由 initData 触发，这里跳过
-  if (isFirstLoad.value || loading.value || finished.value) return;
-
-  loading.value = true;
-  billStore.queryParams.pageNo += 1;
-  await loadBills(true);
-};
-
-// 重置并加载
-const resetAndLoad = async () => {
-  billStore.queryParams.pageNo = 1;
-  billStore.list = [];
-  finished.value = false;
-  loading.value = true;
-  isFirstLoad.value = true;
-  await loadBills(false);
+  // 返回是否还有更多数据
+  return newLength - prevLength >= pageSize;
 };
 
 // 初始化数据
-const initData = async () => {
+const initData = async (forceReset = false) => {
   const userId = userStore.id;
   if (!userId) return;
+
+  // 如果已经初始化过且不是强制重置，则不重新加载
+  if (isInitialized.value && !forceReset) {
+    return;
+  }
 
   showLoading(t("mobile.common.loading"));
   try {
@@ -231,8 +225,8 @@ const initData = async () => {
       billStore.setCurrentAccountBook(accountBookStore.defaultAccountBook);
     }
     // 加载账单列表
-    await loadBills();
-    isFirstLoad.value = false;
+    await resetAndLoad(fetchBills);
+    isInitialized.value = true;
   } catch (error: any) {
     showError(error?.message || t("mobile.common.failed"));
   } finally {
@@ -241,40 +235,25 @@ const initData = async () => {
 };
 
 // 日期模式切换
-const handleDateModeChange = (mode: "month" | "year" | "custom") => {
-  dateMode.value = mode;
+const handleDateModeChange = (mode: "month" | "quarter" | "year") => {
+  billStore.dateMode = mode;
   showDateAction.value = false;
-
-  if (mode === "custom") {
-    showCalendar.value = true;
-  } else {
-    billStore.resetQueryParams();
-    resetAndLoad();
-  }
+  billStore.resetQueryParams();
+  billStore.list = [];
+  resetAndLoad(fetchBills);
 };
 
 // 日期快捷选择
 const handleDateActionSelect = (action: { name: string }) => {
-  const modeMap: Record<string, "month" | "year" | "custom"> = {
+  const modeMap: Record<string, "month" | "quarter" | "year"> = {
     [t("mobile.bill.thisMonth")]: "month",
-    [t("mobile.bill.thisYear")]: "year",
-    [t("mobile.bill.custom")]: "custom"
+    [t("mobile.bill.thisQuarter")]: "quarter",
+    [t("mobile.bill.thisYear")]: "year"
   };
   const mode = modeMap[action.name];
   if (mode) {
     handleDateModeChange(mode);
   }
-};
-
-// 日历确认
-const handleCalendarConfirm = (values: Date[]) => {
-  const startDate = dayjs(values[0]).format("YYYY-MM-DD");
-  const endDate = dayjs(values[1]).format("YYYY-MM-DD");
-  billStore.setQueryParams({
-    date: [startDate, endDate]
-  });
-  showCalendar.value = false;
-  resetAndLoad();
 };
 
 // 打开筛选弹窗
@@ -286,13 +265,24 @@ const handleOpenFilter = () => {
 const handleFilterConfirm = (filters: any) => {
   showFilter.value = false;
   billStore.setQueryParams(filters);
-  resetAndLoad();
+
+  // 如果筛选中包含日期，将 dateMode 设置为 custom，避免被 currentDateRange 覆盖
+  // 并同步日期选择器的值
+  if (filters.date) {
+    billStore.dateMode = "custom";
+    billStore.startDate = filters.date[0].split("-");
+    billStore.endDate = filters.date[1].split("-");
+  }
+
+  billStore.list = [];
+  resetAndLoad(fetchBills);
 };
 
 // 筛选重置
 const handleFilterReset = () => {
   billStore.resetQueryParams();
-  resetAndLoad();
+  billStore.list = [];
+  resetAndLoad(fetchBills);
 };
 
 // 点击账单项 - 编辑
@@ -315,7 +305,8 @@ const handleDelete = async (id: number) => {
     hideLoading();
 
     showSuccess(t("mobile.bill.deleteSuccess"));
-    await resetAndLoad();
+    billStore.list = [];
+    await resetAndLoad(fetchBills);
   } catch {
     hideLoading();
   }
@@ -351,14 +342,34 @@ watch(
   () => billStore.currentAccountBook,
   () => {
     if (userStore.id) {
-      resetAndLoad();
+      billStore.list = [];
+      resetAndLoad(fetchBills);
     }
   }
 );
 
 onMounted(() => {
+  // 首次挂载时初始化
   initData();
 });
+
+// 从子页面返回时激活
+onActivated(() => {
+  // 如果需要刷新（保存账单后返回）
+  if (billStore.needRefresh) {
+    billStore.setNeedRefresh(false);
+    refreshData();
+    return;
+  }
+
+  // 不需要重新加载数据，状态已保存在 store 中
+});
+
+// 刷新数据（用于保存账单后调用）
+const refreshData = async () => {
+  billStore.list = [];
+  await resetAndLoad(fetchBills);
+};
 </script>
 
 <template>
@@ -378,8 +389,9 @@ onMounted(() => {
     <van-list
       v-model:loading="loading"
       :finished="finished"
-      :finished-text="groupedBills.length > 0 ? t('mobile.common.noData') : ''"
-      @load="onLoadMore"
+      :finished-text="groupedBills.length > 0 ? t('mobile.common.noMore') : ''"
+      :immediate-check="false"
+      @load="onLoadMore(fetchBills)"
     >
       <div class="bill-list">
         <div v-for="group in groupedBills" :key="group.date" class="day-group">
@@ -408,9 +420,6 @@ onMounted(() => {
                   <div class="classify-name">{{ getClassifyName(record) }}</div>
                   <div v-if="record.remark" class="remark">
                     {{ record.remark }}
-                  </div>
-                  <div v-else class="remark placeholder">
-                    {{ t("mobile.bill.noRemark") }}
                   </div>
                 </div>
                 <div
@@ -453,19 +462,6 @@ onMounted(() => {
       @select="handleDateActionSelect"
     />
 
-    <!-- 日期范围选择器 -->
-    <van-calendar
-      v-model:show="showCalendar"
-      type="range"
-      :min-date="new Date(2020, 0, 1)"
-      :max-date="new Date()"
-      show-confirm
-      :confirm-text="t('mobile.common.confirm')"
-      position="bottom"
-      round
-      @confirm="handleCalendarConfirm"
-    />
-
     <!-- 筛选弹窗 -->
     <van-popup
       v-model:show="showFilter"
@@ -477,6 +473,9 @@ onMounted(() => {
         :classify-list="classifyStore.list"
         :tag-list="userTagStore.list"
         :remark-list="remarkStore.list"
+        :initial-date="billStore.queryParams.date"
+        :initial-remark="billStore.queryParams.remark"
+        :initial-tag-ids="billStore.queryParams.tagCodes?.map(Number) || []"
         @confirm="handleFilterConfirm"
         @reset="handleFilterReset"
       />
@@ -600,6 +599,9 @@ onMounted(() => {
 .item-info {
   flex: 1;
   min-width: 0;
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
 
   .classify-name {
     overflow: hidden;
@@ -617,10 +619,6 @@ onMounted(() => {
     color: $color-text-secondary;
     text-overflow: ellipsis;
     white-space: nowrap;
-
-    &.placeholder {
-      color: $color-text-placeholder;
-    }
   }
 }
 

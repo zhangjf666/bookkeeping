@@ -9,6 +9,7 @@ import { useAccountBookStore } from "@/store/modules/accountBook";
 import { useUserTagStore } from "@/store/modules/userTag";
 import { useRemarkStore } from "@/store/modules/remark";
 import { useClassifyStore } from "@/store/modules/classify";
+import { useBillStore } from "@/store/modules/bill";
 import {
   getIncomeExpenseById,
   createIncomeExpense,
@@ -45,6 +46,7 @@ const accountBookStore = useAccountBookStore();
 const userTagStore = useUserTagStore();
 const remarkStore = useRemarkStore();
 const classifyStore = useClassifyStore();
+const billStore = useBillStore();
 
 // 路由参数
 const recordId = computed(() => route.params.id as string);
@@ -135,6 +137,26 @@ const selectedTags = computed(() => {
   return tagList.value.filter(item => formData.value.tagIds.includes(item.id));
 });
 
+// 将标签ID转换为标签code
+const getTagCodesByIds = (tagIds: number[]) => {
+  return tagIds
+    .map(id => {
+      const tag = tagList.value.find(t => t.id === id);
+      return tag ? String((tag as any).code) : null;
+    })
+    .filter(code => code !== null)
+    .join(",");
+};
+
+// 将标签code转换为标签ID
+const getTagIdsByCodes = (tagCodesStr: string) => {
+  if (!tagCodesStr) return [];
+  const codes = tagCodesStr.split(",").map(c => Number(c.trim()));
+  return tagList.value
+    .filter(tag => codes.includes((tag as any).code))
+    .map(tag => tag.id);
+};
+
 // 类型切换
 const handleTypeChange = () => {
   // 清空分类选择
@@ -156,20 +178,48 @@ const handleClassifySelect = (
 };
 
 // 选择备注
-const handleRemarkSelect = (
-  remark: UserRemark,
-  mainClassify?: Classify,
-  subClassify?: Classify
-) => {
+const handleRemarkSelect = (remark: UserRemark) => {
   formData.value.remark = remark.remark;
-  // 如果备注关联了分类，自动设置
-  if (mainClassify) {
-    // 根据分类类型切换收入/支出
-    if (mainClassify.type !== formData.value.type) {
-      formData.value.type = mainClassify.type;
+
+  // 如果备注关联了分类，自动设置分类
+  if (remark.classifyId) {
+    // 先查找是否是主分类（pid 为 0、-1、null 或 undefined）
+    const mainClassify = classifyList.value.find(
+      item =>
+        item.id === remark.classifyId &&
+        (item.pid === 0 ||
+          item.pid === -1 ||
+          item.pid === null ||
+          item.pid === undefined)
+    );
+
+    if (mainClassify) {
+      // 根据分类类型切换收入/支出
+      if (mainClassify.type !== formData.value.type) {
+        formData.value.type = mainClassify.type;
+      }
+      formData.value.mainClassifyId = mainClassify.id;
+      formData.value.subClassifyId = null;
+    } else {
+      // 查找是否是子分类，通过 pid 找到父分类
+      const subClassify = classifyList.value.find(
+        item => item.id === remark.classifyId
+      );
+      if (subClassify && subClassify.pid) {
+        // 找到父分类
+        const parentClassify = classifyList.value.find(
+          item => item.id === subClassify.pid
+        );
+        if (parentClassify) {
+          // 根据分类类型切换收入/支出
+          if (parentClassify.type !== formData.value.type) {
+            formData.value.type = parentClassify.type;
+          }
+          formData.value.mainClassifyId = parentClassify.id;
+          formData.value.subClassifyId = subClassify.id;
+        }
+      }
     }
-    formData.value.mainClassifyId = mainClassify.id;
-    formData.value.subClassifyId = subClassify?.id || null;
   }
 };
 
@@ -218,7 +268,7 @@ const handleSave = async () => {
       subClassify: formData.value.subClassifyId || undefined,
       isCreditCard: formData.value.isCreditCard ? "YES" : "NO",
       isAddRemark: formData.value.addToRemark ? "YES" : "NO",
-      tagCodes: formData.value.tagIds.join(",")
+      tagCodes: getTagCodesByIds(formData.value.tagIds)
     };
 
     if (isEdit.value) {
@@ -236,6 +286,9 @@ const handleSave = async () => {
     if (formData.value.addToRemark) {
       await remarkStore.fetchList(userId.value);
     }
+
+    // 设置刷新标记，通知账单页面刷新数据
+    billStore.setNeedRefresh(true);
 
     showSuccess(t("mobile.record.saveSuccess"));
     router.back();
@@ -257,13 +310,13 @@ const loadEditData = async () => {
     try {
       const stateData = JSON.parse(storedData) as IncomeExpenseRecord;
 
-      // 处理标签ID：从 tagCodes 解析（逗号分隔的字符串）
+      // 处理标签ID：从 tagCodes（标签code）转换为标签ID
       let tagIds: number[] = [];
       if (stateData.tagCodes) {
         if (typeof stateData.tagCodes === "string") {
-          tagIds = stateData.tagCodes.split(",").filter(Boolean).map(Number);
+          tagIds = getTagIdsByCodes(stateData.tagCodes);
         } else if (Array.isArray(stateData.tagCodes)) {
-          tagIds = stateData.tagCodes.map(Number);
+          tagIds = getTagIdsByCodes(stateData.tagCodes.join(","));
         }
       }
 
@@ -294,13 +347,13 @@ const loadEditData = async () => {
   try {
     const data = await getIncomeExpenseById(parseInt(recordId.value));
 
-    // 处理标签ID：从 tagCodes 解析
+    // 处理标签ID：从 tagCodes（标签code）转换为标签ID
     let tagIds: number[] = [];
     if (data.tagCodes) {
       if (typeof data.tagCodes === "string") {
-        tagIds = data.tagCodes.split(",").filter(Boolean).map(Number);
+        tagIds = getTagIdsByCodes(data.tagCodes);
       } else if (Array.isArray(data.tagCodes)) {
-        tagIds = data.tagCodes.map(Number);
+        tagIds = getTagIdsByCodes(data.tagCodes.join(","));
       }
     }
 
@@ -515,7 +568,6 @@ onMounted(() => {
     <RemarkPicker
       v-model="showRemarkPicker"
       :remark-list="remarkList"
-      :classify-list="classifyList"
       :current-remark="formData.remark"
       @select="handleRemarkSelect"
     />
@@ -619,7 +671,6 @@ onMounted(() => {
   z-index: 10;
   padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
-  background-color: $color-background;
 }
 
 .selected-tags-cell {

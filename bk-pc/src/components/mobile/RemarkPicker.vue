@@ -2,7 +2,6 @@
 import { ref, computed, watch } from "vue";
 import { useI18n } from "vue-i18n";
 import type { UserRemark } from "@/types/remark";
-import type { Classify } from "@/types/classify";
 
 defineOptions({
   name: "RemarkPicker"
@@ -11,13 +10,12 @@ defineOptions({
 const props = defineProps<{
   modelValue: boolean;
   remarkList: UserRemark[];
-  classifyList: Classify[];
   currentRemark?: string;
 }>();
 
 const emit = defineEmits<{
   "update:modelValue": [value: boolean];
-  select: [remark: UserRemark, mainClassify?: Classify, subClassify?: Classify];
+  select: [remark: UserRemark];
 }>();
 
 const { t } = useI18n();
@@ -30,61 +28,35 @@ const show = computed({
 // 自定义备注输入
 const customRemark = ref("");
 
+// 是否已选择常用备注（用于区分关闭时是否需要emit）
+const hasSelectedRemark = ref(false);
+
 // 选择常用备注
 const handleSelectRemark = (remark: UserRemark) => {
-  if (!remark.classifyId) {
-    emit("select", remark);
-    show.value = false;
-    return;
-  }
-
-  // 先查找是否是主分类（pid 为 0、-1、null 或 undefined）
-  const mainClassify = props.classifyList.find(
-    item =>
-      item.id === remark.classifyId &&
-      (item.pid === 0 ||
-        item.pid === -1 ||
-        item.pid === null ||
-        item.pid === undefined)
-  );
-
-  if (mainClassify) {
-    emit("select", remark, mainClassify);
-  } else {
-    // 查找是否是子分类，通过 pid 找到父分类
-    const subClassify = props.classifyList.find(
-      item => item.id === remark.classifyId
-    );
-    if (subClassify && subClassify.pid) {
-      // 找到父分类
-      const parentClassify = props.classifyList.find(
-        item => item.id === subClassify.pid
-      );
-      if (parentClassify) {
-        emit("select", remark, parentClassify, subClassify);
-        show.value = false;
-        return;
-      }
-    }
-    emit("select", remark);
-  }
+  hasSelectedRemark.value = true;
+  emit("select", remark);
   show.value = false;
 };
 
 // 关闭弹窗时保存自定义备注
 const handleClose = () => {
-  // 如果有自定义备注内容，自动填入
-  if (customRemark.value.trim()) {
-    emit("select", {
-      id: 0,
-      userId: 0,
-      remark: customRemark.value.trim(),
-      classifyId: 0,
-      createTime: "",
-      updateTime: ""
-    } as UserRemark);
+  // 如果是选择常用备注导致的关闭，不再emit
+  if (hasSelectedRemark.value) {
+    hasSelectedRemark.value = false;
     customRemark.value = "";
+    return;
   }
+
+  // 否则是手动关闭，emit自定义备注
+  emit("select", {
+    id: 0,
+    userId: 0,
+    remark: customRemark.value.trim(),
+    classifyId: 0,
+    createTime: "",
+    updateTime: ""
+  } as UserRemark);
+  customRemark.value = "";
 };
 
 // 弹窗打开时显示当前备注，关闭后重置状态

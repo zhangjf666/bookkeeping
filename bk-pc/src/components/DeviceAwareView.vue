@@ -16,7 +16,6 @@ const loadComponent = async () => {
   const meta = route.meta as any;
   const mobileDevice = isMobile();
 
-  // If we have device-specific components in meta, use them
   if (meta?.pcComponent && meta?.mobileComponent) {
     const loader = mobileDevice ? meta.mobileComponent : meta.pcComponent;
     try {
