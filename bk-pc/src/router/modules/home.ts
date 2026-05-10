@@ -49,6 +49,18 @@ export default {
       }
     },
     {
+      path: "/record-detail/:id",
+      name: "RecordDetail",
+      component: () => import("@/components/DeviceAwareView.vue"),
+      meta: {
+        title: $t("bill.pureRecordDetail"),
+        showLink: false,
+        pcComponent: () => import("@/views/bill/index.vue"),
+        mobileComponent: () => import("@/views/mobile/record/detail.vue"),
+        showTabBar: false
+      }
+    },
+    {
       path: "/search",
       name: "Search",
       component: () => import("@/components/DeviceAwareView.vue"),

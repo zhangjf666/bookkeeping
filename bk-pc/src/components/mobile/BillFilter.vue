@@ -254,9 +254,15 @@ const handleConfirm = () => {
     params.remark = undefined;
   }
 
-  // 标签
+  // 标签 - 需要将标签ID转换为标签code
   if (selectedTagIds.value.length > 0) {
-    params.tagCodes = selectedTagIds.value.map(String);
+    const tagCodes = selectedTagIds.value
+      .map(id => {
+        const tag = props.tagList.find(t => t.id === id);
+        return tag ? String((tag as any).code) : null;
+      })
+      .filter(code => code !== null);
+    params.tagCodes = tagCodes;
   } else {
     params.tagCodes = undefined;
   }

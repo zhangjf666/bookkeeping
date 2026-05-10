@@ -21,6 +21,8 @@ common:
   serverError: 系统繁忙，请稍后重试
   selected: 已选择
   selectMode: 已进入多选模式
+  yes: 是
+  no: 否
 
 # 语言切换
 language:
@@ -140,6 +142,7 @@ record:
   title: 记账
   addTitle: 新增账单
   editTitle: 编辑账单
+  detailTitle: 账单详情
   expense: 支出
   income: 收入
   amount: 金额
@@ -172,9 +175,20 @@ report:
   week: 周
   month: 月
   year: 年
-  trend: 趋势
-  classify: 分类占比
+  trend: 账单报表
+  classify: 分类报表
   ranking: 排行榜
+  billType: 账单类型
+  monthBill: 月账单
+  yearBill: 年账单
+  customBill: 自定义
+  timeRange: 时间范围
+  selectMonth: 选择年月
+  selectYear: 选择年份
+  detail: 明细
+  classifyList: 分类列表
+  balance: 结余
+  backToList: 返回分类列表
 
 # 搜索页
 search:

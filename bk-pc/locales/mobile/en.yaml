@@ -21,6 +21,8 @@ common:
   serverError: System is busy, please try again later
   selected: Selected
   selectMode: Multi-select mode enabled
+  yes: Yes
+  no: No
 
 # Language
 language:
@@ -140,6 +142,7 @@ record:
   title: Add Record
   addTitle: Add Income/Expense Record
   editTitle: Edit Record
+  detailTitle: Record Details
   expense: Expense
   income: Income
   amount: Amount
@@ -172,9 +175,20 @@ report:
   week: Week
   month: Month
   year: Year
-  trend: Trend
-  classify: Categories
+  trend: Bill Report
+  classify: Category Report
   ranking: Ranking
+  billType: Bill Type
+  monthBill: Monthly
+  yearBill: Yearly
+  customBill: Custom
+  timeRange: Time Range
+  selectMonth: Select Month
+  selectYear: Select Year
+  detail: Details
+  classifyList: Category List
+  balance: Balance
+  backToList: Back to Categories
 
 # Search
 search:
