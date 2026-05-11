@@ -108,11 +108,6 @@ const loadRecordData = async () => {
   }
 };
 
-// 返回
-const handleBack = () => {
-  router.back();
-};
-
 // 初始化
 const init = async () => {
   if (!userId.value) return;
@@ -146,13 +141,6 @@ onMounted(() => {
 
 <template>
   <div class="record-detail-page">
-    <!-- 头部导航 -->
-    <div class="header-nav">
-      <van-icon name="arrow-left" size="20" @click="handleBack" />
-      <span class="nav-title">{{ t("mobile.record.detailTitle") }}</span>
-      <span class="nav-placeholder" />
-    </div>
-
     <!-- 类型显示 -->
     <div class="type-display">
       <div
@@ -240,27 +228,9 @@ onMounted(() => {
 
 .record-detail-page {
   min-height: 100vh;
+  padding-top: env(safe-area-inset-top);
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
   background-color: $color-background;
-}
-
-.header-nav {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 16px;
-  background-color: $color-card;
-  border-bottom: 1px solid $color-border;
-
-  .nav-title {
-    font-size: 16px;
-    font-weight: 500;
-    color: $color-text-primary;
-  }
-
-  .nav-placeholder {
-    width: 20px;
-  }
 }
 
 .type-display {

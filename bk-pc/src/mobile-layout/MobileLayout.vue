@@ -34,6 +34,7 @@ const pageTitle = computed(() => {
   const titleMap: Record<string, string> = {
     Record: "mobile.record.addTitle",
     RecordEdit: "mobile.record.editTitle",
+    RecordDetail: "mobile.record.detailTitle",
     Search: "mobile.search.title",
     ReportDetail: "mobile.report.title",
     UserProfileSettings: "mobile.user.profile",

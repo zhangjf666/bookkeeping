@@ -155,6 +155,7 @@ bill:
   pureEdit: Edit
   pureRecord: Add Record
   pureEditRecord: Edit Record
+  pureRecordDetail: Record Details
   pureSearch: Search
   pureDelete: Delete
   pureBatchDelete: Batch Delete
