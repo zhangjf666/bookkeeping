@@ -537,6 +537,7 @@ const handleReset = () => {
                   :placeholder="t('bill.pureRemarkPlaceholder')"
                   class="filter-remark-trigger"
                   clearable
+                  @keydown.space.stop
                 />
               </template>
               <div class="filter-remark-content">

@@ -426,6 +426,7 @@ const handleSubmit = async () => {
               :placeholder="t('bill.pureRemarkPlaceholder')"
               class="remark-dropdown-trigger"
               clearable
+              @keydown.space.stop
             />
           </template>
           <div class="remark-popover-content">
