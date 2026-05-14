@@ -1,7 +1,7 @@
 <script setup lang="ts">
-import { ref, computed, onMounted, watch, onActivated } from "vue";
+import { ref, computed, onMounted, watch, nextTick } from "vue";
 import { useI18n } from "vue-i18n";
-import { useRouter, useRoute } from "vue-router";
+import { useRouter } from "vue-router";
 import { showConfirmDialog } from "vant";
 import dayjs from "dayjs";
 import { useUserStoreHook } from "@/store/modules/user";
@@ -29,16 +29,12 @@ defineOptions({
 
 const { t } = useI18n();
 const router = useRouter();
-const route = useRoute();
 const userStore = useUserStoreHook();
 const billStore = useBillStoreHook();
 const classifyStore = useClassifyStoreHook();
 const accountBookStore = useAccountBookStoreHook();
 const userTagStore = useUserTagStoreHook();
 const remarkStore = useRemarkStoreHook();
-
-// 是否已初始化过（用于区分从tabbar进入还是从子页面返回）
-const isInitialized = ref(false);
 
 // 日期快捷选择 - 从 store 读取状态
 const dateMode = computed({
@@ -57,6 +53,12 @@ const { loading, finished, onLoadMore, reset, resetAndLoad } =
   useInfiniteScroll({
     pageSize: 20
   });
+
+// 标记是否跳过下一次加载（从编辑页返回时避免 van-list 自动触发加载）
+const skipNextLoad = ref(false);
+
+// 下拉刷新状态
+const refreshing = ref(false);
 
 // 当前日期范围
 const currentDateRange = computed(() => {
@@ -193,12 +195,12 @@ const fetchBills = async (
 };
 
 // 初始化数据
-const initData = async (forceReset = false) => {
+const initData = async () => {
   const userId = userStore.id;
   if (!userId) return;
 
-  // 如果已经初始化过且不是强制重置，则不重新加载
-  if (isInitialized.value && !forceReset) {
+  // 如果列表已有数据，说明是 keep-alive 缓存返回，不重新加载
+  if (billStore.list.length > 0) {
     return;
   }
 
@@ -221,12 +223,16 @@ const initData = async (forceReset = false) => {
       await accountBookStore.fetchList(userId);
     }
     // 设置当前账本
-    if (accountBookStore.defaultAccountBook) {
+    const needSetAccountBook = accountBookStore.defaultAccountBook && !billStore.currentAccountBook;
+    if (needSetAccountBook) {
       billStore.setCurrentAccountBook(accountBookStore.defaultAccountBook);
+      // 由 watch 触发加载，这里不再调用 resetAndLoad
+    } else {
+      // 标记跳过 van-list 的首次自动加载，避免与 resetAndLoad 重复查询
+      skipNextLoad.value = true;
+      // 加载账单列表
+      await resetAndLoad(fetchBills);
     }
-    // 加载账单列表
-    await resetAndLoad(fetchBills);
-    isInitialized.value = true;
   } catch (error: any) {
     showError(error?.message || t("mobile.common.failed"));
   } finally {
@@ -241,6 +247,7 @@ const handleDateModeChange = (mode: "month" | "quarter" | "year") => {
   billStore.resetQueryParams();
   billStore.list = [];
   resetAndLoad(fetchBills);
+  window.scrollTo({ top: 0, behavior: "instant" });
 };
 
 // 日期快捷选择
@@ -276,6 +283,7 @@ const handleFilterConfirm = (filters: any) => {
 
   billStore.list = [];
   resetAndLoad(fetchBills);
+  window.scrollTo({ top: 0, behavior: "instant" });
 };
 
 // 筛选重置
@@ -283,12 +291,24 @@ const handleFilterReset = () => {
   billStore.resetQueryParams();
   billStore.list = [];
   resetAndLoad(fetchBills);
+  window.scrollTo({ top: 0, behavior: "instant" });
+};
+
+// 下拉刷新
+const onRefresh = async () => {
+  try {
+    billStore.list = [];
+    await resetAndLoad(fetchBills);
+  } finally {
+    refreshing.value = false;
+  }
 };
 
 // 点击账单项 - 编辑
 const handleBillClick = (record: IncomeExpense) => {
-  // 直接传递数据，不需要重新获取详情
-  sessionStorage.setItem("editRecordData", JSON.stringify(record));
+  const top = window.scrollY;
+  billStore.setScrollTop(top);
+  billStore.setEditRecordData(record);
   router.push(`/record/${record.id}`);
 };
 
@@ -305,8 +325,12 @@ const handleDelete = async (id: number) => {
     hideLoading();
 
     showSuccess(t("mobile.bill.deleteSuccess"));
-    billStore.list = [];
-    await resetAndLoad(fetchBills);
+    // 本地移除，不再全量刷新
+    billStore.localRemoveRecord(id);
+    // 如果删除后列表为空，重置加载状态
+    if (billStore.list.length === 0) {
+      reset();
+    }
   } catch {
     hideLoading();
   }
@@ -343,33 +367,39 @@ watch(
   () => {
     if (userStore.id) {
       billStore.list = [];
+      skipNextLoad.value = true;
       resetAndLoad(fetchBills);
     }
   }
 );
 
-onMounted(() => {
-  // 首次挂载时初始化
-  initData();
-});
-
-// 从子页面返回时激活
-onActivated(() => {
-  // 如果需要刷新（保存账单后返回）
-  if (billStore.needRefresh) {
-    billStore.setNeedRefresh(false);
-    refreshData();
+// 处理 van-list 的 load 事件（跳过从编辑页返回时的首次自动触发）
+const handleListLoad = () => {
+  if (skipNextLoad.value) {
+    skipNextLoad.value = false;
     return;
   }
-
-  // 不需要重新加载数据，状态已保存在 store 中
-});
-
-// 刷新数据（用于保存账单后调用）
-const refreshData = async () => {
-  billStore.list = [];
-  await resetAndLoad(fetchBills);
+  onLoadMore(fetchBills);
 };
+
+onMounted(() => {
+  // 如果列表已有数据（从编辑页返回），标记跳过 van-list 的首次自动加载
+  if (billStore.list.length > 0) {
+    skipNextLoad.value = true;
+  }
+  initData();
+  // 从 record 页面返回时恢复滚动位置
+  if (billStore.scrollTop > 0) {
+    nextTick(() => {
+      requestAnimationFrame(() => {
+        requestAnimationFrame(() => {
+          window.scrollTo({ top: billStore.scrollTop, behavior: "instant" });
+          billStore.setScrollTop(0);
+        });
+      });
+    });
+  }
+});
 </script>
 
 <template>
@@ -386,69 +416,71 @@ const refreshData = async () => {
     </div>
 
     <!-- 账单列表 -->
-    <van-list
-      v-model:loading="loading"
-      :finished="finished"
-      :finished-text="groupedBills.length > 0 ? t('mobile.common.noMore') : ''"
-      :immediate-check="false"
-      @load="onLoadMore(fetchBills)"
-    >
-      <div class="bill-list">
-        <div v-for="group in groupedBills" :key="group.date" class="day-group">
-          <!-- 日期标题 -->
-          <div class="group-header">
-            <div class="date-info">
-              <span class="date">{{ formatDateDisplay(group.date) }}</span>
-              <span class="weekday">{{ group.weekday }}</span>
+    <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
+      <van-list
+        v-model:loading="loading"
+        :finished="finished"
+        :finished-text="groupedBills.length > 0 ? t('mobile.common.noMore') : ''"
+        :immediate-check="false"
+        @load="handleListLoad"
+      >
+        <div class="bill-list">
+          <div v-for="group in groupedBills" :key="group.date" class="day-group">
+            <!-- 日期标题 -->
+            <div class="group-header">
+              <div class="date-info">
+                <span class="date">{{ formatDateDisplay(group.date) }}</span>
+                <span class="weekday">{{ group.weekday }}</span>
+              </div>
+              <div class="day-summary">
+                <span v-if="group.dayExpense > 0" class="expense">
+                  -¥{{ formatNumber(group.dayExpense) }}
+                </span>
+                <span v-if="group.dayIncome > 0" class="income">
+                  +¥{{ formatNumber(group.dayIncome) }}
+                </span>
+              </div>
             </div>
-            <div class="day-summary">
-              <span v-if="group.dayExpense > 0" class="expense">
-                -¥{{ formatNumber(group.dayExpense) }}
-              </span>
-              <span v-if="group.dayIncome > 0" class="income">
-                +¥{{ formatNumber(group.dayIncome) }}
-              </span>
-            </div>
-          </div>
 
-          <!-- 当日账单项 -->
-          <div class="group-records">
-            <van-swipe-cell v-for="record in group.records" :key="record.id">
-              <div class="bill-item" @click="handleBillClick(record)">
-                <div class="item-icon">{{ getIcon(record) }}</div>
-                <div class="item-info">
-                  <div class="classify-name">{{ getClassifyName(record) }}</div>
-                  <div v-if="record.remark" class="remark">
-                    {{ record.remark }}
+            <!-- 当日账单项 -->
+            <div class="group-records">
+              <van-swipe-cell v-for="record in group.records" :key="record.id">
+                <div class="bill-item" @click="handleBillClick(record)">
+                  <div class="item-icon">{{ getIcon(record) }}</div>
+                  <div class="item-info">
+                    <div class="classify-name">{{ getClassifyName(record) }}</div>
+                    <div v-if="record.remark" class="remark">
+                      {{ record.remark }}
+                    </div>
+                  </div>
+                  <div
+                    class="item-amount"
+                    :class="record.type === 'EXPENSE' ? 'expense' : 'income'"
+                  >
+                    ¥{{ formatNumber(Math.abs(record.amount)) }}
                   </div>
                 </div>
-                <div
-                  class="item-amount"
-                  :class="record.type === 'EXPENSE' ? 'expense' : 'income'"
-                >
-                  ¥{{ formatNumber(Math.abs(record.amount)) }}
-                </div>
-              </div>
-              <template #right>
-                <van-button
-                  square
-                  type="danger"
-                  text="删除"
-                  class="delete-btn"
-                  @click="handleDelete(record.id)"
-                />
-              </template>
-            </van-swipe-cell>
+                <template #right>
+                  <van-button
+                    square
+                    type="danger"
+                    text="删除"
+                    class="delete-btn"
+                    @click="handleDelete(record.id)"
+                  />
+                </template>
+              </van-swipe-cell>
+            </div>
           </div>
-        </div>
 
-        <!-- 空状态 -->
-        <van-empty
-          v-if="groupedBills.length === 0 && !billStore.listLoading"
-          :description="t('mobile.bill.noData')"
-        />
-      </div>
-    </van-list>
+          <!-- 空状态 -->
+          <van-empty
+            v-if="groupedBills.length === 0 && !billStore.listLoading"
+            :description="t('mobile.bill.noData')"
+          />
+        </div>
+      </van-list>
+    </van-pull-refresh>
 
     <!-- 悬浮记账按钮 -->
     <div class="floating-btn" @click="handleAdd">
@@ -493,6 +525,9 @@ const refreshData = async () => {
 }
 
 .filter-bar {
+  position: sticky;
+  top: 0;
+  z-index: 10;
   display: flex;
   align-items: center;
   justify-content: space-between;

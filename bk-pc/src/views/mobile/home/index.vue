@@ -9,6 +9,7 @@ import { useUserTagStore } from "@/store/modules/userTag";
 import { useRemarkStore } from "@/store/modules/remark";
 import { useUserConfigStore } from "@/store/modules/userConfig";
 import { useClassifyStore } from "@/store/modules/classify";
+import { useBillStore } from "@/store/modules/bill";
 import { getSummary } from "@/api/incomeExpense";
 import type { Summary, IncomeExpenseRecord } from "@/types/bill";
 import {
@@ -37,6 +38,7 @@ const userTagStore = useUserTagStore();
 const remarkStore = useRemarkStore();
 const userConfigStore = useUserConfigStore();
 const classifyStore = useClassifyStore();
+const billStore = useBillStore();
 
 // 状态
 const refreshing = ref(false);
@@ -144,8 +146,10 @@ const onRefresh = async () => {
 
 // 点击记录项
 const handleRecordClick = (record: IncomeExpenseRecord) => {
-  // 使用 sessionStorage 传递数据，避免路由 state 丢失
-  sessionStorage.setItem("editRecordData", JSON.stringify(record));
+  // 先保存滚动位置，再传递数据
+  billStore.setScrollTop(window.scrollY);
+  // 使用 billStore 传递数据，比 sessionStorage 更可靠
+  billStore.setEditRecordData(record as any);
   router.push(`/record/${record.id}`);
 };
 

@@ -157,6 +157,46 @@ const getTagIdsByCodes = (tagCodesStr: string) => {
     .map(tag => tag.id);
 };
 
+// 构造用于本地更新的 IncomeExpense 对象
+const buildLocalRecord = (): IncomeExpense => {
+  const mainClassify = classifyList.value.find(
+    item => item.id === formData.value.mainClassifyId
+  );
+  const subClassify = classifyList.value.find(
+    item => item.id === formData.value.subClassifyId
+  );
+  const accountBook = accountBookList.value.find(
+    item => item.id === formData.value.accountBookId
+  );
+  const tagCodes = getTagCodesByIds(formData.value.tagIds);
+  const tagNames = tagList.value
+    .filter(tag => formData.value.tagIds.includes(tag.id))
+    .map(tag => tag.name)
+    .join(",");
+
+  return {
+    id: isEdit.value ? parseInt(recordId.value) : Date.now(),
+    userId: userId.value || 0,
+    accountBookId: formData.value.accountBookId!,
+    accountBookName: accountBook?.name || "",
+    amount: formData.value.amount || 0,
+    type: formData.value.type,
+    date: formData.value.date,
+    remark: formData.value.remark || "",
+    mainClassify: formData.value.mainClassifyId!,
+    mainClassifyName: mainClassify?.name || "",
+    mainClassifyImage: mainClassify?.image || "",
+    subClassify: formData.value.subClassifyId || null,
+    subClassifyName: subClassify?.name || "",
+    subClassifyImage: subClassify?.image || "",
+    isCreditCard: formData.value.isCreditCard ? "YES" : "NO",
+    tagCodes,
+    tagNames,
+    createTime: dayjs().format("YYYY-MM-DD HH:mm:ss"),
+    updateTime: dayjs().format("YYYY-MM-DD HH:mm:ss")
+  } as IncomeExpense;
+};
+
 // 类型切换
 const handleTypeChange = () => {
   // 清空分类选择
@@ -287,8 +327,13 @@ const handleSave = async () => {
       await remarkStore.fetchList(userId.value);
     }
 
-    // 设置刷新标记，通知账单页面刷新数据
-    billStore.setNeedRefresh(true);
+    // 本地更新列表数据，避免返回后全量刷新
+    const record = buildLocalRecord();
+    if (isEdit.value) {
+      billStore.localUpdateRecord(record);
+    } else {
+      billStore.localAddRecord(record);
+    }
 
     showSuccess(t("mobile.record.saveSuccess"));
     router.back();
@@ -304,43 +349,41 @@ const handleSave = async () => {
 const loadEditData = async () => {
   if (!isEdit.value) return;
 
-  // 优先使用 sessionStorage 传递的数据
-  const storedData = sessionStorage.getItem("editRecordData");
+  // 优先使用 billStore 传递的数据（列表页点击时传入）
+  const storedData = billStore.editRecordData;
   if (storedData) {
     try {
-      const stateData = JSON.parse(storedData) as IncomeExpenseRecord;
-
       // 处理标签ID：从 tagCodes（标签code）转换为标签ID
       let tagIds: number[] = [];
-      if (stateData.tagCodes) {
-        if (typeof stateData.tagCodes === "string") {
-          tagIds = getTagIdsByCodes(stateData.tagCodes);
-        } else if (Array.isArray(stateData.tagCodes)) {
-          tagIds = getTagIdsByCodes(stateData.tagCodes.join(","));
+      if (storedData.tagCodes) {
+        if (typeof storedData.tagCodes === "string") {
+          tagIds = getTagIdsByCodes(storedData.tagCodes);
+        } else if (Array.isArray(storedData.tagCodes)) {
+          tagIds = getTagIdsByCodes(storedData.tagCodes.join(","));
         }
       }
 
       formData.value = {
-        type: stateData.type as "EXPENSE" | "INCOME",
-        amount: stateData.amount,
-        accountBookId: stateData.accountBookId,
-        mainClassifyId: stateData.mainClassify,
-        subClassifyId: stateData.subClassify,
-        date: stateData.date,
-        remark: stateData.remark || "",
+        type: storedData.type as "EXPENSE" | "INCOME",
+        amount: storedData.amount,
+        accountBookId: storedData.accountBookId,
+        mainClassifyId: storedData.mainClassify,
+        subClassifyId: storedData.subClassify,
+        date: storedData.date,
+        remark: storedData.remark || "",
         addToRemark: false,
         tagIds,
-        isCreditCard: stateData.isCreditCard === "YES"
+        isCreditCard: storedData.isCreditCard === "YES"
       };
       // 使用后清除
-      sessionStorage.removeItem("editRecordData");
+      billStore.setEditRecordData(null);
       return;
     } catch (e) {
       console.error("解析存储数据失败:", e);
     }
   }
 
-  // 如果没有存储数据，则调用接口获取
+  // 没有本地数据时调用接口查询
   loading.value = true;
   showLoading(t("mobile.common.loading"));
 

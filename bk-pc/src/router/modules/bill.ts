@@ -19,7 +19,8 @@ export default {
         title: $t("menus.pureBill"),
         pcComponent: () => import("@/views/bill/index.vue"),
         mobileComponent: () => import("@/views/mobile/bill/index.vue"),
-        showTabBar: true
+        showTabBar: true,
+        keepAlive: true
       }
     }
   ]

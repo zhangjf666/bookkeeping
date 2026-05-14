@@ -43,8 +43,10 @@ export const useBillStore = defineStore("pure-bill", {
     tagList: [] as Tag[],
     remarkList: [] as { id: number; remark: string; classifyId: number }[],
     userConfigList: [] as { name: string; value: string }[],
-    // 标记是否需要刷新列表（保存账单后设置）
-    needRefresh: false,
+    // 编辑记录数据（用于页面间传递）
+    editRecordData: null as IncomeExpense | null,
+    // 列表滚动位置
+    scrollTop: 0,
     // 日期模式（用于保持页面状态）
     dateMode: "month" as "month" | "year" | "custom",
     // 日期选择器状态
@@ -61,9 +63,11 @@ export const useBillStore = defineStore("pure-bill", {
     setUserConfigList(configs: { name: string; value: string }[]) {
       this.userConfigList = configs;
     },
-    // 设置需要刷新标记
-    setNeedRefresh(value: boolean) {
-      this.needRefresh = value;
+    setEditRecordData(record: IncomeExpense | null) {
+      this.editRecordData = record;
+    },
+    setScrollTop(top: number) {
+      this.scrollTop = top;
     },
     async loadAccountBooks(userId: number) {
       try {
@@ -214,6 +218,30 @@ export const useBillStore = defineStore("pure-bill", {
       });
 
       return tree;
+    },
+    localAddRecord(record: IncomeExpense) {
+      const insertIndex = this.list.findIndex(
+        item => item.date < record.date
+      );
+      if (insertIndex === -1) {
+        this.list.push(record);
+      } else {
+        this.list.splice(insertIndex, 0, record);
+      }
+      this.total++;
+    },
+    localUpdateRecord(record: IncomeExpense) {
+      const index = this.list.findIndex(item => item.id === record.id);
+      if (index !== -1) {
+        this.list.splice(index, 1, record);
+      }
+    },
+    localRemoveRecord(id: number) {
+      const index = this.list.findIndex(item => item.id === id);
+      if (index !== -1) {
+        this.list.splice(index, 1);
+        this.total--;
+      }
     }
   }
 });
