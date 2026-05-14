@@ -166,7 +166,7 @@ export const useBillStore = defineStore("pure-bill", {
       this.queryParams = {
         pageNo: 1,
         pageSize: 20,
-        accountBookId: this.queryParams.accountBookId,
+        accountBookId: this.currentAccountBook?.id,
         date: undefined,
         amount: undefined,
         classifyList: undefined,

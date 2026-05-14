@@ -294,9 +294,9 @@ const handleQuery = () => {
   emit("query");
 };
 
-const handleReset = () => {
+const resetFilterForm = () => {
   filterForm.value = {
-    accountBookId: filterForm.value.accountBookId,
+    accountBookId: currentAccountBookId.value,
     date: [],
     amount: [],
     classifyList: [],
@@ -308,8 +308,16 @@ const handleReset = () => {
   isIndeterminateExpense.value = false;
   isIndeterminateIncome.value = false;
   classifyTreeRef.value?.setCheckedKeys([]);
+};
+
+const handleReset = () => {
+  resetFilterForm();
   emit("reset");
 };
+
+defineExpose({
+  resetFilterForm
+});
 
 const handleExport = async () => {
   if (!filterForm.value.date || filterForm.value.date.length !== 2) {

@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { onMounted, ref, computed } from "vue";
+import { onMounted, ref, computed, onActivated } from "vue";
 import { useI18n } from "vue-i18n";
 import { message } from "@/utils/message";
 import { useUserStoreHook } from "@/store/modules/user";
@@ -22,6 +22,7 @@ const billStore = useBillStoreHook();
 const showForm = ref(false);
 const formData = ref<IncomeExpense | null>(null);
 const selectedIds = ref<number[]>([]);
+const billFilterRef = ref();
 
 const userId = computed(() => userStore.id);
 
@@ -80,6 +81,14 @@ const handleSelectionChange = (selection: IncomeExpense[]) => {
   selectedIds.value = selection.map((item: IncomeExpense) => item.id);
 };
 
+const initPage = () => {
+  billStore.resetQueryParams();
+  billFilterRef.value?.resetFilterForm();
+  if (userId.value) {
+    billStore.loadList(userId.value);
+  }
+};
+
 const handleFormSuccess = () => {
   showForm.value = false;
   billStore.loadList(userId.value);
@@ -108,15 +117,17 @@ onMounted(async () => {
   if (billStore.classifyList.length === 0 && userId.value) {
     await billStore.loadClassifyAndTag(userId.value);
   }
-  if (userId.value) {
-    billStore.loadList(userId.value);
-  }
+  initPage();
+});
+
+onActivated(() => {
+  initPage();
 });
 </script>
 
 <template>
   <div class="bill-container">
-    <BillFilter @query="handleQuery" @reset="handleReset" />
+    <BillFilter ref="billFilterRef" @query="handleQuery" @reset="handleReset" />
 
     <div class="bill-toolbar">
       <div class="toolbar-left">
