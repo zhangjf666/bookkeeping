@@ -53,6 +53,9 @@ const { list: accountBookList } = storeToRefs(accountBookStore);
 const { showExpenseLimit, limitType, monthExpenseLimit, yearExpenseLimit } =
   storeToRefs(userConfigStore);
 
+// 头部固定区域
+const headerFixedRef = ref<HTMLElement>();
+
 // 加载用户基础数据
 const loadUserData = async () => {
   if (!userId.value) return;
@@ -165,28 +168,31 @@ onMounted(() => {
 
 <template>
   <div class="home-page">
-    <!-- 下拉刷新区域（包含摘要和列表） -->
     <van-pull-refresh v-model="refreshing" @refresh="onRefresh">
-      <!-- 摘要卡片 -->
-      <SummaryCard
-        v-if="summaryData"
-        :data="summaryData"
-        :account-book-list="accountBookList"
-        :current-account-book-id="currentAccountBookId"
-        :show-expense-limit="showExpenseLimit"
-        :limit-type="limitType"
-        :month-expense-limit="monthExpenseLimit"
-        :year-expense-limit="yearExpenseLimit"
-        :loading="loading"
-        @update:currentAccountBookId="handleAccountBookChange"
-      />
+      <div class="page-content">
+        <!-- 粘性顶部区域 -->
+        <div ref="headerFixedRef" class="header-sticky">
+          <!-- 摘要卡片 -->
+          <SummaryCard
+            v-if="summaryData"
+            :data="summaryData"
+            :account-book-list="accountBookList"
+            :current-account-book-id="currentAccountBookId"
+            :show-expense-limit="showExpenseLimit"
+            :limit-type="limitType"
+            :month-expense-limit="monthExpenseLimit"
+            :year-expense-limit="yearExpenseLimit"
+            :loading="loading"
+            @update:currentAccountBookId="handleAccountBookChange"
+          />
 
-      <!-- 近三日记录列表 -->
-      <div class="record-list">
-        <div class="list-header">
-          {{ t("mobile.home.recentBills") }}
+          <!-- 近三日账单标题 -->
+          <div class="list-header">
+            {{ t("mobile.home.recentBills") }}
+          </div>
         </div>
 
+        <!-- 列表 -->
         <div v-if="summaryData?.incomeExpenseList?.length" class="list-content">
           <RecordItem
             v-for="record in summaryData.incomeExpenseList"
@@ -213,29 +219,63 @@ onMounted(() => {
 
 .home-page {
   min-height: 100vh;
-  padding-bottom: calc(50px + env(safe-area-inset-bottom) + 60px);
+  background-color: $color-background;
+  overscroll-behavior-y: none;
+}
+
+// 解除 van-pull-refresh 的 overflow: hidden，使其不成为滚动容器
+// 这样 position: sticky 才能以 viewport 为参考系正常粘顶
+:deep(.van-pull-refresh) {
+  overflow: visible;
+}
+
+.page-content {
+  min-height: 100vh;
+  padding-bottom: calc(60px + env(safe-area-inset-bottom));
   background-color: $color-background;
 }
 
-.record-list {
-  margin-top: 12px;
+.list-content {
+  margin: 0 16px;
+  background-color: $color-card;
+  border-radius: 12px;
+  overflow: hidden;
+}
 
-  .list-header {
-    padding: 12px 16px;
-    font-size: 14px;
-    font-weight: 500;
-    color: $color-text-primary;
-  }
+// 粘性头部：向上滚动时粘顶，下拉时跟随 van-pull-refresh 同步下滑
+.header-sticky {
+  position: sticky;
+  position: -webkit-sticky;
+  top: 0;
+  z-index: 10;
+  width: 100%;
+  padding-top: calc(env(safe-area-inset-top) + 15px);
+  background-color: $color-background;
+}
 
-  .list-content {
-    background-color: $color-card;
-  }
+// 消除 SummaryCard 默认 margin-top，避免 margin collapsing 导致 sticky 偏移
+.header-sticky :deep(.summary-card) {
+  margin-top: 0;
+}
+
+.list-header {
+  padding: 12px 16px;
+  font-size: 14px;
+  font-weight: 500;
+  color: $color-text-primary;
+}
+
+.list-content {
+  margin: 0 16px;
+  background-color: $color-card;
+  border-radius: 12px;
+  overflow: hidden;
 }
 
 .floating-btn {
   position: fixed;
   right: 16px;
-  bottom: calc(50px + env(safe-area-inset-bottom) + 16px);
+  bottom: calc(66px + env(safe-area-inset-bottom));
   z-index: 100;
   display: flex;
   align-items: center;
