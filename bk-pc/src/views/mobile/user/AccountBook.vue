@@ -5,7 +5,7 @@ import { showConfirmDialog } from "vant";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useAccountBookStore } from "@/store/modules/accountBook";
 import {
-  getAccountBookList,
+  getAccountBooks,
   createAccountBook,
   updateAccountBook,
   deleteAccountBook
@@ -96,8 +96,8 @@ const loadData = async () => {
   if (!userId) return;
 
   try {
-    const result = await getAccountBookList(userId);
-    accountBookList.value = result?.list || result?.record || [];
+    const result = await getAccountBooks(userId);
+    accountBookList.value = result || [];
   } catch (error: any) {
     showError(error?.message || t("mobile.common.failed"));
   }
@@ -282,15 +282,16 @@ onMounted(() => {
 
 <template>
   <div class="account-book-page">
-    <!-- 搜索框 -->
-    <van-search
-      v-model="searchKeyword"
-      shape="round"
-      :placeholder="t('mobile.accountBook.searchPlaceholder')"
-    />
+    <!-- 顶部固定区域：搜索框 + 多选工具栏 -->
+    <div class="sticky-header">
+      <van-search
+        v-model="searchKeyword"
+        shape="round"
+        :placeholder="t('mobile.accountBook.searchPlaceholder')"
+      />
 
-    <!-- 多选模式工具栏 -->
-    <div v-if="selectMode" class="select-toolbar">
+      <!-- 多选模式工具栏 -->
+      <div v-if="selectMode" class="select-toolbar">
       <span class="select-info">
         {{ t("mobile.common.selected") }}: {{ selectedIds.length }}
       </span>
@@ -305,6 +306,7 @@ onMounted(() => {
       >
         {{ t("mobile.common.delete") }}
       </van-button>
+    </div>
     </div>
 
     <!-- 账本网格 -->
@@ -427,9 +429,14 @@ onMounted(() => {
 @use "@/styles/mobile/variables.scss" as *;
 
 .account-book-page {
-  min-height: 100vh;
   padding-bottom: calc(60px + env(safe-area-inset-bottom));
   background-color: $color-background;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 46px;
+  z-index: 10;
 }
 
 .select-toolbar {

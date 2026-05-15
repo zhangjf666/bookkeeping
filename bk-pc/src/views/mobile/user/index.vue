@@ -15,11 +15,20 @@ const { t } = useI18n();
 // 用户信息
 const userStore = useUserStoreHook();
 
-// 用户头像 - store 已经处理了 URL 拼接
+const BASE_URL = import.meta.env.VITE_BASE_URL as string;
+
+// 用户头像 - 处理相对路径和绝对路径
 const userAvatar = computed(() => {
-  return (
-    userStore.avatar || "https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg"
-  );
+  const avatar = userStore.avatar;
+  if (!avatar) {
+    return "https://fastly.jsdelivr.net/npm/@vant/assets/cat.jpeg";
+  }
+  // 如果已经是完整URL，直接返回
+  if (avatar.startsWith("http")) {
+    return avatar;
+  }
+  // 否则拼接 BASE_URL
+  return `${BASE_URL}${avatar}`;
 });
 
 // 用户昵称
@@ -167,8 +176,6 @@ const handleLogout = async () => {
 @use "@/styles/mobile/variables.scss" as *;
 
 .user-page {
-  min-height: 100vh;
-  padding-bottom: calc(50px + env(safe-area-inset-bottom));
   background-color: $color-background;
 }
 

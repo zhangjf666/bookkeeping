@@ -5,7 +5,7 @@ import { showConfirmDialog } from "vant";
 import { useUserStoreHook } from "@/store/modules/user";
 import { useUserTagStore } from "@/store/modules/userTag";
 import {
-  getUserTagPage,
+  getUserTagList,
   createUserTag,
   updateUserTag,
   deleteUserTag
@@ -105,8 +105,8 @@ const loadData = async () => {
   if (!userId) return;
 
   try {
-    const result = await getUserTagPage(userId);
-    tagList.value = result?.list || result?.record || [];
+    const result = await getUserTagList(userId);
+    tagList.value = result || [];
   } catch (error: any) {
     showError(error?.message || t("mobile.common.failed"));
   }
@@ -262,15 +262,16 @@ onMounted(() => {
 
 <template>
   <div class="tag-page">
-    <!-- 搜索框 -->
-    <van-search
-      v-model="searchKeyword"
-      shape="round"
-      :placeholder="t('mobile.tag.searchPlaceholder')"
-    />
+    <!-- 顶部固定区域：搜索框 + 多选工具栏 -->
+    <div class="sticky-header">
+      <van-search
+        v-model="searchKeyword"
+        shape="round"
+        :placeholder="t('mobile.tag.searchPlaceholder')"
+      />
 
-    <!-- 多选模式工具栏 -->
-    <div v-if="selectMode" class="select-toolbar">
+      <!-- 多选模式工具栏 -->
+      <div v-if="selectMode" class="select-toolbar">
       <span class="select-info">
         {{ t("mobile.common.selected") }}: {{ selectedIds.length }}
       </span>
@@ -285,6 +286,7 @@ onMounted(() => {
       >
         {{ t("mobile.common.delete") }}
       </van-button>
+    </div>
     </div>
 
     <!-- 标签网格 -->
@@ -412,9 +414,14 @@ onMounted(() => {
 @use "@/styles/mobile/variables.scss" as *;
 
 .tag-page {
-  min-height: 100vh;
   padding-bottom: calc(60px + env(safe-area-inset-bottom));
   background-color: $color-background;
+}
+
+.sticky-header {
+  position: sticky;
+  top: 46px;
+  z-index: 10;
 }
 
 .select-toolbar {

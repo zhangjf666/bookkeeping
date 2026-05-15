@@ -596,12 +596,14 @@ onMounted(() => {
 @use "@/styles/mobile/variables.scss" as *;
 
 .classify-page {
-  min-height: 100vh;
   padding-bottom: calc(60px + env(safe-area-inset-bottom));
   background-color: $color-background;
 }
 
 .type-switch {
+  position: sticky;
+  top: 46px;
+  z-index: 10;
   display: flex;
   gap: 12px;
   padding: 12px 16px;
