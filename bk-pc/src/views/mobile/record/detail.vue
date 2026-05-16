@@ -227,7 +227,6 @@ onMounted(() => {
 @use "@/styles/mobile/variables.scss" as *;
 
 .record-detail-page {
-  min-height: 100vh;
   padding-top: env(safe-area-inset-top);
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
   background-color: $color-background;

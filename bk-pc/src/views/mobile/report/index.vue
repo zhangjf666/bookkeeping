@@ -158,33 +158,35 @@ watch(activeTab, async (newTab) => {
 
 <template>
   <div class="report-page">
-    <!-- Tab 切换 -->
-    <div class="tab-header">
-      <div
-        class="tab-item"
-        :class="{ active: activeTab === 'bill' }"
-        @click="activeTab = 'bill'"
-      >
-        {{ t("mobile.report.trend") }}
+    <!-- 粘性头部：Tab 切换 + 筛选栏 -->
+    <div class="sticky-header">
+      <div class="tab-header">
+        <div
+          class="tab-item"
+          :class="{ active: activeTab === 'bill' }"
+          @click="activeTab = 'bill'"
+        >
+          {{ t("mobile.report.trend") }}
+        </div>
+        <div
+          class="tab-item"
+          :class="{ active: activeTab === 'classify' }"
+          @click="activeTab = 'classify'"
+        >
+          {{ t("mobile.report.classify") }}
+        </div>
       </div>
-      <div
-        class="tab-item"
-        :class="{ active: activeTab === 'classify' }"
-        @click="activeTab = 'classify'"
-      >
-        {{ t("mobile.report.classify") }}
-      </div>
-    </div>
 
-    <!-- 筛选栏 -->
-    <div class="filter-bar">
-      <div class="date-display" @click="handleOpenFilter">
-        <span>{{ dateDisplayText }}</span>
-        <van-icon name="arrow-down" />
+      <!-- 筛选栏 -->
+      <div class="filter-bar">
+        <div class="date-display" @click="handleOpenFilter">
+          <span>{{ dateDisplayText }}</span>
+          <van-icon name="arrow-down" />
+        </div>
+        <van-button size="small" icon="filter-o" @click="handleOpenFilter">
+          {{ t("mobile.bill.filter") }}
+        </van-button>
       </div>
-      <van-button size="small" icon="filter-o" @click="handleOpenFilter">
-        {{ t("mobile.bill.filter") }}
-      </van-button>
     </div>
 
     <!-- 内容区域 -->
@@ -207,6 +209,7 @@ watch(activeTab, async (newTab) => {
       position="bottom"
       round
       :style="{ height: '80%' }"
+      :z-index="9999"
     >
       <ReportFilter
         :classify-list="classifyStore.list"
@@ -224,10 +227,17 @@ watch(activeTab, async (newTab) => {
 @use "@/styles/mobile/variables.scss" as *;
 
 .report-page {
-  display: flex;
-  flex-direction: column;
   min-height: 100vh;
   background-color: $color-background;
+}
+
+.sticky-header {
+  position: sticky;
+  top: -1px;
+  z-index: 99999;
+  padding-top: 1px;
+  margin-top: -1px;
+  background-color: $color-card;
 }
 
 .tab-header {
@@ -271,9 +281,11 @@ watch(activeTab, async (newTab) => {
   color: $color-text-primary;
   cursor: pointer;
 }
+</style>
 
-.content-area {
-  flex: 1;
-  overflow-y: auto;
+<style>
+/* echarts tooltip 不遮挡报表页固定头部 */
+.report-chart-tooltip {
+  z-index: 1 !important;
 }
 </style>

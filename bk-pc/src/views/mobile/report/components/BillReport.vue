@@ -144,6 +144,7 @@ const initChart = () => {
   const option: echarts.EChartsOption = {
     tooltip: {
       trigger: "axis",
+      className: "report-chart-tooltip",
       axisPointer: {
         type: "shadow"
       },

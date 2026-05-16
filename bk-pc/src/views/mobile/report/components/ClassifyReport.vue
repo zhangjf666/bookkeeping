@@ -136,6 +136,7 @@ const initChart = () => {
   const option: echarts.EChartsOption = {
     tooltip: {
       trigger: "item",
+      className: "report-chart-tooltip",
       formatter: (params: any) => {
         return `${params.name}<br/>¥${formatNumber(params.value)} (${params.data.percent.toFixed(1)}%)`;
       }
