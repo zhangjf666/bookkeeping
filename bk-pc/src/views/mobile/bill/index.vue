@@ -377,6 +377,7 @@ watch(
 const handleListLoad = () => {
   if (skipNextLoad.value) {
     skipNextLoad.value = false;
+    loading.value = false; // 重置 loading，否则 van-list 会一直显示加载中
     return;
   }
   onLoadMore(fetchBills);
