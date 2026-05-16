@@ -336,6 +336,7 @@ const handleSave = async () => {
     }
 
     showSuccess(t("mobile.record.saveSuccess"));
+    sessionStorage.setItem("homeNeedRefresh", "true");
     router.back();
   } catch (error: any) {
     hideLoading();
@@ -658,7 +659,6 @@ onMounted(() => {
 @use "@/styles/mobile/variables.scss" as *;
 
 .record-page {
-  min-height: 100vh;
   padding-bottom: calc(80px + env(safe-area-inset-bottom));
   background-color: $color-background;
 }

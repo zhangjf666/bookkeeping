@@ -1,5 +1,5 @@
 <script setup lang="ts">
-import { ref, computed, onMounted } from "vue";
+import { ref, computed, onMounted, onActivated } from "vue";
 import { useRouter } from "vue-router";
 import { useI18n } from "vue-i18n";
 import { storeToRefs } from "pinia";
@@ -163,6 +163,15 @@ const handleAddRecord = () => {
 
 onMounted(() => {
   initPage();
+});
+
+// 从记录页返回时，如果保存成功则刷新摘要
+onActivated(() => {
+  const needRefresh = sessionStorage.getItem("homeNeedRefresh");
+  if (needRefresh) {
+    sessionStorage.removeItem("homeNeedRefresh");
+    loadSummary();
+  }
 });
 </script>
 

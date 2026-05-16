@@ -21,7 +21,8 @@ export default {
         showLink: VITE_HIDE_HOME === "true" ? false : true,
         pcComponent: () => import("@/views/dashboard/index.vue"),
         mobileComponent: () => import("@/views/mobile/home/index.vue"),
-        showTabBar: true
+        showTabBar: true,
+        keepAlive: true
       }
     },
     {
