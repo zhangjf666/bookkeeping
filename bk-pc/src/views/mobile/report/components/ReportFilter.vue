@@ -525,9 +525,14 @@ const handleConfirm = () => {
   flex-direction: column;
   gap: 16px;
   height: 100%;
+  min-height: 0;
   padding: 16px;
   padding-bottom: calc(16px + env(safe-area-inset-bottom));
   overflow-y: auto;
+}
+
+.filter-section {
+  flex-shrink: 0;
 }
 
 .filter-section {
@@ -587,6 +592,7 @@ const handleConfirm = () => {
 
 .filter-footer {
   display: flex;
+  flex-shrink: 0;
   gap: 12px;
   padding-top: 16px;
   margin-top: auto;
