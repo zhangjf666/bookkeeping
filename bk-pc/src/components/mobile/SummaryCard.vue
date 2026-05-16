@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import type { Summary, IncomeExpenseRecord } from "@/types/bill";
 import type { AccountBook } from "@/types/accountBook";
 import { formatNumber } from "@/utils/format";
+import { getAccountBookIcon } from "@/utils/accountBook";
 
 defineOptions({
   name: "SummaryCard"
@@ -115,6 +116,7 @@ const handleSelectAccountBook = (book: AccountBook) => {
     <van-action-sheet
       v-model:show="showAccountBookPicker"
       :title="t('mobile.home.selectAccountBook')"
+      teleport="body"
     >
       <div class="account-book-list">
         <van-cell
@@ -123,6 +125,9 @@ const handleSelectAccountBook = (book: AccountBook) => {
           clickable
           @click="handleSelectAccountBook(book)"
         >
+          <template #icon>
+            <span class="book-icon">{{ getAccountBookIcon(book.image) }}</span>
+          </template>
           <template #title>
             <div class="book-item">
               <span class="book-name">{{ book.name }}</span>
@@ -253,6 +258,16 @@ const handleSelectAccountBook = (book: AccountBook) => {
   max-height: 300px;
   padding-bottom: env(safe-area-inset-bottom);
   overflow-y: auto;
+}
+
+.book-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 24px;
+  height: 24px;
+  margin-right: 8px;
+  font-size: 18px;
 }
 
 .book-item {
