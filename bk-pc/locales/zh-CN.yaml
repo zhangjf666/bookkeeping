@@ -101,6 +101,7 @@ menus:
 login:
   pureUsername: 账号
   purePassword: 密码
+  pureRememberMe: 记住我
   pureLogin: 登录
   pureLoginSuccess: 登录成功
   pureLoginFail: 登录失败
