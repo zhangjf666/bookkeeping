@@ -56,7 +56,8 @@ const ruleForm = reactive({
   username: "",
   password: "",
   captcha: "",
-  uuid: ""
+  uuid: "",
+  rememberMe: false
 });
 
 const loadCaptcha = async () => {
@@ -81,12 +82,14 @@ const onLogin = async (formEl: FormInstance | undefined) => {
   await formEl.validate(valid => {
     if (valid) {
       loading.value = true;
+      useUserStoreHook().SET_ISREMEMBERED(ruleForm.rememberMe);
       useUserStoreHook()
         .loginByUsername({
           username: ruleForm.username,
           password: ruleForm.password,
           captcha: ruleForm.captcha,
-          uuid: uuid.value
+          uuid: uuid.value,
+          rememberMe: ruleForm.rememberMe
         })
         .then(() => {
           // 全部采取静态路由模式
@@ -263,6 +266,14 @@ const toRegister = () => {
                 >
                   <el-icon><Refresh /></el-icon>
                 </el-button>
+              </el-form-item>
+            </Motion>
+
+            <Motion :delay="225">
+              <el-form-item>
+                <el-checkbox v-model="ruleForm.rememberMe">
+                  {{ t("login.pureRememberMe") }}
+                </el-checkbox>
               </el-form-item>
             </Motion>
 
