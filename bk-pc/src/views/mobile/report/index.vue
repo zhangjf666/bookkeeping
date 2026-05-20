@@ -128,10 +128,10 @@ const dateDisplayText = computed(() => {
   const params = filterParams.value;
   if (params.billType === "month") {
     const date = dayjs(params.beginDate);
-    return `${date.year()}年${date.month() + 1}月`;
+    return date.format("YYYY-MM");
   } else if (params.billType === "year") {
     const date = dayjs(params.beginDate);
-    return `${date.year()}年`;
+    return date.format("YYYY");
   } else {
     return `${params.beginDate} ~ ${params.endDate}`;
   }

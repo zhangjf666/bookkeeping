@@ -80,7 +80,7 @@ const currentYear = new Date().getFullYear();
 const yearOptions = computed(() => {
   const years = [];
   for (let i = currentYear; i >= currentYear - 10; i--) {
-    years.push({ text: `${i}年`, value: i });
+    years.push({ text: `${i}`, value: i });
   }
   return years;
 });
@@ -88,7 +88,7 @@ const yearOptions = computed(() => {
 const monthOptions = computed(() => {
   const months = [];
   for (let i = 1; i <= 12; i++) {
-    months.push({ text: `${i}月`, value: i });
+    months.push({ text: `${i}`, value: i });
   }
   return months;
 });
@@ -97,7 +97,7 @@ const monthOptions = computed(() => {
 const yearOnlyOptions = computed(() => {
   const years = [];
   for (let i = currentYear; i >= currentYear - 10; i--) {
-    years.push({ text: `${i}年`, value: i });
+    years.push({ text: `${i}`, value: i });
   }
   return years;
 });
@@ -125,7 +125,7 @@ const dateDisplay = computed(() => {
   } else {
     const start = formatDateString(startDate.value);
     const end = formatDateString(endDate.value);
-    return `${start} 至 ${end}`;
+    return `${start} ~ ${end}`;
   }
 });
 
@@ -414,6 +414,8 @@ const handleConfirm = () => {
       <van-picker
         :columns="[yearOptions, monthOptions]"
         :title="t('mobile.report.selectMonth')"
+        :confirm-button-text="t('mobile.common.confirm')"
+        :cancel-button-text="t('mobile.common.cancel')"
         @confirm="showMonthPicker = false"
         @cancel="showMonthPicker = false"
         @change="({ selectedValues }) => {
@@ -433,6 +435,8 @@ const handleConfirm = () => {
       <van-picker
         :columns="yearOnlyOptions"
         :title="t('mobile.report.selectYear')"
+        :confirm-button-text="t('mobile.common.confirm')"
+        :cancel-button-text="t('mobile.common.cancel')"
         @confirm="showYearPicker = false"
         @cancel="showYearPicker = false"
         @change="({ selectedValues }) => {

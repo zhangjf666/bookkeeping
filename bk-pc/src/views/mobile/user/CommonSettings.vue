@@ -285,6 +285,7 @@ onMounted(async () => {
     <van-dialog
       v-model:show="showMonthlyLimitEditor"
       show-confirm-button
+      :confirm-button-text="t('mobile.common.confirm')"
       close-on-click-overlay
       @confirm="handleMonthlyLimitConfirm"
     >
@@ -316,6 +317,7 @@ onMounted(async () => {
     <van-dialog
       v-model:show="showYearlyLimitEditor"
       show-confirm-button
+      :confirm-button-text="t('mobile.common.confirm')"
       close-on-click-overlay
       @confirm="handleYearlyLimitConfirm"
     >

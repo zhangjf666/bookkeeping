@@ -1,9 +1,12 @@
 <script setup lang="ts">
 import { ref, computed, watch } from "vue";
+import { useI18n } from "vue-i18n";
 
 defineOptions({
   name: "AmountInput"
 });
+
+const { t } = useI18n();
 
 const props = defineProps<{
   modelValue: number;
@@ -133,7 +136,7 @@ const handleConfirm = () => {
       v-model="keyboardValue"
       theme="custom"
       extra-key="."
-      close-button-text="确定"
+      :close-button-text="t('mobile.common.confirm')"
       maxlength="11"
       @close="handleConfirm"
       @blur="handleConfirm"

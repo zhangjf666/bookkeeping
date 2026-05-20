@@ -327,6 +327,7 @@ onMounted(() => {
     <van-dialog
       v-model:show="showNicknameEditor"
       show-confirm-button
+      :confirm-button-text="t('mobile.common.confirm')"
       close-on-click-overlay
       :confirm-button-loading="saving"
       :before-close="handleNicknameBeforeClose"
@@ -380,6 +381,7 @@ onMounted(() => {
     <van-dialog
       v-model:show="showEmailEditor"
       show-confirm-button
+      :confirm-button-text="t('mobile.common.confirm')"
       close-on-click-overlay
       :confirm-button-loading="saving"
       :before-close="handleEmailBeforeClose"
@@ -408,6 +410,7 @@ onMounted(() => {
     <van-dialog
       v-model:show="showPhoneEditor"
       show-confirm-button
+      :confirm-button-text="t('mobile.common.confirm')"
       close-on-click-overlay
       :confirm-button-loading="saving"
       :before-close="handlePhoneBeforeClose"

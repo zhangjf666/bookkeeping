@@ -23,6 +23,8 @@ common:
   selectMode: 已进入多选模式
   yes: 是
   no: 否
+  version: 版本
+  author: 作者
 
 # 语言切换
 language:

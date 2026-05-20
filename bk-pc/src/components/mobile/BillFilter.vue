@@ -73,7 +73,7 @@ const showTagPicker = ref(false);
 // 日期显示文本
 const dateDisplay = computed(() => {
   if (!dateRange.value) return "";
-  return `${dateRange.value[0]} 至 ${dateRange.value[1]}`;
+  return `${dateRange.value[0]} ~ ${dateRange.value[1]}`;
 });
 
 // 金额显示文本

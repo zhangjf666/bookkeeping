@@ -28,8 +28,8 @@ const appInfo = ref({
     <!-- 信息列表 -->
     <van-cell-group inset class="info-group">
       <van-cell :title="t('mobile.user.about') + ' ' + appInfo.name" />
-      <van-cell title="版本" :value="'v' + appInfo.version" />
-      <van-cell title="作者" :value="appInfo.author" />
+      <van-cell :title="t('mobile.common.version')" :value="'v' + appInfo.version" />
+      <van-cell :title="t('mobile.common.author')" :value="appInfo.author" />
     </van-cell-group>
 
     <!-- 版权信息 -->

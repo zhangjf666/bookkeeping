@@ -121,13 +121,13 @@ interface DayGroup {
 }
 
 const weekDayMap: Record<string, string> = {
-  Sun: "周日",
-  Mon: "周一",
-  Tue: "周二",
-  Wed: "周三",
-  Thu: "周四",
-  Fri: "周五",
-  Sat: "周六"
+  Sun: "Sun",
+  Mon: "Mon",
+  Tue: "Tue",
+  Wed: "Wed",
+  Thu: "Thu",
+  Fri: "Fri",
+  Sat: "Sat"
 };
 
 const groupedBills = computed<DayGroup[]>(() => {
@@ -140,8 +140,7 @@ const groupedBills = computed<DayGroup[]>(() => {
     if (!groups.has(dateStr)) {
       const date = dayjs(dateStr);
       const weekEn = date.format("ddd");
-      const weekday =
-        t("mobile.language.zh") === "中文" ? weekDayMap[weekEn] : weekEn;
+      const weekday = weekDayMap[weekEn];
       groups.set(dateStr, {
         date: dateStr,
         weekday,
@@ -358,7 +357,7 @@ const getClassifyName = (record: IncomeExpense) => {
 // 格式化日期显示
 const formatDateDisplay = (dateStr: string) => {
   const date = dayjs(dateStr);
-  return `${date.month() + 1}月${date.date()}日`;
+  return date.format("YYYY-MM-DD");
 };
 
 // 监听账本切换
