@@ -3,6 +3,7 @@ export interface LoginParams {
   password: string;
   captcha: string;
   uuid: string;
+  rememberMe?: boolean;
 }
 
 export interface RegisterParams {
