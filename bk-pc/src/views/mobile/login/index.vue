@@ -120,11 +120,15 @@ const handleLogin = async () => {
   showLoading(t("mobile.common.loading"));
 
   try {
+    // H5 端默认开启记住我
+    userStore.SET_ISREMEMBERED(true);
+
     await userStore.loginByUsername({
       username: formData.value.username,
       password: formData.value.password,
       captcha: formData.value.captcha,
-      uuid: uuid.value
+      uuid: uuid.value,
+      rememberMe: true
     });
 
     usePermissionStoreHook().handleWholeMenus([]);
