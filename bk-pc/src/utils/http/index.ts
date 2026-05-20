@@ -10,7 +10,9 @@ import type {
   PureHttpRequestConfig
 } from "./types.d";
 import { stringify } from "qs";
-import { getToken, formatToken, removeToken } from "@/utils/auth";
+import { getToken, formatToken, removeToken, multipleTabsKey } from "@/utils/auth";
+import { useUserStoreHook } from "@/store/modules/user";
+import Cookies from "js-cookie";
 import router from "@/router";
 
 // 相关配置请参考：www.axios-js.com/zh-cn/docs/#axios-request-config-1
@@ -98,6 +100,14 @@ class PureHttp {
     instance.interceptors.response.use(
       (response: PureHttpResponse) => {
         const $config = response.config;
+
+        // 记住我模式下，刷新 multiple-tabs cookie 过期时间
+        const userStore = useUserStoreHook();
+        if (Cookies.get(multipleTabsKey) && userStore.isRemembered) {
+          Cookies.set(multipleTabsKey, "true", {
+            expires: userStore.loginDay
+          });
+        }
 
         if ($config.responseType === "blob") {
           return response.data;
