@@ -93,17 +93,17 @@ const onBack = () => {
 };
 
 // TabBar 配置（使用与PC端一致的路径）
-const tabs = [
-  { name: "home", path: "/dashboard", icon: "wap-home-o", text: "首页" },
-  { name: "bill", path: "/bill-list", icon: "notes-o", text: "账单" },
+const tabs = computed(() => [
+  { name: "home", path: "/dashboard", icon: "wap-home-o", text: t("mobile.tabBar.home") },
+  { name: "bill", path: "/bill-list", icon: "notes-o", text: t("mobile.tabBar.bill") },
   {
     name: "report",
     path: "/report/bill-report",
     icon: "bar-chart-o",
-    text: "报表"
+    text: t("mobile.tabBar.report")
   },
-  { name: "user", path: "/user/profile", icon: "user-o", text: "我的" }
-];
+  { name: "user", path: "/user/profile", icon: "user-o", text: t("mobile.tabBar.user") }
+]);
 </script>
 
 <template>

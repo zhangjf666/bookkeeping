@@ -87,7 +87,8 @@ const handleLogout = async () => {
     await showConfirmDialog({
       title: t("mobile.user.logoutConfirmTitle"),
       message: t("mobile.user.logoutConfirmMessage"),
-      confirmButtonColor: "#d83d34"
+      confirmButtonColor: "#d83d34",
+      width: "320px"
     });
 
     // 清除用户信息并跳转到登录页

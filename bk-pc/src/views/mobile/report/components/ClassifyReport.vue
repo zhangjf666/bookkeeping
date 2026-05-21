@@ -411,7 +411,7 @@ onUnmounted(() => {
             <div class="header-info">
               <span class="classify-name">{{ selectedClassify.classifyName }}</span>
               <span class="classify-percent">{{ selectedClassify.percent.toFixed(1) }}%</span>
-              <span class="record-count">{{ selectedClassify.num }}笔</span>
+              <span class="record-count">{{ t("mobile.report.recordCount", { count: selectedClassify.num }) }}</span>
               <span
                 class="classify-amount"
                 :class="selectedClassify.expense > 0 ? 'expense' : 'income'"

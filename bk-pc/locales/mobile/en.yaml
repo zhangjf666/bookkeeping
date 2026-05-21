@@ -191,6 +191,7 @@ report:
   classifyList: Category List
   balance: Balance
   backToList: Back to Categories
+  recordCount: "{count} records"
 
 # Search
 search:

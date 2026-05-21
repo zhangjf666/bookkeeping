@@ -191,6 +191,7 @@ report:
   classifyList: 分类列表
   balance: 结余
   backToList: 返回分类列表
+  recordCount: "{count} 笔"
 
 # 搜索页
 search:
