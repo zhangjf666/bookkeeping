@@ -416,7 +416,6 @@ const handleConfirm = () => {
         :title="t('mobile.report.selectMonth')"
         :confirm-button-text="t('mobile.common.confirm')"
         :cancel-button-text="t('mobile.common.cancel')"
-        confirm-button-color="#d83d34"
         @confirm="showMonthPicker = false"
         @cancel="showMonthPicker = false"
         @change="({ selectedValues }) => {
@@ -638,5 +637,10 @@ const handleConfirm = () => {
 .picker-footer {
   padding: 12px 16px;
   padding-bottom: calc(12px + env(safe-area-inset-bottom));
+}
+
+/* Picker confirm button text color */
+:deep(.van-picker__confirm) {
+  color: #d83d34 !important;
 }
 </style>

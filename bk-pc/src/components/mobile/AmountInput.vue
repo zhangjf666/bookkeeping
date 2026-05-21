@@ -160,7 +160,7 @@ const handleConfirm = () => {
 }
 
 /* 数字键盘确认按钮背景色 */
-:deep(.van-number-keyboard__close) {
+:deep(.van-key--blue) {
   background-color: #d83d34 !important;
 }
 
