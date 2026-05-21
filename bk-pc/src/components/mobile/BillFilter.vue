@@ -35,7 +35,7 @@ interface FilterParams {
   date?: string[];
   amount?: number[];
   classifyList?: { mainClassifyId: number; subClassifyId: number | null }[];
-  remark?: string;
+  remark?: string[];
   tagCodes?: string[];
 }
 
@@ -222,8 +222,13 @@ const handleConfirm = () => {
   }
 
   // 金额范围
-  if (minAmount.value !== null || maxAmount.value !== null) {
-    params.amount = [minAmount.value ?? 0, maxAmount.value ?? 999999999];
+  const hasMinAmount = minAmount.value != null;
+  const hasMaxAmount = maxAmount.value != null;
+  if (hasMinAmount || hasMaxAmount) {
+    params.amount = [
+      hasMinAmount ? minAmount.value : null,
+      hasMaxAmount ? maxAmount.value : null
+    ];
   } else {
     params.amount = undefined;
   }
@@ -249,7 +254,7 @@ const handleConfirm = () => {
 
   // 备注
   if (remark.value) {
-    params.remark = remark.value;
+    params.remark = [remark.value];
   } else {
     params.remark = undefined;
   }

@@ -34,7 +34,7 @@ export const useBillStore = defineStore("pure-bill", {
       classifyList: undefined as
         | { mainClassifyId: number; subClassifyId: number | null }[]
         | undefined,
-      remark: undefined as string | undefined,
+      remark: undefined as string[] | undefined,
       tagCodes: undefined as string[] | undefined
     } as IncomeExpenseQuery,
     listLoading: false,
@@ -91,12 +91,16 @@ export const useBillStore = defineStore("pure-bill", {
       try {
         const params: Record<string, any> = {};
         Object.entries(this.queryParams).forEach(([key, value]) => {
-          if (value !== undefined && value !== null && value !== "") {
-            if (Array.isArray(value) && value.length === 0) {
-              return;
-            }
-            params[key] = value;
+          if (value === undefined || value === null) {
+            return;
           }
+          if (typeof value === "string" && value === "") {
+            return;
+          }
+          if (Array.isArray(value) && value.length === 0) {
+            return;
+          }
+          params[key] = value;
         });
         if (params.accountBookId === undefined && this.currentAccountBook) {
           params.accountBookId = this.currentAccountBook.id;
@@ -149,12 +153,11 @@ export const useBillStore = defineStore("pure-bill", {
       const newParams: any = { ...this.queryParams };
       Object.entries(params).forEach(([key, value]) => {
         // 如果值为空（undefined、null、空字符串、空数组），则删除该参数
-        if (
-          value === undefined ||
-          value === null ||
-          value === "" ||
-          (Array.isArray(value) && value.length === 0)
-        ) {
+        if (value === undefined || value === null) {
+          delete newParams[key];
+        } else if (typeof value === "string" && value === "") {
+          delete newParams[key];
+        } else if (Array.isArray(value) && value.length === 0) {
           delete newParams[key];
         } else {
           newParams[key] = value;

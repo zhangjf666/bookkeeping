@@ -261,30 +261,34 @@ const handleQuery = () => {
 
   const queryParams: any = {};
 
-  if (filterForm.value.accountBookId !== undefined) {
-    queryParams.accountBookId = filterForm.value.accountBookId;
-  }
-  if (filterForm.value.date && filterForm.value.date.length === 2) {
-    queryParams.date = filterForm.value.date;
-  }
-  if (
-    filterForm.value.amount[0] !== null ||
-    filterForm.value.amount[1] !== null
-  ) {
-    queryParams.amount = filterForm.value.amount;
-  }
-  if (
-    filterForm.value.classifyList &&
-    filterForm.value.classifyList.length > 0
-  ) {
-    queryParams.classifyList = filterForm.value.classifyList;
-  }
-  if (filterForm.value.remark) {
-    queryParams.remark = filterForm.value.remark;
-  }
-  if (selectedTagCodes && selectedTagCodes.length > 0) {
-    queryParams.tagCodes = selectedTagCodes;
-  }
+  queryParams.accountBookId =
+    filterForm.value.accountBookId !== undefined
+      ? filterForm.value.accountBookId
+      : undefined;
+  queryParams.date =
+    filterForm.value.date && filterForm.value.date.length === 2
+      ? filterForm.value.date
+      : undefined;
+  const hasMinAmount = filterForm.value.amount[0] != null;
+  const hasMaxAmount = filterForm.value.amount[1] != null;
+  queryParams.amount =
+    hasMinAmount || hasMaxAmount
+      ? [
+          hasMinAmount ? filterForm.value.amount[0] : null,
+          hasMaxAmount ? filterForm.value.amount[1] : null
+        ]
+      : undefined;
+  queryParams.classifyList =
+    filterForm.value.classifyList && filterForm.value.classifyList.length > 0
+      ? filterForm.value.classifyList
+      : undefined;
+  queryParams.remark = filterForm.value.remark
+    ? [filterForm.value.remark]
+    : undefined;
+  queryParams.tagCodes =
+    selectedTagCodes && selectedTagCodes.length > 0
+      ? selectedTagCodes
+      : undefined;
 
   if (queryParams.accountBookId !== billStore.queryParams.accountBookId) {
     queryParams.pageNo = 1;
@@ -351,11 +355,13 @@ const handleExport = async () => {
   if (filterForm.value.accountBookId !== undefined) {
     exportParams.accountBookId = filterForm.value.accountBookId;
   }
-  if (
-    filterForm.value.amount[0] !== null ||
-    filterForm.value.amount[1] !== null
-  ) {
-    exportParams.amount = filterForm.value.amount;
+  const exportHasMinAmount = filterForm.value.amount[0] != null;
+  const exportHasMaxAmount = filterForm.value.amount[1] != null;
+  if (exportHasMinAmount || exportHasMaxAmount) {
+    exportParams.amount = [
+      exportHasMinAmount ? filterForm.value.amount[0] : null,
+      exportHasMaxAmount ? filterForm.value.amount[1] : null
+    ];
   }
   if (
     filterForm.value.classifyList &&

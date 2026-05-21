@@ -115,6 +115,7 @@ const handleFilterConfirm = (params: ReportFilterParams) => {
 
 // 筛选重置
 const handleFilterReset = () => {
+  showFilter.value = false;
   filterParams.value = {
     billType: "month",
     beginDate: dayjs().startOf("month").format("YYYY-MM-DD"),

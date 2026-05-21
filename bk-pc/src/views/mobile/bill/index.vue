@@ -287,6 +287,7 @@ const handleFilterConfirm = (filters: any) => {
 
 // 筛选重置
 const handleFilterReset = () => {
+  showFilter.value = false;
   billStore.resetQueryParams();
   billStore.list = [];
   resetAndLoad(fetchBills);
@@ -506,7 +507,7 @@ onMounted(() => {
         :tag-list="userTagStore.list"
         :remark-list="remarkStore.list"
         :initial-date="billStore.queryParams.date"
-        :initial-remark="billStore.queryParams.remark"
+        :initial-remark="billStore.queryParams.remark?.[0]"
         :initial-tag-ids="billStore.queryParams.tagCodes?.map(Number) || []"
         @confirm="handleFilterConfirm"
         @reset="handleFilterReset"

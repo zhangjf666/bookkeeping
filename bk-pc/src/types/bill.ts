@@ -34,7 +34,7 @@ export interface IncomeExpenseQuery {
   date?: string[];
   amount?: number[];
   classifyList?: { mainClassifyId: number; subClassifyId: number | null }[];
-  remark?: string;
+  remark?: string[];
   tagCodes?: string[];
 }
 
