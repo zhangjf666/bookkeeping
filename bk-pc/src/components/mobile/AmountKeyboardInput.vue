@@ -152,12 +152,6 @@ const handleClear = () => {
   cursor: pointer;
   background-color: $color-background;
   border-radius: 8px;
-}
-
-/* 数字键盘确认按钮背景色 */
-:deep(.van-number-keyboard__close) {
-  background-color: #d83d34 !important;
-}
 
   .input-value {
     flex: 1;
@@ -175,5 +169,10 @@ const handleClear = () => {
     font-size: 16px;
     color: $color-text-placeholder;
   }
+}
+
+/* 数字键盘确认按钮背景色 */
+:deep(.van-number-keyboard__close) {
+  background-color: #d83d34 !important;
 }
 </style>
