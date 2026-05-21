@@ -328,6 +328,7 @@ onMounted(() => {
       v-model:show="showNicknameEditor"
       show-confirm-button
       :confirm-button-text="t('mobile.common.confirm')"
+      confirm-button-color="#d83d34"
       close-on-click-overlay
       :confirm-button-loading="saving"
       :before-close="handleNicknameBeforeClose"
@@ -382,6 +383,7 @@ onMounted(() => {
       v-model:show="showEmailEditor"
       show-confirm-button
       :confirm-button-text="t('mobile.common.confirm')"
+      confirm-button-color="#d83d34"
       close-on-click-overlay
       :confirm-button-loading="saving"
       :before-close="handleEmailBeforeClose"
@@ -411,6 +413,7 @@ onMounted(() => {
       v-model:show="showPhoneEditor"
       show-confirm-button
       :confirm-button-text="t('mobile.common.confirm')"
+      confirm-button-color="#d83d34"
       close-on-click-overlay
       :confirm-button-loading="saving"
       :before-close="handlePhoneBeforeClose"

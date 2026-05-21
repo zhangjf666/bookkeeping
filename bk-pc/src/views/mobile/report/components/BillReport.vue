@@ -302,7 +302,7 @@ const formatDateMonthDay = (dateStr: string) => {
 // 格式化月份显示
 const formatMonthDisplay = (month: string) => {
   const date = dayjs(month);
-  return `${date.year()}年${date.month() + 1}月`;
+  return date.format("YYYY-MM");
 };
 
 // 点击账单项 - 查看详情

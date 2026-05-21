@@ -119,9 +119,9 @@ const classifyCount = computed(() => {
 // 时间显示文本
 const dateDisplay = computed(() => {
   if (billType.value === "month") {
-    return `${selectedYear.value}年${selectedMonth.value}月`;
+    return `${selectedYear.value}-${selectedMonth.value}`;
   } else if (billType.value === "year") {
-    return `${selectedYearOnly.value}年`;
+    return `${selectedYearOnly.value}`;
   } else {
     const start = formatDateString(startDate.value);
     const end = formatDateString(endDate.value);
@@ -416,6 +416,7 @@ const handleConfirm = () => {
         :title="t('mobile.report.selectMonth')"
         :confirm-button-text="t('mobile.common.confirm')"
         :cancel-button-text="t('mobile.common.cancel')"
+        confirm-button-color="#d83d34"
         @confirm="showMonthPicker = false"
         @cancel="showMonthPicker = false"
         @change="({ selectedValues }) => {
@@ -437,6 +438,7 @@ const handleConfirm = () => {
         :title="t('mobile.report.selectYear')"
         :confirm-button-text="t('mobile.common.confirm')"
         :cancel-button-text="t('mobile.common.cancel')"
+        confirm-button-color="#d83d34"
         @confirm="showYearPicker = false"
         @cancel="showYearPicker = false"
         @change="({ selectedValues }) => {

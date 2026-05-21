@@ -137,6 +137,7 @@ const handleConfirm = () => {
       theme="custom"
       extra-key="."
       :close-button-text="t('mobile.common.confirm')"
+      close-button-color="#d83d34"
       maxlength="11"
       @close="handleConfirm"
       @blur="handleConfirm"
