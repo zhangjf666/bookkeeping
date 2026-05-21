@@ -136,8 +136,7 @@ const handleConfirm = () => {
       v-model="keyboardValue"
       theme="custom"
       extra-key="."
-      :close-button-text="t('mobile.common.confirm')"
-      close-button-color="#d83d34"
+          :close-button-text="t('mobile.common.confirm')"
       maxlength="11"
       @close="handleConfirm"
       @blur="handleConfirm"
@@ -158,7 +157,14 @@ const handleConfirm = () => {
   align-items: baseline;
   padding: 12px 0;
   cursor: pointer;
+}
 
+/* 数字键盘确认按钮背景色 */
+:deep(.van-number-keyboard__close) {
+  background-color: #d83d34 !important;
+}
+
+.amount-display {
   .currency {
     margin-right: 4px;
     font-size: 20px;

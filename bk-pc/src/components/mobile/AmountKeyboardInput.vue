@@ -130,7 +130,6 @@ const handleClear = () => {
       theme="custom"
       extra-key="."
       :close-button-text="t('mobile.common.confirm')"
-      close-button-color="#d83d34"
       maxlength="11"
       @close="handleConfirm"
       @blur="handleConfirm"
@@ -153,6 +152,12 @@ const handleClear = () => {
   cursor: pointer;
   background-color: $color-background;
   border-radius: 8px;
+}
+
+/* 数字键盘确认按钮背景色 */
+:deep(.van-number-keyboard__close) {
+  background-color: #d83d34 !important;
+}
 
   .input-value {
     flex: 1;
