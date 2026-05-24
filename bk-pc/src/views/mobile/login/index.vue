@@ -6,6 +6,7 @@ import { getCaptcha } from "@/api/auth";
 import { useUserStoreHook } from "@/store/modules/user";
 import { usePermissionStoreHook } from "@/store/modules/permission";
 import { addPathMatch, getTopMenu } from "@/router/utils";
+import { useUserConfig } from "@/composables/useUserConfig";
 import { storageLocal } from "@pureadmin/utils";
 import { responsiveStorageNameSpace } from "@/config";
 import {
@@ -22,6 +23,7 @@ defineOptions({
 const router = useRouter();
 const { t, locale } = useI18n();
 const userStore = useUserStoreHook();
+const { loadUserConfig } = useUserConfig();
 
 // 语言选项
 const languageOptions = [
@@ -136,6 +138,9 @@ const handleLogin = async () => {
 
     hideLoading();
     showSuccess(t("mobile.login.success"));
+
+    // 加载用户配置
+    await loadUserConfig(userStore.id);
 
     // 跳转首页
     router.replace(getTopMenu(true).path);

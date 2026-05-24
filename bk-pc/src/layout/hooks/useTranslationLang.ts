@@ -1,23 +1,61 @@
 import { useNav } from "./useNav";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import { watch, onBeforeMount, type Ref } from "vue";
+import { ref, watch, onBeforeMount, type Ref } from "vue";
+import { useUserConfig } from "@/composables/useUserConfig";
+import { useUserStoreHook } from "@/store/modules/user";
 
-export function useTranslationLang(ref?: Ref) {
+export function useTranslationLang(targetRef?: Ref) {
   const { $storage, changeTitle, handleResize } = useNav();
   const { locale, t } = useI18n();
   const route = useRoute();
+  const { getSystemLanguage, saveConfig } = useUserConfig();
+  const userStore = useUserStoreHook();
 
-  function translationCh() {
+  /** Track selected language option: system/zh/en */
+  const languageSetting = ref("system");
+
+  async function translationCh() {
+    languageSetting.value = "zh";
     $storage.locale = { locale: "zh" };
     locale.value = "zh";
-    ref && handleResize(ref.value);
+    targetRef && handleResize(targetRef.value);
+    if (userStore.id) {
+      try {
+        await saveConfig("language", "zh");
+      } catch (error) {
+        console.error("Failed to save language config:", error);
+      }
+    }
   }
 
-  function translationEn() {
+  async function translationEn() {
+    languageSetting.value = "en";
     $storage.locale = { locale: "en" };
     locale.value = "en";
-    ref && handleResize(ref.value);
+    targetRef && handleResize(targetRef.value);
+    if (userStore.id) {
+      try {
+        await saveConfig("language", "en");
+      } catch (error) {
+        console.error("Failed to save language config:", error);
+      }
+    }
+  }
+
+  async function translationSystem() {
+    languageSetting.value = "system";
+    const systemLang = getSystemLanguage();
+    $storage.locale = { locale: systemLang };
+    locale.value = systemLang;
+    targetRef && handleResize(targetRef.value);
+    if (userStore.id) {
+      try {
+        await saveConfig("language", "system");
+      } catch (error) {
+        console.error("Failed to save language config:", error);
+      }
+    }
   }
 
   watch(
@@ -35,7 +73,9 @@ export function useTranslationLang(ref?: Ref) {
     t,
     route,
     locale,
+    languageSetting,
     translationCh,
-    translationEn
+    translationEn,
+    translationSystem
   };
 }

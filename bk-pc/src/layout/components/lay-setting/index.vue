@@ -18,6 +18,8 @@ import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import Segmented, { type OptionsType } from "@/components/ReSegmented";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { useDark, useGlobal, debounce, isNumber } from "@pureadmin/utils";
+import { useUserConfig } from "@/composables/useUserConfig";
+import { useUserStoreHook } from "@/store/modules/user";
 
 import Check from "~icons/ep/check";
 import LeftArrow from "~icons/ri/arrow-left-s-line?width=20&height=20";
@@ -30,6 +32,8 @@ const { t } = useI18n();
 const { device } = useNav();
 const { isDark } = useDark();
 const { $storage } = useGlobal<GlobalPropertiesApi>();
+const { saveConfig } = useUserConfig();
+const userStore = useUserStoreHook();
 
 const mixRef = ref();
 const verticalRef = ref();
@@ -331,6 +335,11 @@ onUnmounted(() => removeMatchMedia);
             overallStyle = theme.option.theme;
             dataThemeChange(theme.option.theme);
             theme.index === 2 && watchSystemThemeChange();
+            if (userStore.id) {
+              saveConfig('theme', theme.option.theme).catch((err: any) =>
+                console.error('Failed to save theme config:', err)
+              );
+            }
           }
         "
       />

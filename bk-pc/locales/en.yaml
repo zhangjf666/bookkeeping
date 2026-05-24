@@ -352,6 +352,14 @@ commonConfig:
   pureOperationFail: Operation Failed
   pureSetMonthlyLimit: Set Monthly Expense Limit
   pureSetYearlyLimit: Set Yearly Expense Limit
+  pureTheme: "Theme"
+  pureThemeSystem: "System"
+  pureThemeLight: "Light"
+  pureThemeDark: "Dark"
+  pureLanguage: "Language"
+  pureLanguageSystem: "System"
+  pureLanguageZh: "简体中文"
+  pureLanguageEn: "English"
 
 profile:
   pureTitle: Profile

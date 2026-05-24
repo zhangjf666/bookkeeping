@@ -59,9 +59,12 @@ const focusInput = (inputRef: typeof nicknameInput, value: string) => {
     ) as HTMLInputElement | null;
     if (input) {
       input.focus();
-      // 将光标移动到内容末尾
+      // 将光标移动到内容末尾（email/tel/number 等类型不支持 setSelectionRange）
       const len = value.length;
-      input.setSelectionRange(len, len);
+      const supportedTypes = ["text", "search", "url", "tel", "password"];
+      if (supportedTypes.includes(input.type) || !input.type) {
+        input.setSelectionRange(len, len);
+      }
     }
   }, 100);
 };

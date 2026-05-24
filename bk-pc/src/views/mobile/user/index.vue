@@ -87,6 +87,8 @@ const handleLogout = async () => {
     await showConfirmDialog({
       title: t("mobile.user.logoutConfirmTitle"),
       message: t("mobile.user.logoutConfirmMessage"),
+      confirmButtonText: t("mobile.common.confirm"),
+      cancelButtonText: t("mobile.common.cancel"),
       confirmButtonColor: "#d83d34",
       width: "320px"
     });

@@ -13,3 +13,18 @@ CREATE TABLE `user_tag` (
 
 --增加标签tag_codes列
 ALTER TABLE income_expense ADD tag_codes varchar(512) NULL COMMENT '所属标签代码,逗号分隔';
+
+-- 为历史用户补齐 theme 和 language 默认配置
+INSERT INTO user_config (user_id, name, value, description, enable)
+SELECT u.id, 'theme', 'system', '主题设置(system:跟随系统,light:浅色,dark:深色)', '1'
+FROM bookkeeping_user u
+WHERE NOT EXISTS (
+    SELECT 1 FROM user_config uc WHERE uc.user_id = u.id AND uc.name = 'theme'
+);
+
+INSERT INTO user_config (user_id, name, value, description, enable)
+SELECT u.id, 'language', 'system', '语言设置(system:跟随系统,zh-CN:简体中文,en:英文)', '1'
+FROM bookkeeping_user u
+WHERE NOT EXISTS (
+    SELECT 1 FROM user_config uc WHERE uc.user_id = u.id AND uc.name = 'language'
+);

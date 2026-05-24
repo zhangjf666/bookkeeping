@@ -407,4 +407,12 @@ commonConfig:
   pureOperationFail: 操作失败
   pureSetMonthlyLimit: 设置当月支出限额
   pureSetYearlyLimit: 设置当年支出限额
+  pureTheme: "主题"
+  pureThemeSystem: "跟随系统"
+  pureThemeLight: "浅色"
+  pureThemeDark: "深色"
+  pureLanguage: "语言"
+  pureLanguageSystem: "跟随系统"
+  pureLanguageZh: "简体中文"
+  pureLanguageEn: "English"
 

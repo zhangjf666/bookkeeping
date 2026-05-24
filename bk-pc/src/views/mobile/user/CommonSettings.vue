@@ -3,6 +3,7 @@ import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { useUserStoreHook } from "@/store/modules/user";
 import { getUserConfigList, updateUserConfig } from "@/api/userConfig";
+import { useUserConfig } from "@/composables/useUserConfig";
 import type { UserConfig, UserConfigForm } from "@/types/userConfig";
 import { showLoading, hideLoading, showError } from "@/utils/mobile/message";
 
@@ -43,6 +44,34 @@ const yearlyLimitInput = ref<{ $el: HTMLElement } | null>(null);
 
 // 加载状态
 const loading = ref(false);
+
+const { saveConfig, applyTheme, applyLanguage } = useUserConfig();
+
+const theme = ref("system");
+const language = ref("system");
+
+const showThemePicker = ref(false);
+const showLanguagePicker = ref(false);
+
+const themeOptions = computed(() => [
+  { value: "system", label: t("mobile.commonSettings.themeSystem") },
+  { value: "light", label: t("mobile.commonSettings.themeLight") },
+  { value: "dark", label: t("mobile.commonSettings.themeDark") }
+]);
+
+const languageOptions = computed(() => [
+  { value: "system", label: t("mobile.commonSettings.languageSystem") },
+  { value: "zh", label: t("mobile.commonSettings.languageZh") },
+  { value: "en", label: t("mobile.commonSettings.languageEn") }
+]);
+
+const themeText = computed(() => {
+  return themeOptions.value.find(item => item.value === theme.value)?.label || "";
+});
+
+const languageText = computed(() => {
+  return languageOptions.value.find(item => item.value === language.value)?.label || "";
+});
 
 // 聚焦输入框并将光标移到末尾
 const focusInput = (inputRef: typeof monthlyLimitInput, value: string) => {
@@ -109,6 +138,15 @@ const loadConfigs = async () => {
     const yearlyLimitConfig = getConfigByName("default_yearly_expense_limit");
     if (yearlyLimitConfig) {
       yearlyExpenseLimit.value = yearlyLimitConfig.value;
+    }
+
+    const themeConfig = getConfigByName("theme");
+    if (themeConfig) {
+      theme.value = themeConfig.value;
+    }
+    const languageConfig = getConfigByName("language");
+    if (languageConfig) {
+      language.value = languageConfig.value;
     }
   } catch {
     configList.value = [];
@@ -181,6 +219,28 @@ const handleYearlyLimitConfirm = async () => {
   showYearlyLimitEditor.value = false;
 };
 
+const handleThemeSelect = async (value: string) => {
+  showThemePicker.value = false;
+  if (value === theme.value) return;
+  try {
+    await updateConfigValue("theme", value);
+    applyTheme(value);
+  } catch (error: any) {
+    showError(error?.message || t("mobile.common.failed"));
+  }
+};
+
+const handleLanguageSelect = async (value: string) => {
+  showLanguagePicker.value = false;
+  if (value === language.value) return;
+  try {
+    await updateConfigValue("language", value);
+    applyLanguage(value);
+  } catch (error: any) {
+    showError(error?.message || t("mobile.common.failed"));
+  }
+};
+
 onMounted(async () => {
   showLoading(t("mobile.common.loading"));
   try {
@@ -213,6 +273,18 @@ onMounted(async () => {
           />
         </template>
       </van-cell>
+      <van-cell
+        :title="t('mobile.commonSettings.theme')"
+        :value="themeText"
+        is-link
+        @click="showThemePicker = true"
+      />
+      <van-cell
+        :title="t('mobile.commonSettings.language')"
+        :value="languageText"
+        is-link
+        @click="showLanguagePicker = true"
+      />
     </van-cell-group>
 
     <!-- 限额配置 -->
@@ -344,6 +416,54 @@ onMounted(async () => {
         </van-field>
       </div>
     </van-dialog>
+
+    <!-- Theme picker -->
+    <van-action-sheet
+      v-model:show="showThemePicker"
+      :title="t('mobile.commonSettings.theme')"
+    >
+      <div class="picker-list">
+        <van-cell
+          v-for="item in themeOptions"
+          :key="item.value"
+          :title="item.label"
+          clickable
+          @click="handleThemeSelect(item.value)"
+        >
+          <template #right-icon>
+            <van-icon
+              v-if="theme === item.value"
+              name="success"
+              color="#d83d34"
+            />
+          </template>
+        </van-cell>
+      </div>
+    </van-action-sheet>
+
+    <!-- Language picker -->
+    <van-action-sheet
+      v-model:show="showLanguagePicker"
+      :title="t('mobile.commonSettings.language')"
+    >
+      <div class="picker-list">
+        <van-cell
+          v-for="item in languageOptions"
+          :key="item.value"
+          :title="item.label"
+          clickable
+          @click="handleLanguageSelect(item.value)"
+        >
+          <template #right-icon>
+            <van-icon
+              v-if="language === item.value"
+              name="success"
+              color="#d83d34"
+            />
+          </template>
+        </van-cell>
+      </div>
+    </van-action-sheet>
   </div>
 </template>
 

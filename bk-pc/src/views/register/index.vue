@@ -16,6 +16,7 @@ import { usePermissionStoreHook } from "@/store/modules/permission";
 import { bg, illustration } from "@/views/login/utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import { useUserConfig } from "@/composables/useUserConfig";
 import Lock from "~icons/ri/lock-fill";
 import User from "~icons/ri/user-3-fill";
 import Refresh from "~icons/ep/refresh-right";
@@ -38,6 +39,8 @@ const registerRules = computed(() =>
 );
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
+
+const { loadUserConfig } = useUserConfig();
 
 const captchaImg = ref("");
 const uuid = ref("");
@@ -99,6 +102,7 @@ const onRegister = async (formEl: FormInstance | undefined) => {
     usePermissionStoreHook().handleWholeMenus([]);
     addPathMatch();
     router.push(getTopMenu(true).path);
+    await loadUserConfig(useUserStoreHook().id);
   } catch (error: any) {
     const errMsg = error?.message || t("login.pureRegisterFail");
     message(errMsg, { type: "error" });

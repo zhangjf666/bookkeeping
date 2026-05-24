@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
 import { getUserConfigList, updateUserConfig } from "@/api/userConfig";
+import { useUserConfig } from "@/composables/useUserConfig";
 import type { UserConfig, UserConfigForm } from "@/types/userConfig";
 
 defineOptions({
@@ -25,6 +26,23 @@ const limitModeOptions = [
   { value: "1", label: t("commonConfig.pureNotDisplay") },
   { value: "2", label: t("commonConfig.pureMonthlyLimit") },
   { value: "3", label: t("commonConfig.pureYearlyLimit") }
+];
+
+const { saveConfig } = useUserConfig();
+
+const theme = ref("system");
+const language = ref("system");
+
+const themeOptions = [
+  { value: "system", label: t("commonConfig.pureThemeSystem") },
+  { value: "light", label: t("commonConfig.pureThemeLight") },
+  { value: "dark", label: t("commonConfig.pureThemeDark") }
+];
+
+const languageOptions = [
+  { value: "system", label: t("commonConfig.pureLanguageSystem") },
+  { value: "zh", label: t("commonConfig.pureLanguageZh") },
+  { value: "en", label: t("commonConfig.pureLanguageEn") }
 ];
 
 const loadData = async () => {
@@ -60,6 +78,15 @@ const loadData = async () => {
     );
     if (yearlyLimitConfig) {
       defaultYearlyExpenseLimit.value = yearlyLimitConfig.value;
+    }
+
+    const themeConfig = configList.value.find(c => c.name === "theme");
+    if (themeConfig) {
+      theme.value = themeConfig.value;
+    }
+    const languageConfig = configList.value.find(c => c.name === "language");
+    if (languageConfig) {
+      language.value = languageConfig.value;
     }
   } catch {
     configList.value = [];
@@ -137,6 +164,14 @@ const handleYearlyLimitBlur = async () => {
   );
 };
 
+const handleThemeChange = async (value: string) => {
+  await saveConfig("theme", value);
+};
+
+const handleLanguageChange = async (value: string) => {
+  await saveConfig("language", value);
+};
+
 const updateConfigValue = async (
   id: number,
   userId: number,
@@ -186,6 +221,32 @@ onMounted(() => {
             inactive-value="NO"
             @change="handleCreditCardChange"
           />
+        </div>
+
+        <div class="config-item">
+          <span class="config-label">{{ t("commonConfig.pureTheme") }}</span>
+          <el-radio-group v-model="theme" @change="handleThemeChange">
+            <el-radio-button
+              v-for="opt in themeOptions"
+              :key="opt.value"
+              :value="opt.value"
+            >
+              {{ opt.label }}
+            </el-radio-button>
+          </el-radio-group>
+        </div>
+
+        <div class="config-item">
+          <span class="config-label">{{ t("commonConfig.pureLanguage") }}</span>
+          <el-radio-group v-model="language" @change="handleLanguageChange">
+            <el-radio-button
+              v-for="opt in languageOptions"
+              :key="opt.value"
+              :value="opt.value"
+            >
+              {{ opt.label }}
+            </el-radio-button>
+          </el-radio-group>
         </div>
       </div>
 

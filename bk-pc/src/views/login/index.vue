@@ -18,6 +18,9 @@ import { bg, avatar, illustration } from "./utils/static";
 import { useRenderIcon } from "@/components/ReIcon/src/hooks";
 import { useTranslationLang } from "@/layout/hooks/useTranslationLang";
 import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
+import { useUserConfig } from "@/composables/useUserConfig";
+import { storageLocal } from "@pureadmin/utils";
+import { responsiveStorageNameSpace } from "@/config";
 import { getCaptcha } from "@/api/auth";
 
 import dayIcon from "@/assets/svg/day.svg?component";
@@ -45,8 +48,20 @@ const { t } = useI18n();
 const loginRules = computed(() => createLoginRules(t));
 const { dataTheme, overallStyle, dataThemeChange } = useDataThemeChange();
 dataThemeChange(overallStyle.value);
-const { title, getDropdownItemStyle, getDropdownItemClass } = useNav();
-const { locale, translationCh, translationEn } = useTranslationLang();
+const { title, getDropdownItemStyle, getDropdownItemClass, $storage } = useNav();
+const { locale } = useTranslationLang();
+const { loadUserConfig, getSystemLanguage, applyTheme } = useUserConfig();
+const languageOption = ref("system");
+
+const selectLanguage = (option: string) => {
+  languageOption.value = option;
+  if (option === "system") {
+    locale.value = getSystemLanguage();
+  } else {
+    locale.value = option;
+  }
+  $storage.locale = { locale: locale.value };
+};
 
 const captchaImg = ref("");
 const uuid = ref("");
@@ -75,6 +90,15 @@ const loadCaptcha = async () => {
 
 onMounted(() => {
   loadCaptcha();
+  // Default language: follow system
+  const systemLang = getSystemLanguage();
+  locale.value = systemLang;
+  storageLocal().setItem(`${responsiveStorageNameSpace()}locale`, {
+    locale: systemLang
+  });
+  languageOption.value = "system";
+  // Default theme: light
+  applyTheme("light");
 });
 
 const onLogin = async (formEl: FormInstance | undefined) => {
@@ -91,7 +115,7 @@ const onLogin = async (formEl: FormInstance | undefined) => {
           uuid: uuid.value,
           rememberMe: ruleForm.rememberMe
         })
-        .then(() => {
+        .then(async () => {
           // 全部采取静态路由模式
           disabled.value = true;
           usePermissionStoreHook().handleWholeMenus([]);
@@ -99,6 +123,11 @@ const onLogin = async (formEl: FormInstance | undefined) => {
           router.push(getTopMenu(true).path);
           message(t("login.pureLoginSuccess"), { type: "success" });
           disabled.value = false;
+          try {
+            await loadUserConfig(useUserStoreHook().id);
+          } catch (error) {
+            console.error("Failed to load user config:", error);
+          }
           // return initRouter().then(() => {
           //   disabled.value = true;
           //   router
@@ -158,26 +187,38 @@ const toRegister = () => {
         <template #dropdown>
           <el-dropdown-menu class="translation">
             <el-dropdown-item
+              :class="[
+                'dark:text-white!',
+                languageOption === 'system' ? 'selected' : ''
+              ]"
+              @click="selectLanguage('system')"
+            >
+              <span v-show="languageOption === 'system'" class="check-system">
+                <IconifyIconOffline :icon="Check" />
+              </span>
+              {{ t("commonConfig.pureLanguageSystem") }}
+            </el-dropdown-item>
+            <el-dropdown-item
               :style="getDropdownItemStyle(locale, 'zh')"
               :class="['dark:text-white!', getDropdownItemClass(locale, 'zh')]"
-              @click="translationCh"
+              @click="selectLanguage('zh')"
             >
               <IconifyIconOffline
                 v-show="locale === 'zh'"
                 class="check-zh"
                 :icon="Check"
               />
-              简体中文
+              {{ t("commonConfig.pureLanguageZh") }}
             </el-dropdown-item>
             <el-dropdown-item
               :style="getDropdownItemStyle(locale, 'en')"
               :class="['dark:text-white!', getDropdownItemClass(locale, 'en')]"
-              @click="translationEn"
+              @click="selectLanguage('en')"
             >
               <span v-show="locale === 'en'" class="check-en">
                 <IconifyIconOffline :icon="Check" />
               </span>
-              English
+              {{ t("commonConfig.pureLanguageEn") }}
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -325,6 +366,11 @@ const toRegister = () => {
   }
 
   .check-en {
+    position: absolute;
+    left: 20px;
+  }
+
+  .check-system {
     position: absolute;
     left: 20px;
   }

@@ -29,7 +29,8 @@ const {
   getDropdownItemClass
 } = useNav();
 
-const { t, locale, translationCh, translationEn } = useTranslationLang();
+const { t, locale, languageSetting, translationCh, translationEn, translationSystem } =
+  useTranslationLang();
 const router = useRouter();
 
 const goToProfile = () => {
@@ -64,6 +65,18 @@ const goToProfile = () => {
         <template #dropdown>
           <el-dropdown-menu class="translation">
             <el-dropdown-item
+              :class="[
+                'dark:text-white!',
+                languageSetting === 'system' ? 'selected' : ''
+              ]"
+              @click="translationSystem"
+            >
+              <span v-show="languageSetting === 'system'" class="check-system">
+                <IconifyIconOffline :icon="Check" />
+              </span>
+              {{ t("commonConfig.pureLanguageSystem") }}
+            </el-dropdown-item>
+            <el-dropdown-item
               :style="getDropdownItemStyle(locale, 'zh')"
               :class="['dark:text-white!', getDropdownItemClass(locale, 'zh')]"
               @click="translationCh"
@@ -73,7 +86,7 @@ const goToProfile = () => {
                 class="check-zh"
                 :icon="Check"
               />
-              简体中文
+              {{ t("commonConfig.pureLanguageZh") }}
             </el-dropdown-item>
             <el-dropdown-item
               :style="getDropdownItemStyle(locale, 'en')"
@@ -83,7 +96,7 @@ const goToProfile = () => {
               <span v-show="locale === 'en'" class="check-en">
                 <IconifyIconOffline :icon="Check" />
               </span>
-              English
+              {{ t("commonConfig.pureLanguageEn") }}
             </el-dropdown-item>
           </el-dropdown-menu>
         </template>
@@ -182,6 +195,11 @@ const goToProfile = () => {
   }
 
   .check-en {
+    position: absolute;
+    left: 20px;
+  }
+
+  .check-system {
     position: absolute;
     left: 20px;
   }
