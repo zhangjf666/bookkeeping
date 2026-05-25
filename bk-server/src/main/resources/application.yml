@@ -135,7 +135,9 @@ system:
   #单一登录
   single-login: true
   #开启验证码
-  enable-captcha: false
+  enable-captcha: true
+  #调试模式（开启后不校验验证码）
+  debug-mode: false
   #开启请求ip验证
   enable-ip-check: true
   #上传文件临时路径

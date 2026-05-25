@@ -101,6 +101,10 @@ public class AuthenticationController {
         if(!systemProperties.getEnableCaptcha()){
             return;
         }
+        //调试模式跳过验证码校验
+        if(Boolean.TRUE.equals(systemProperties.getDebugMode())){
+            return;
+        }
         //获取验证码
         String captcha = (String) RedisUtil.get(CAPTCHA_KEY + loginUserDto.getUuid());
         if (StringUtils.isBlank(captcha)) {
@@ -109,7 +113,7 @@ public class AuthenticationController {
         //清除验证码
         RedisUtil.del(CAPTCHA_KEY + loginUserDto.getUuid());
         //校验验证码
-        if (StringUtils.isBlank(loginUserDto.getCaptcha()) && captcha.equalsIgnoreCase(loginUserDto.getCaptcha())) {
+        if (StringUtils.isBlank(loginUserDto.getCaptcha()) || !captcha.equalsIgnoreCase(loginUserDto.getCaptcha())) {
             throw new BusinessException("验证码错误");
         }
     }
