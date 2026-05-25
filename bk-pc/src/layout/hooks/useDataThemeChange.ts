@@ -9,6 +9,9 @@ import { useAppStoreHook } from "@/store/modules/app";
 import { useEpThemeStoreHook } from "@/store/modules/epTheme";
 import { useMultiTagsStoreHook } from "@/store/modules/multiTags";
 import { darken, lighten, useGlobal, storageLocal } from "@pureadmin/utils";
+import { sharedDataTheme, sharedOverallStyle } from "@/composables/useSharedConfig";
+
+let isInitialized = false;
 
 export function useDataThemeChange() {
   const { layoutTheme, layout } = useLayout();
@@ -32,8 +35,16 @@ export function useDataThemeChange() {
   ]);
 
   const { $storage } = useGlobal<GlobalPropertiesApi>();
-  const dataTheme = ref<boolean>($storage?.layout?.darkMode);
-  const overallStyle = ref<string>($storage?.layout?.overallStyle);
+
+  // 首次调用时从 storage 初始化共享状态，确保所有实例共用同一组值
+  if (!isInitialized) {
+    sharedDataTheme.value = $storage?.layout?.darkMode ?? false;
+    sharedOverallStyle.value = $storage?.layout?.overallStyle ?? "light";
+    isInitialized = true;
+  }
+
+  const dataTheme = sharedDataTheme;
+  const overallStyle = sharedOverallStyle;
   const body = document.documentElement as HTMLElement;
 
   function toggleClass(flag: boolean, clsName: string, target?: HTMLElement) {

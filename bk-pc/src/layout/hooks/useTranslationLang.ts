@@ -1,9 +1,10 @@
 import { useNav } from "./useNav";
 import { useI18n } from "vue-i18n";
 import { useRoute } from "vue-router";
-import { ref, watch, onBeforeMount, type Ref } from "vue";
+import { watch, onBeforeMount, type Ref } from "vue";
 import { useUserConfig } from "@/composables/useUserConfig";
 import { useUserStoreHook } from "@/store/modules/user";
+import { sharedLanguageSetting } from "@/composables/useSharedConfig";
 
 export function useTranslationLang(targetRef?: Ref) {
   const { $storage, changeTitle, handleResize } = useNav();
@@ -13,7 +14,7 @@ export function useTranslationLang(targetRef?: Ref) {
   const userStore = useUserStoreHook();
 
   /** Track selected language option: system/zh/en */
-  const languageSetting = ref("system");
+  const languageSetting = sharedLanguageSetting;
 
   async function translationCh() {
     languageSetting.value = "zh";

@@ -5,7 +5,7 @@ import { i18n, useI18n } from "@/plugins/i18n";
 import { getPlatformConfig } from "./config";
 import { MotionPlugin } from "@vueuse/motion";
 // import { useEcharts } from "@/plugins/echarts";
-import { createApp, type Directive } from "vue";
+import { createApp, type Directive, type WritableComputedRef } from "vue";
 import { useElementPlus } from "@/plugins/elementPlus";
 import { injectResponsiveStorage } from "@/utils/responsive";
 
@@ -64,7 +64,7 @@ getPlatformConfig(app).then(async config => {
   // 同步 i18n locale 与响应式存储（解决 i18n 模块加载时 getConfig 未初始化导致读取错误 key 的问题）
   const storageLocale = app.config.globalProperties.$storage?.locale?.locale;
   if (storageLocale) {
-    i18n.global.locale.value = storageLocale;
+    (i18n.global.locale as WritableComputedRef<string>).value = storageLocale;
   }
 
   app.use(MotionPlugin).use(useI18n).use(useElementPlus).use(Table);

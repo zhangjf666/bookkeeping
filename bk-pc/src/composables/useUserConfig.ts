@@ -4,12 +4,17 @@ import { useDataThemeChange } from "@/layout/hooks/useDataThemeChange";
 import { getUserConfigList, updateUserConfig } from "@/api/userConfig";
 import { storageLocal } from "@pureadmin/utils";
 import { responsiveStorageNameSpace } from "@/config";
+import { useUserStoreHook } from "@/store/modules/user";
+import { sharedLanguageSetting } from "@/composables/useSharedConfig";
 import type { UserConfig } from "@/types/userConfig";
+
+// Module-level shared config list so all composable instances share the same data
+const sharedConfigList = ref<UserConfig[]>([]);
 
 export function useUserConfig() {
   const { locale } = useI18n();
   const { dataThemeChange, dataTheme, overallStyle } = useDataThemeChange();
-  const configList = ref<UserConfig[]>([]);
+  const configList = sharedConfigList;
 
   const getSystemLanguage = (): string => {
     const lang = navigator.language.toLowerCase();
@@ -38,6 +43,7 @@ export function useUserConfig() {
     storageLocal().setItem(`${responsiveStorageNameSpace()}locale`, {
       locale: actualLang
     });
+    sharedLanguageSetting.value = language;
   };
 
   const loadUserConfig = async (userId: number): Promise<void> => {
@@ -54,7 +60,22 @@ export function useUserConfig() {
   };
 
   const saveConfig = async (name: string, value: string): Promise<void> => {
-    const config = configList.value.find(c => c.name === name);
+    let config = configList.value.find(c => c.name === name);
+
+    // Auto-load configs from API if not found locally and user is logged in
+    if (!config) {
+      const userStore = useUserStoreHook();
+      if (userStore.id) {
+        try {
+          const result = await getUserConfigList(userStore.id);
+          configList.value = result || [];
+          config = configList.value.find(c => c.name === name);
+        } catch (error) {
+          console.error("Failed to auto-load user config:", error);
+        }
+      }
+    }
+
     if (!config) return;
     await updateUserConfig({
       id: config.id,

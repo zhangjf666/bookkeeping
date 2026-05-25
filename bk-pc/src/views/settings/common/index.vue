@@ -1,10 +1,14 @@
 <script setup lang="ts">
-import { ref, onMounted } from "vue";
+import { ref, computed, onMounted } from "vue";
 import { useI18n } from "vue-i18n";
 import { ElMessage } from "element-plus";
 import { useUserStoreHook } from "@/store/modules/user";
 import { getUserConfigList, updateUserConfig } from "@/api/userConfig";
 import { useUserConfig } from "@/composables/useUserConfig";
+import {
+  sharedLanguageSetting,
+  sharedOverallStyle
+} from "@/composables/useSharedConfig";
 import type { UserConfig, UserConfigForm } from "@/types/userConfig";
 
 defineOptions({
@@ -28,22 +32,23 @@ const limitModeOptions = [
   { value: "3", label: t("commonConfig.pureYearlyLimit") }
 ];
 
-const { saveConfig } = useUserConfig();
+const { applyTheme, applyLanguage } = useUserConfig();
 
-const theme = ref("system");
-const language = ref("system");
+// 使用模块级共享状态，与导航栏、设置面板保持双向同步
+const theme = sharedOverallStyle;
+const language = sharedLanguageSetting;
 
-const themeOptions = [
+const themeOptions = computed(() => [
   { value: "system", label: t("commonConfig.pureThemeSystem") },
   { value: "light", label: t("commonConfig.pureThemeLight") },
   { value: "dark", label: t("commonConfig.pureThemeDark") }
-];
+]);
 
-const languageOptions = [
+const languageOptions = computed(() => [
   { value: "system", label: t("commonConfig.pureLanguageSystem") },
   { value: "zh", label: t("commonConfig.pureLanguageZh") },
   { value: "en", label: t("commonConfig.pureLanguageEn") }
-];
+]);
 
 const loadData = async () => {
   if (!userStore.id) return;
@@ -82,11 +87,11 @@ const loadData = async () => {
 
     const themeConfig = configList.value.find(c => c.name === "theme");
     if (themeConfig) {
-      theme.value = themeConfig.value;
+      sharedOverallStyle.value = themeConfig.value;
     }
     const languageConfig = configList.value.find(c => c.name === "language");
     if (languageConfig) {
-      language.value = languageConfig.value;
+      sharedLanguageSetting.value = languageConfig.value;
     }
   } catch {
     configList.value = [];
@@ -165,11 +170,25 @@ const handleYearlyLimitBlur = async () => {
 };
 
 const handleThemeChange = async (value: string) => {
-  await saveConfig("theme", value);
+  const config = getConfigByName("theme");
+  if (!config) return;
+  try {
+    await updateConfigValue(config.id, config.userId, "theme", value);
+    applyTheme(value);
+  } catch {
+    // error handled by updateConfigValue
+  }
 };
 
 const handleLanguageChange = async (value: string) => {
-  await saveConfig("language", value);
+  const config = getConfigByName("language");
+  if (!config) return;
+  try {
+    await updateConfigValue(config.id, config.userId, "language", value);
+    applyLanguage(value);
+  } catch {
+    // error handled by updateConfigValue
+  }
 };
 
 const updateConfigValue = async (

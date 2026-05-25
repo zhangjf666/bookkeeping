@@ -77,23 +77,33 @@ const goToProfile = () => {
               {{ t("commonConfig.pureLanguageSystem") }}
             </el-dropdown-item>
             <el-dropdown-item
-              :style="getDropdownItemStyle(locale, 'zh')"
-              :class="['dark:text-white!', getDropdownItemClass(locale, 'zh')]"
+              :style="languageSetting === 'system' ? '' : getDropdownItemStyle(locale, 'zh')"
+              :class="[
+                'dark:text-white!',
+                languageSetting === 'system'
+                  ? 'dark:hover:text-primary!'
+                  : getDropdownItemClass(locale, 'zh')
+              ]"
               @click="translationCh"
             >
               <IconifyIconOffline
-                v-show="locale === 'zh'"
+                v-show="locale === 'zh' && languageSetting !== 'system'"
                 class="check-zh"
                 :icon="Check"
               />
               {{ t("commonConfig.pureLanguageZh") }}
             </el-dropdown-item>
             <el-dropdown-item
-              :style="getDropdownItemStyle(locale, 'en')"
-              :class="['dark:text-white!', getDropdownItemClass(locale, 'en')]"
+              :style="languageSetting === 'system' ? '' : getDropdownItemStyle(locale, 'en')"
+              :class="[
+                'dark:text-white!',
+                languageSetting === 'system'
+                  ? 'dark:hover:text-primary!'
+                  : getDropdownItemClass(locale, 'en')
+              ]"
               @click="translationEn"
             >
-              <span v-show="locale === 'en'" class="check-en">
+              <span v-show="locale === 'en' && languageSetting !== 'system'" class="check-en">
                 <IconifyIconOffline :icon="Check" />
               </span>
               {{ t("commonConfig.pureLanguageEn") }}
