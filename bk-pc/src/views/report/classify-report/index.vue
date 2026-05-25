@@ -548,10 +548,21 @@ onMounted(async () => {
             </el-table-column>
             <el-table-column :label="t('bill.pureClassify')" width="200">
               <template #default="{ row }">
-                <span>{{ row.mainClassifyName }}</span>
-                <span v-if="row.subClassifyName" style="color: #909399">
-                  / {{ row.subClassifyName }}</span
-                >
+                <div class="classify-cell">
+                  <span
+                    v-if="row.subClassifyName"
+                    class="classify-icon"
+                  >
+                    {{ getClassifyIcon(row.subClassifyImage) }}
+                  </span>
+                  <span v-else class="classify-icon">
+                    {{ getClassifyIcon(row.mainClassifyImage) }}
+                  </span>
+                  <span>{{ row.mainClassifyName }}</span>
+                  <span v-if="row.subClassifyName" class="sub-classify">
+                    / {{ row.subClassifyName }}</span
+                  >
+                </div>
               </template>
             </el-table-column>
             <el-table-column
@@ -655,10 +666,21 @@ onMounted(async () => {
             </el-table-column>
             <el-table-column :label="t('bill.pureClassify')" width="200">
               <template #default="{ row }">
-                <span>{{ row.mainClassifyName }}</span>
-                <span v-if="row.subClassifyName" style="color: #909399">
-                  / {{ row.subClassifyName }}</span
-                >
+                <div class="classify-cell">
+                  <span
+                    v-if="row.subClassifyName"
+                    class="classify-icon"
+                  >
+                    {{ getClassifyIcon(row.subClassifyImage) }}
+                  </span>
+                  <span v-else class="classify-icon">
+                    {{ getClassifyIcon(row.mainClassifyImage) }}
+                  </span>
+                  <span>{{ row.mainClassifyName }}</span>
+                  <span v-if="row.subClassifyName" class="sub-classify">
+                    / {{ row.subClassifyName }}</span
+                  >
+                </div>
               </template>
             </el-table-column>
             <el-table-column
@@ -793,6 +815,22 @@ onMounted(async () => {
         }
       }
     }
+  }
+}
+
+.classify-cell {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+
+  .classify-icon {
+    font-size: 16px;
+    margin-right: 2px;
+  }
+
+  .sub-classify {
+    font-size: 12px;
+    color: #909399;
   }
 }
 </style>

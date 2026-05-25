@@ -4,6 +4,7 @@ import { useI18n } from "vue-i18n";
 import type { IncomeExpenseRecord } from "@/types/bill";
 import { useBillStoreHook } from "@/store/modules/bill";
 import { formatAmount } from "@/utils/format";
+import { getClassifyIcon } from "@/utils/classifyIcons";
 
 defineOptions({
   name: "RecentRecords"
@@ -34,17 +35,17 @@ const getAccountBookName = (accountBookId: number) => {
   return book ? book.name : "";
 };
 
-const findClassifyName = (
+const findClassifyInfo = (
   mainClassifyId: number,
   subClassifyId: number | null
-): { mainName: string; subName: string } => {
+): { mainName: string; subName: string; mainIcon: string; subIcon: string } => {
   const classifyList = billStore.classifyList;
 
   const mainClassify = classifyList.find(
     c => c.id === mainClassifyId && c.pid === -1
   );
   if (!mainClassify) {
-    return { mainName: String(mainClassifyId), subName: "" };
+    return { mainName: String(mainClassifyId), subName: "", mainIcon: "", subIcon: "" };
   }
 
   if (subClassifyId) {
@@ -52,15 +53,25 @@ const findClassifyName = (
       c => c.id === subClassifyId && c.pid === mainClassifyId
     );
     if (subClassify) {
-      return { mainName: mainClassify.name, subName: subClassify.name };
+      return {
+        mainName: mainClassify.name,
+        subName: subClassify.name,
+        mainIcon: getClassifyIcon(mainClassify.image),
+        subIcon: getClassifyIcon(subClassify.image)
+      };
     }
   }
 
-  return { mainName: mainClassify.name, subName: "" };
+  return {
+    mainName: mainClassify.name,
+    subName: "",
+    mainIcon: getClassifyIcon(mainClassify.image),
+    subIcon: ""
+  };
 };
 
 const getClassifyDisplay = (row: IncomeExpenseRecord) => {
-  return findClassifyName(row.mainClassify, row.subClassify);
+  return findClassifyInfo(row.mainClassify, row.subClassify);
 };
 
 const getTagsByCodes = (tagCodes: string | null | undefined) => {
@@ -101,6 +112,15 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
       <el-table-column :label="t('bill.pureClassify')" width="300">
         <template #default="{ row }">
           <div class="classify-cell">
+            <span
+              v-if="getClassifyDisplay(row).subName"
+              class="classify-icon"
+            >
+              {{ getClassifyDisplay(row).subIcon }}
+            </span>
+            <span v-else class="classify-icon">
+              {{ getClassifyDisplay(row).mainIcon }}
+            </span>
             <span>{{ getClassifyDisplay(row).mainName }}</span>
             <span v-if="getClassifyDisplay(row).subName" class="sub-classify">
               / {{ getClassifyDisplay(row).subName }}
@@ -157,6 +177,15 @@ const getTagsByCodes = (tagCodes: string | null | undefined) => {
   }
 
   .classify-cell {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+
+    .classify-icon {
+      font-size: 16px;
+      margin-right: 2px;
+    }
+
     .sub-classify {
       font-size: 12px;
       color: #909399;
