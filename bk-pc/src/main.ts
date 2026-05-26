@@ -1,7 +1,7 @@
 import App from "./App.vue";
 import router from "./router";
 import { setupStore } from "@/store";
-import { i18n, useI18n } from "@/plugins/i18n";
+import { i18n, useI18n, syncDayjsLocale } from "@/plugins/i18n";
 import { getPlatformConfig } from "./config";
 import { MotionPlugin } from "@vueuse/motion";
 // import { useEcharts } from "@/plugins/echarts";
@@ -65,6 +65,7 @@ getPlatformConfig(app).then(async config => {
   const storageLocale = app.config.globalProperties.$storage?.locale?.locale;
   if (storageLocale) {
     (i18n.global.locale as WritableComputedRef<string>).value = storageLocale;
+    syncDayjsLocale(storageLocale);
   }
 
   app.use(MotionPlugin).use(useI18n).use(useElementPlus).use(Table);

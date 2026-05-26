@@ -28,7 +28,7 @@ defineOptions({
   name: "MobileBill"
 });
 
-const { t } = useI18n();
+const { t, locale } = useI18n();
 const router = useRouter();
 const userStore = useUserStoreHook();
 const billStore = useBillStoreHook();
@@ -122,17 +122,10 @@ interface DayGroup {
   records: IncomeExpense[];
 }
 
-const weekDayMap: Record<string, string> = {
-  Sun: "Sun",
-  Mon: "Mon",
-  Tue: "Tue",
-  Wed: "Wed",
-  Thu: "Thu",
-  Fri: "Fri",
-  Sat: "Sat"
-};
-
 const groupedBills = computed<DayGroup[]>(() => {
+  // 依赖 locale，语言切换时重新计算星期显示
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ = locale.value;
   const groups: Map<string, DayGroup> = new Map();
 
   billStore.list.forEach(record => {
@@ -141,11 +134,9 @@ const groupedBills = computed<DayGroup[]>(() => {
 
     if (!groups.has(dateStr)) {
       const date = dayjs(dateStr);
-      const weekEn = date.format("ddd");
-      const weekday = weekDayMap[weekEn];
       groups.set(dateStr, {
         date: dateStr,
-        weekday,
+        weekday: date.format("ddd"),
         dayExpense: 0,
         dayIncome: 0,
         records: []
@@ -592,11 +583,13 @@ onMounted(() => {
   .date {
     font-size: 14px;
     font-weight: 500;
+    line-height: 1;
     color: $color-text-primary;
   }
 
   .weekday {
-    font-size: 12px;
+    font-size: 14px;
+    line-height: 1;
     color: $color-text-secondary;
   }
 }
@@ -604,15 +597,22 @@ onMounted(() => {
 .day-summary {
   display: flex;
   gap: 8px;
+  align-items: center;
 
   .expense {
-    font-size: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
     color: $color-primary;
+    transform: translateY(1px);
   }
 
   .income {
-    font-size: 12px;
+    font-size: 16px;
+    font-weight: 600;
+    line-height: 1;
     color: $color-secondary;
+    transform: translateY(1px);
   }
 }
 

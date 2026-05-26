@@ -2,7 +2,6 @@
 import { computed } from "vue";
 import { useI18n } from "vue-i18n";
 import dayjs from "dayjs";
-import "dayjs/locale/zh-cn";
 import type { IncomeExpenseRecord } from "@/types/bill";
 import { formatNumber } from "@/utils/format";
 import { getClassifyIcon } from "@/utils/classifyIcons";
@@ -24,26 +23,14 @@ const emit = defineEmits<{
 
 const { locale } = useI18n();
 
-// 中文星期映射
-const weekDayMap: Record<string, string> = {
-  Sun: "周日",
-  Mon: "周一",
-  Tue: "周二",
-  Wed: "周三",
-  Thu: "周四",
-  Fri: "周五",
-  Sat: "周六"
-};
-
-// 格式化日期
+// 格式化日期（依赖 locale，语言切换时自动重新计算）
 const formattedDate = computed(() => {
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const _ = locale.value;
   const date = dayjs(props.record.date);
-  const weekEn = date.format("ddd");
-  // 根据语言环境显示周几
-  const week = locale.value === "en" ? weekEn : weekDayMap[weekEn] || weekEn;
   return {
     day: date.format("MM-DD"),
-    week
+    week: date.format("ddd")
   };
 });
 

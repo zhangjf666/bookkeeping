@@ -6,6 +6,7 @@ import { storageLocal } from "@pureadmin/utils";
 import { responsiveStorageNameSpace } from "@/config";
 import { useUserStoreHook } from "@/store/modules/user";
 import { sharedLanguageSetting } from "@/composables/useSharedConfig";
+import { syncDayjsLocale } from "@/plugins/i18n";
 import type { UserConfig } from "@/types/userConfig";
 
 // Module-level shared config list so all composable instances share the same data
@@ -40,6 +41,7 @@ export function useUserConfig() {
   const applyLanguage = (language: string): void => {
     const actualLang = getActualLanguage(language);
     locale.value = actualLang;
+    syncDayjsLocale(actualLang);
     storageLocal().setItem(`${responsiveStorageNameSpace()}locale`, {
       locale: actualLang
     });

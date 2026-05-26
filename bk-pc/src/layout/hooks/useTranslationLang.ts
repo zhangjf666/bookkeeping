@@ -5,6 +5,7 @@ import { watch, onBeforeMount, type Ref } from "vue";
 import { useUserConfig } from "@/composables/useUserConfig";
 import { useUserStoreHook } from "@/store/modules/user";
 import { sharedLanguageSetting } from "@/composables/useSharedConfig";
+import { syncDayjsLocale } from "@/plugins/i18n";
 
 export function useTranslationLang(targetRef?: Ref) {
   const { $storage, changeTitle, handleResize } = useNav();
@@ -20,6 +21,7 @@ export function useTranslationLang(targetRef?: Ref) {
     languageSetting.value = "zh";
     $storage.locale = { locale: "zh" };
     locale.value = "zh";
+    syncDayjsLocale("zh");
     targetRef && handleResize(targetRef.value);
     if (userStore.id) {
       try {
@@ -34,6 +36,7 @@ export function useTranslationLang(targetRef?: Ref) {
     languageSetting.value = "en";
     $storage.locale = { locale: "en" };
     locale.value = "en";
+    syncDayjsLocale("en");
     targetRef && handleResize(targetRef.value);
     if (userStore.id) {
       try {
@@ -49,6 +52,7 @@ export function useTranslationLang(targetRef?: Ref) {
     const systemLang = getSystemLanguage();
     $storage.locale = { locale: systemLang };
     locale.value = systemLang;
+    syncDayjsLocale(systemLang);
     targetRef && handleResize(targetRef.value);
     if (userStore.id) {
       try {
@@ -67,7 +71,9 @@ export function useTranslationLang(targetRef?: Ref) {
   );
 
   onBeforeMount(() => {
-    locale.value = $storage.locale?.locale ?? "zh";
+    const savedLocale = $storage.locale?.locale ?? "zh";
+    locale.value = savedLocale;
+    syncDayjsLocale(savedLocale);
   });
 
   return {

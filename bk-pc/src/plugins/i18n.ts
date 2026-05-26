@@ -3,6 +3,9 @@ import { type I18n, createI18n } from "vue-i18n";
 import type { App, WritableComputedRef } from "vue";
 import { responsiveStorageNameSpace } from "@/config";
 import { storageLocal, isObject } from "@pureadmin/utils";
+import dayjs from "dayjs";
+import "dayjs/locale/zh-cn";
+import "dayjs/locale/en";
 
 // element-plus国际化
 import enLocale from "element-plus/es/locale/lang/en";
@@ -116,15 +119,25 @@ export function transformI18n(message: any = "") {
   }
 }
 
+/** 同步 dayjs 语言环境（用于日期格式化如星期几显示） */
+export function syncDayjsLocale(locale: string) {
+  dayjs.locale(locale === "zh" ? "zh-cn" : "en");
+}
+
 /** 此函数只是配合i18n Ally插件来进行国际化智能提示，并无实际意义（只对提示起作用），如果不需要国际化可删除 */
 export const $t = (key: string) => key;
 
+const initialLocale =
+  storageLocal().getItem<StorageConfigs>(
+    `${responsiveStorageNameSpace()}locale`
+  )?.locale ?? "zh";
+
+// 初始化 dayjs 语言环境与 i18n 保持一致
+syncDayjsLocale(initialLocale);
+
 export const i18n: I18n = createI18n({
   legacy: false,
-  locale:
-    storageLocal().getItem<StorageConfigs>(
-      `${responsiveStorageNameSpace()}locale`
-    )?.locale ?? "zh",
+  locale: initialLocale,
   fallbackLocale: "en",
   messages: localesConfigs
 });
