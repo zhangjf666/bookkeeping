@@ -7,6 +7,7 @@ import * as echarts from "echarts";
 import type { ClassifyReportData, ClassifySummary, IncomeExpenseRecord } from "@/types/bill";
 import { getClassifyReportData } from "@/api/incomeExpense";
 import { useUserStoreHook } from "@/store/modules/user";
+import { useClassifyStore } from "@/store/modules/classify";
 import { formatNumber } from "@/utils/format";
 import { getClassifyIcon } from "@/utils/classifyIcons";
 import {
@@ -27,6 +28,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const router = useRouter();
 const userStore = useUserStoreHook();
+const classifyStore = useClassifyStore();
 
 // 图表容器
 const chartRef = ref<HTMLElement | null>(null);
@@ -253,11 +255,28 @@ const handleBackToList = () => {
   selectedClassify.value = null;
 };
 
+// 从classifyStore查找分类图标
+const getClassifyImageFromStore = (classifyId: number | null): string => {
+  if (!classifyId) return "";
+  const classify = classifyStore.list.find(c => c.id === classifyId);
+  return classify ? classify.image : "";
+};
+
+// 获取汇总分类图标（从classify字段提取主分类ID）
+const getSummaryClassifyIcon = (classifyStr: string): string => {
+  const mainId = Number(classifyStr.split("-")[0]);
+  const image = getClassifyImageFromStore(mainId);
+  return getClassifyIcon(image || "other");
+};
+
 // 获取分类图标
 const getIcon = (record: IncomeExpenseRecord) => {
-  return getClassifyIcon(
-    record.subClassifyImage || record.mainClassifyImage || "other"
-  );
+  const subImage = getClassifyImageFromStore(record.subClassify);
+  if (subImage) {
+    return getClassifyIcon(subImage);
+  }
+  const mainImage = getClassifyImageFromStore(record.mainClassify);
+  return getClassifyIcon(mainImage || "other");
 };
 
 // 获取分类名称
@@ -362,7 +381,7 @@ onUnmounted(() => {
             @click="handleClassifyClick(item)"
           >
             <div class="item-left">
-              <span class="classify-icon">{{ getClassifyIcon(item.classifyImage) }}</span>
+              <span class="classify-icon">{{ getSummaryClassifyIcon(item.classify) }}</span>
               <span class="classify-name">{{ item.classifyName }}</span>
             </div>
             <div class="item-right">
@@ -383,7 +402,7 @@ onUnmounted(() => {
             @click="handleClassifyClick(item)"
           >
             <div class="item-left">
-              <span class="classify-icon">{{ getClassifyIcon(item.classifyImage) }}</span>
+              <span class="classify-icon">{{ getSummaryClassifyIcon(item.classify) }}</span>
               <span class="classify-name">{{ item.classifyName }}</span>
             </div>
             <div class="item-right">

@@ -7,6 +7,7 @@ import * as echarts from "echarts";
 import type { TrendData, IncomeExpenseRecord, DaySum } from "@/types/bill";
 import { getTrendData } from "@/api/incomeExpense";
 import { useUserStoreHook } from "@/store/modules/user";
+import { useClassifyStore } from "@/store/modules/classify";
 import { formatNumber } from "@/utils/format";
 import { getClassifyIcon } from "@/utils/classifyIcons";
 import {
@@ -27,6 +28,7 @@ const props = defineProps<{
 const { t } = useI18n();
 const router = useRouter();
 const userStore = useUserStoreHook();
+const classifyStore = useClassifyStore();
 
 // 图表容器
 const chartRef = ref<HTMLElement | null>(null);
@@ -273,11 +275,21 @@ const loadData = async () => {
   }
 };
 
+// 从classifyStore查找分类图标
+const getClassifyImageFromStore = (classifyId: number | null): string => {
+  if (!classifyId) return "";
+  const classify = classifyStore.list.find(c => c.id === classifyId);
+  return classify ? classify.image : "";
+};
+
 // 获取分类图标
 const getIcon = (record: IncomeExpenseRecord) => {
-  return getClassifyIcon(
-    record.subClassifyImage || record.mainClassifyImage || "other"
-  );
+  const subImage = getClassifyImageFromStore(record.subClassify);
+  if (subImage) {
+    return getClassifyIcon(subImage);
+  }
+  const mainImage = getClassifyImageFromStore(record.mainClassify);
+  return getClassifyIcon(mainImage || "other");
 };
 
 // 获取分类名称

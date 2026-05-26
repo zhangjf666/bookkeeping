@@ -20,6 +20,7 @@ import {
 } from "@/utils/mobile/message";
 import { formatNumber } from "@/utils/format";
 import { getClassifyIcon } from "@/utils/classifyIcons";
+import { useClassifyStore } from "@/store/modules/classify";
 import BillFilter from "@/components/mobile/BillFilter.vue";
 import { useInfiniteScroll } from "@/composables/useInfiniteScroll";
 
@@ -32,6 +33,7 @@ const router = useRouter();
 const userStore = useUserStoreHook();
 const billStore = useBillStoreHook();
 const classifyStore = useClassifyStoreHook();
+const classifyStoreRef = useClassifyStore();
 const accountBookStore = useAccountBookStoreHook();
 const userTagStore = useUserTagStoreHook();
 const remarkStore = useRemarkStoreHook();
@@ -341,11 +343,21 @@ const handleAdd = () => {
   router.push("/record");
 };
 
+// 从classifyStore查找分类图标
+const getClassifyImageFromStore = (classifyId: number | null): string => {
+  if (!classifyId) return "";
+  const classify = classifyStoreRef.list.find(c => c.id === classifyId);
+  return classify ? classify.image : "";
+};
+
 // 获取分类图标
 const getIcon = (record: IncomeExpense) => {
-  return getClassifyIcon(
-    record.subClassifyImage || record.mainClassifyImage || "other"
-  );
+  const subImage = getClassifyImageFromStore(record.subClassify);
+  if (subImage) {
+    return getClassifyIcon(subImage);
+  }
+  const mainImage = getClassifyImageFromStore(record.mainClassify);
+  return getClassifyIcon(mainImage || "other");
 };
 
 // 获取分类名称
@@ -445,7 +457,10 @@ onMounted(() => {
 
             <!-- 当日账单项 -->
             <div class="group-records">
-              <van-swipe-cell v-for="record in group.records" :key="record.id">
+              <van-swipe-cell
+                v-for="record in group.records"
+                :key="record.id"
+              >
                 <div class="bill-item" @click="handleBillClick(record)">
                   <div class="item-icon">{{ getIcon(record) }}</div>
                   <div class="item-info">
@@ -558,6 +573,7 @@ onMounted(() => {
   margin-bottom: 12px;
   background-color: $color-card;
   border-radius: 12px;
+  overflow: hidden;
 }
 
 .group-header {
@@ -692,6 +708,7 @@ onMounted(() => {
 }
 
 .delete-btn {
+  width: 65px;
   height: 100% !important;
 }
 </style>

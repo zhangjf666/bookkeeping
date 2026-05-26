@@ -6,6 +6,7 @@ import "dayjs/locale/zh-cn";
 import type { IncomeExpenseRecord } from "@/types/bill";
 import { formatNumber } from "@/utils/format";
 import { getClassifyIcon } from "@/utils/classifyIcons";
+import { useClassifyStore } from "@/store/modules/classify";
 
 defineOptions({
   name: "RecordItem"
@@ -46,14 +47,23 @@ const formattedDate = computed(() => {
   };
 });
 
+const classifyStore = useClassifyStore();
+
+// 从classifyStore查找分类图标
+const getClassifyImageFromStore = (classifyId: number | null): string => {
+  if (!classifyId) return "";
+  const classify = classifyStore.list.find(c => c.id === classifyId);
+  return classify ? classify.image : "";
+};
+
 // 分类图标 - 优先显示子分类图标，没有子分类则显示顶级分类图标
 const classifyIcon = computed(() => {
-  // 如果有子分类图标，优先使用子分类图标
-  if (props.record.subClassifyImage) {
-    return getClassifyIcon(props.record.subClassifyImage);
+  const subImage = getClassifyImageFromStore(props.record.subClassify);
+  if (subImage) {
+    return getClassifyIcon(subImage);
   }
-  // 否则使用主分类图标
-  return getClassifyIcon(props.record.mainClassifyImage);
+  const mainImage = getClassifyImageFromStore(props.record.mainClassify);
+  return getClassifyIcon(mainImage);
 });
 
 // 分类名称（父分类-子分类）
@@ -197,11 +207,25 @@ const handleDelete = () => {
 </style>
 
 <style lang="scss">
-/* 全局样式，修复左滑删除按钮高度问题 */
+/* 全局样式，修复左滑删除按钮高度、宽度和默认状态可见性问题 */
+.van-swipe-cell {
+  position: relative !important;
+  overflow: hidden !important;
+}
+
 .van-swipe-cell__right {
+  position: absolute;
+  top: 0;
+  right: -2px;
+  height: 100%;
+  transform: translate3d(101%, 0, 0) !important;
+  overflow: hidden;
+
   .van-button {
+    width: 65px;
     height: 100% !important;
     margin: 0;
+    border: none;
   }
 }
 </style>

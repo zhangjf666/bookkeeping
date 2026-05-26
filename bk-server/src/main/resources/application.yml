@@ -133,7 +133,7 @@ jwt:
 #系统设置
 system:
   #单一登录
-  single-login: true
+  single-login: false
   #开启验证码
   enable-captcha: true
   #调试模式（开启后不校验验证码）

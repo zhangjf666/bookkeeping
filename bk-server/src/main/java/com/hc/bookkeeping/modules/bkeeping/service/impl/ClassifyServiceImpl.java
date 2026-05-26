@@ -11,6 +11,7 @@ import com.hc.bookkeeping.modules.bkeeping.entity.Classify;
 import com.hc.bookkeeping.modules.bkeeping.mapper.ClassifyMapper;
 import com.hc.bookkeeping.modules.bkeeping.mapstruct.ClassifyMapstruct;
 import com.hc.bookkeeping.modules.bkeeping.service.ClassifyService;
+import org.springframework.cache.annotation.CacheEvict;
 import org.springframework.cache.annotation.Cacheable;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
@@ -45,6 +46,14 @@ public class ClassifyServiceImpl extends BaseServiceImpl<ClassifyMapstruct, Clas
         return null;
     }
 
+    @CacheEvict(value = "classify", key = "#dto.userId +':'+ #dto.id")
+    @Transactional(rollbackFor = Throwable.class)
+    @Override
+    public boolean update(ClassifyDto dto) {
+        return baseMapper.updateById(baseMapstruct.toEntity(dto)) >= 1;
+    }
+
+    @CacheEvict(value = "classify", allEntries = true)
     @Transactional(rollbackFor = Throwable.class)
     @Override
     public boolean deleteByIds(Collection<? extends Serializable> ids) {
