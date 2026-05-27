@@ -117,8 +117,7 @@ const dateActions = computed(() => [
 interface DayGroup {
   date: string;
   weekday: string;
-  dayExpense: number;
-  dayIncome: number;
+  dayNet: number;
   records: IncomeExpense[];
 }
 
@@ -137,8 +136,7 @@ const groupedBills = computed<DayGroup[]>(() => {
       groups.set(dateStr, {
         date: dateStr,
         weekday: date.format("ddd"),
-        dayExpense: 0,
-        dayIncome: 0,
+        dayNet: 0,
         records: []
       });
     }
@@ -147,9 +145,9 @@ const groupedBills = computed<DayGroup[]>(() => {
     group.records.push(record);
 
     if (record.type === "EXPENSE") {
-      group.dayExpense += record.amount;
+      group.dayNet -= record.amount;
     } else {
-      group.dayIncome += record.amount;
+      group.dayNet += record.amount;
     }
   });
 
@@ -437,11 +435,10 @@ onMounted(() => {
                 <span class="weekday">{{ group.weekday }}</span>
               </div>
               <div class="day-summary">
-                <span v-if="group.dayExpense > 0" class="expense">
-                  -¥{{ formatNumber(group.dayExpense) }}
-                </span>
-                <span v-if="group.dayIncome > 0" class="income">
-                  +¥{{ formatNumber(group.dayIncome) }}
+                <span :class="group.dayNet >= 0 ? 'income' : 'expense'">
+                  {{ group.dayNet >= 0 ? '+' : '-' }}¥{{
+                    formatNumber(Math.abs(group.dayNet))
+                  }}
                 </span>
               </div>
             </div>
