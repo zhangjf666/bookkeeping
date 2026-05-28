@@ -37,8 +37,7 @@ const classifyList = ref<Classify[]>([]);
 const mainClassifyList = computed(() => {
   return classifyList.value.filter(
     item =>
-      (item.pid === 0 ||
-        item.pid === -1 ||
+      (item.pid === -1 ||
         item.pid === null ||
         item.pid === undefined) &&
       item.type === currentType.value
@@ -70,7 +69,7 @@ let longPressTimer: ReturnType<typeof setTimeout> | null = null;
 const formData = ref<ClassifyForm>({
   userId: 0,
   name: "",
-  pid: 0,
+  pid: -1,
   image: "food",
   sort: 1,
   type: "EXPENSE",
@@ -82,12 +81,11 @@ const iconOptions = getClassifyIconOptions();
 
 // 父分类选项（根据当前选择的类型过滤）
 const parentOptions = computed(() => {
-  const options = [{ id: 0, name: t("mobile.classify.none"), image: "other" }];
+  const options = [{ id: -1, name: t("mobile.classify.none"), image: "other" }];
   const parents = classifyList.value
     .filter(
       item =>
-        (item.pid === 0 ||
-          item.pid === -1 ||
+        (item.pid === -1 ||
           item.pid === null ||
           item.pid === undefined) &&
         item.type === formData.value.type
@@ -98,7 +96,7 @@ const parentOptions = computed(() => {
 
 // 父分类名称
 const parentClassifyName = computed(() => {
-  if (formData.value.pid === 0) {
+  if (formData.value.pid === -1 || formData.value.pid === null) {
     return t("mobile.classify.none");
   }
   const parent = classifyList.value.find(
@@ -137,7 +135,7 @@ const handleAdd = () => {
   formData.value = {
     userId: userStore.id,
     name: "",
-    pid: 0,
+    pid: -1,
     image: currentType.value === "EXPENSE" ? "food" : "salary",
     sort: 1,
     type: currentType.value,
@@ -182,7 +180,7 @@ const handleEdit = (classify: Classify) => {
     id: classify.id,
     userId: classify.userId,
     name: classify.name,
-    pid: isSubClassify ? classify.pid : 0, // 顶级分类的pid设为0
+    pid: classify.pid, // 保持原有pid，顶级分类应为-1
     image: classify.image,
     sort: classify.sort,
     type: classify.type,
@@ -559,13 +557,13 @@ onMounted(() => {
           <!-- 无选项 -->
           <div
             class="parent-item"
-            :class="{ active: formData.pid === 0 }"
-            @click="handleSelectParent(0)"
+            :class="{ active: formData.pid === -1 || formData.pid === null }"
+            @click="handleSelectParent(-1)"
           >
             <div class="item-icon">{{ getClassifyIcon("other") }}</div>
             <div class="item-name">{{ t("mobile.classify.none") }}</div>
             <van-icon
-              v-if="formData.pid === 0"
+              v-if="formData.pid === -1 || formData.pid === null"
               name="success"
               class="check-icon"
             />
