@@ -1,0 +1,44 @@
+// 移动端样式入口
+@use "./variables" as *;
+
+// 移动端基础样式
+.mobile-page {
+  min-height: 100vh;
+  background-color: $color-background;
+}
+
+// 安全区域适配
+.safe-area-top {
+  padding-top: $safe-area-inset-top;
+}
+
+.safe-area-bottom {
+  padding-bottom: $safe-area-inset-bottom;
+}
+
+// Vant Notify 组件样式修复
+.van-notify {
+  &--success {
+    .van-notify__text {
+      color: #fff !important;
+    }
+  }
+
+  &--danger {
+    .van-notify__text {
+      color: #fff !important;
+    }
+  }
+
+  &--warning {
+    .van-notify__text {
+      color: #fff !important;
+    }
+  }
+
+  &--primary {
+    .van-notify__text {
+      color: #fff !important;
+    }
+  }
+}

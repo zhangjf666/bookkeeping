@@ -7,7 +7,6 @@ import com.google.common.collect.Lists;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.constants.Constants;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.common.utils.SpringSecurityUtil;
@@ -55,7 +54,7 @@ public class MenuController {
     @ApiOperation("查询菜单")
     @GetMapping
     @PreAuthorize("@ph.check('system:menu:list')")
-    public Response getMenu(@Validated MenuQueryDto queryDto, Page pageable) {
+    public Page getMenu(@Validated MenuQueryDto queryDto, Page pageable) {
         pageable.setPageSize(9999);
         Page page = menuService.queryPage(queryDto, pageable);
         List<MenuDto> dtos = page.getRecord();
@@ -65,39 +64,36 @@ public class MenuController {
             vo.setHasChildren(menuService.count(new QueryWrapper<Menu>().lambda().eq(Menu::getPid,vo.getId())) > 0);
         }
         page.setRecord(volist);
-        return Response.ok(page);
+        return page;
     }
 
     @Log("创建菜单")
     @ApiOperation("创建菜单")
     @PostMapping
     @PreAuthorize("@ph.check('system:menu:add')")
-    public Response create(@Validated(Insert.class) @RequestBody MenuDto dto) {
-        menuService.create(dto);
-        return Response.ok();
+    public MenuDto create(@Validated(Insert.class) @RequestBody MenuDto dto) {
+        return menuService.create(dto);
     }
 
     @Log("编辑菜单")
     @ApiOperation("编辑菜单")
     @PutMapping
     @PreAuthorize("@ph.check('system:menu:edit')")
-    public Response update(@Validated(Update.class) @RequestBody MenuDto dto) {
-        menuService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody MenuDto dto) {
+        return menuService.update(dto);
     }
 
     @Log("删除菜单")
     @ApiOperation("删除菜单")
     @DeleteMapping
     @PreAuthorize("@ph.check('system:menu:del')")
-    public Response delete(@RequestBody Set<Long> ids) {
-        menuService.removeByIds(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids) {
+        return menuService.removeByIds(ids);
     }
 
     @ApiOperation("获取用户菜单")
     @GetMapping("/userMenu")
-    public Response getUserMenu() {
+    public List<UserMenuRoute> getUserMenu() {
         Set<RoleDto> roles = roleService.getRoleByUserId(SpringSecurityUtil.getCurrentUserId());
         Set<Long> roleId = roles.stream().map(RoleDto::getId).collect(Collectors.toSet());
         Set<MenuDto> userMenus = menuService.getMenusByRoleId(roleId);
@@ -105,18 +101,18 @@ public class MenuController {
                 .filter(dto -> !Menu.TYPE_BUTTON.equals(dto.getType()))
                 .map(UserMenuRoute::new)
                 .collect(Collectors.toList());
-        return Response.ok(buildMenus(TreeUtil.build(routes, Constants.TREE_ROOT)));
+        return buildMenus(TreeUtil.build(routes, Constants.TREE_ROOT));
     }
 
     @Log("获取所有菜单树")
     @ApiOperation("获取所有菜单树")
     @GetMapping("/tree")
     @PreAuthorize("@ph.check('system:menu:list')")
-    public Response getMenuTree() {
+    public List<MenuVo> getMenuTree() {
         List<MenuDto> dtos = menuService.query(new MenuQueryDto());
         List<MenuVo> volist =
                 dtos.stream().map(dto -> BeanUtil.toBean(dto, MenuVo.class)).collect(Collectors.toList());
-        return Response.ok(TreeUtil.build(volist, Constants.TREE_ROOT));
+        return TreeUtil.build(volist, Constants.TREE_ROOT);
     }
 
     /**
@@ -163,7 +159,7 @@ public class MenuController {
     @ApiOperation("查询菜单:根据ID获取同级与上级数据")
     @PostMapping("/superior")
     @PreAuthorize("@ph.check('system:menu:list')")
-    public Response getSuperior(@RequestBody List<Long> ids) {
+    public List<MenuVo> getSuperior(@RequestBody List<Long> ids) {
         Set<MenuDto> menuDtos  = new LinkedHashSet<>();
         for (Long id : ids) {
             MenuDto menuDto = menuService.queryById(id);
@@ -174,6 +170,6 @@ public class MenuController {
                 menuDtos.stream().map(dto -> BeanUtil.toBean(dto,MenuVo.class)).collect(Collectors.toList());
         volist = TreeUtil.build(volist, Constants.TREE_ROOT);
         menuService.superiorCheckChildren(volist);
-        return Response.ok(volist);
+        return volist;
     }
 }

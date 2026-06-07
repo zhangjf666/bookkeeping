@@ -18,7 +18,7 @@ public class NormalTest {
         ab.setImage("red");
         ab.setUserId(11111L);
         ab.setDescription("默认账本");
-        ab.setIsDefault(BoolEnum.True);
+        ab.setIsDefault(BoolEnum.YES);
         System.out.println(JsonUtil.toJsonString(ab));
     }
 }

@@ -57,11 +57,16 @@ public class IncomeExpense implements Serializable {
     private Long mainClassify;
 
     @ApiModelProperty(value = "子分类id")
+    @TableField(updateStrategy = FieldStrategy.IGNORED)
     private Long subClassify;
 
     @ApiModelProperty(value = "是否信用卡消费(0:否,1;是)")
     @TableField("is_credit_card")
     private BoolEnum isCreditCard;
+
+    @ApiModelProperty(value = "所属标签id列表")
+    @TableField("tag_codes")
+    private String tagCodes;
 
     @ApiModelProperty(value = "创建时间")
     @TableField(value = "create_time", fill = FieldFill.INSERT)

@@ -2,7 +2,6 @@ package com.hc.bookkeeping.modules.admin.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.modules.admin.dto.ParamDto;
@@ -37,35 +36,31 @@ public class ParamController {
     @ApiOperation("查询系统参数")
     @GetMapping
     @PreAuthorize("@ph.check('system:param:list')")
-    public Response getParam(@Validated ParamQueryDto queryDto, Page pageable){
-        Page page = paramService.queryPage(queryDto, pageable);
-        return Response.ok(page);
+    public Page getParam(@Validated ParamQueryDto queryDto, Page pageable){
+        return paramService.queryPage(queryDto, pageable);
     }
 
     @Log("创建系统参数")
     @ApiOperation("创建系统参数")
     @PostMapping
     @PreAuthorize("@ph.check('system:param:add')")
-    public Response create(@Validated(Insert.class) @RequestBody ParamDto dto){
-        paramService.create(dto);
-        return Response.ok();
+    public ParamDto create(@Validated(Insert.class) @RequestBody ParamDto dto){
+        return paramService.create(dto);
     }
 
     @Log("编辑系统参数")
     @ApiOperation("编辑系统参数")
     @PutMapping
     @PreAuthorize("@ph.check('system:param:edit')")
-    public Response update(@Validated(Update.class) @RequestBody ParamDto dto){
-        paramService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody ParamDto dto){
+        return paramService.update(dto);
     }
 
     @Log("删除系统参数")
     @ApiOperation("删除系统参数")
     @DeleteMapping
     @PreAuthorize("@ph.check('system:param:del')")
-    public Response delete(@RequestBody Set<Long> ids){
-        paramService.removeByIds(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids){
+        return paramService.removeByIds(ids);
     }
 }

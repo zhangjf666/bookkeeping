@@ -16,8 +16,9 @@ import lombok.RequiredArgsConstructor;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.io.Serializable;
+import java.util.Collection;
 import java.util.List;
-import java.util.Set;
 
 /**
  * <p>
@@ -47,11 +48,11 @@ public class DictServiceImpl extends BaseServiceImpl<DictMapstruct, DictDto, Dic
 
     @Override
     @Transactional(rollbackFor = Exception.class)
-    public boolean deleteDicts(Set<Long> ids) {
-        for (Long id: ids) {
+    public boolean deleteByIds(Collection<? extends Serializable> ids) {
+        for (Serializable id: ids) {
             baseMapper.deleteById(id);
             dictDetailMapper.delete(Wrappers.<DictDetail>lambdaQuery().eq(DictDetail::getDictId,id));
         }
-        return false;
+        return true;
     }
 }

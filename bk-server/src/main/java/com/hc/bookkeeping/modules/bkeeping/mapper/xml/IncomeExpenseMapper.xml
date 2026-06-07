@@ -26,13 +26,26 @@
     <select id="querySumAmount" resultType="cn.hutool.core.lang.Dict">
         SELECT ie.type, sum(ie.amount) amount from income_expense ie
         where ie.user_id = #{userId}
+        <if test="accountBookId != null">
+            and ie.account_book_id = #{accountBookId}
+        </if>
         and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
+        </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
         </if>
         group by ie.type
     </select>
@@ -40,28 +53,56 @@
     <select id="querySumAmountMonthly" resultType="cn.hutool.core.lang.Dict">
         select date_format(ie.`date` , '%Y-%m') period, ie.`type` ,SUM(ie.amount) amount
         from income_expense ie
-        where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        where ie.user_id = #{userId}
+        <if test="accountBookId != null">
+            and ie.account_book_id = #{accountBookId}
+        </if>
+        and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
+        </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
         </if>
         group by period, ie.`type` order by period;
     </select>
 
 
-    <select id="querySumAmountDayly" resultType="cn.hutool.core.lang.Dict">
+    <select id="querySumAmountDaily" resultType="cn.hutool.core.lang.Dict">
         select date_format(ie.`date` , '%Y-%m-%d') period, ie.`type` ,SUM(ie.amount) amount
         from income_expense ie
-        where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        where ie.user_id = #{userId}
+        <if test="accountBookId != null">
+            and ie.account_book_id = #{accountBookId}
+        </if>
+        and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
+        </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
         </if>
         group by period, ie.`type` order by period;
     </select>
@@ -70,12 +111,25 @@
         select ie.`type`, ie.main_classify classify,SUM(ie.amount) amount,COUNT(*) num
         from income_expense ie
         where ie.user_id = #{userId} and ie.`date` >= #{beginDate} and ie.`date` &lt;= #{endDate}
-        <if test="classify != null and classify.size() != 0">
-            and ie.main_classify in
-            <foreach collection="classify" item="id" index="index"
-                     open="(" close=")" separator=",">
-                #{id}
+        <if test="accountBookId != null">
+            and ie.account_book_id = #{accountBookId}
+        </if>
+        <if test="classifyList != null and classifyList.size() != 0">
+            and (
+            <foreach collection="classifyList" item="item" index="index">
+                <if test="index > 0">or </if>(<if test="item.subClassifyId == null">ie.main_classify = #{item.mainClassifyId}</if><if test="item.subClassifyId != null">ie.main_classify = #{item.mainClassifyId} and ie.sub_classify = #{item.subClassifyId}</if>)
             </foreach>
+            )
+        </if>
+        <if test="remark != null and remark != ''">
+            and ie.remark like concat('%', #{remark}, '%')
+        </if>
+        <if test="tagCodes != null and tagCodes.size() != 0">
+            and (
+            <foreach collection="tagCodes" item="tagCode" index="index">
+                <if test="index > 0">or </if>FIND_IN_SET(#{tagCode}, ie.tag_codes) > 0
+            </foreach>
+            )
         </if>
         group by ie.`type`, ie.main_classify;
     </select>

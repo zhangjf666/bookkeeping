@@ -2,7 +2,6 @@ package com.hc.bookkeeping.modules.admin.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.modules.admin.dto.DictDto;
@@ -37,35 +36,31 @@ public class DictController {
     @ApiOperation("查询字典")
     @GetMapping
     @PreAuthorize("@ph.check('system:dict:list')")
-    public Response getPosition(@Validated DictQueryDto queryDto, Page pageable){
-        Page page = dictService.queryPage(queryDto, pageable);
-        return Response.ok(page);
+    public Page getPosition(@Validated DictQueryDto queryDto, Page pageable){
+        return dictService.queryPage(queryDto, pageable);
     }
 
     @Log("创建字典")
     @ApiOperation("创建字典")
     @PostMapping
     @PreAuthorize("@ph.check('system:dict:add')")
-    public Response create(@Validated(Insert.class) @RequestBody DictDto dto){
-        dictService.create(dto);
-        return Response.ok();
+    public DictDto create(@Validated(Insert.class) @RequestBody DictDto dto){
+        return dictService.create(dto);
     }
 
     @Log("编辑字典")
     @ApiOperation("编辑字典")
     @PutMapping
     @PreAuthorize("@ph.check('system:dict:edit')")
-    public Response update(@Validated(Update.class) @RequestBody DictDto dto){
-        dictService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody DictDto dto){
+        return dictService.update(dto);
     }
 
     @Log("删除字典")
     @ApiOperation("删除字典")
     @DeleteMapping
     @PreAuthorize("@ph.check('system:dict:del')")
-    public Response delete(@RequestBody Set<Long> ids){
-        dictService.deleteDicts(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids){
+        return dictService.deleteByIds(ids);
     }
 }

@@ -31,6 +31,7 @@ public class UserRemarkQueryDto implements Serializable {
     private Long userId;
 
     @ApiModelProperty(value = "备注内容")
+    @Query(match = Query.Matching.INNER_LIKE)
     private String remark;
 
     @ApiModelProperty(value = "创建时间")
@@ -40,4 +41,7 @@ public class UserRemarkQueryDto implements Serializable {
     @Sort(column = "update_time", sort = Sort.SortType.DESC)
     private LocalDateTime updateTime;
 
+    @ApiModelProperty(value = "所属分类id")
+    @Query(column = "classify_id")
+    private Long classifyId;
 }

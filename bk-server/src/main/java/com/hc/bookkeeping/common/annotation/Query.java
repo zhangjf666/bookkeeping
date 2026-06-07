@@ -21,15 +21,23 @@ public @interface Query {
     //查询类型,默认匹配方式
     Type type() default Type.MATCHING;
 
+    //联接方式,默认and
+    LinkType linkType() default LinkType.AND;
+
     //原始sql
     String sql() default "";
 
     //匹配类型,默认相等
     Matching match() default Matching.EQUAL;
 
+    //自定义处理器
+    Class<? extends QueryHandler> customHandler() default QueryHandler.class;
+
     enum Matching {
         //相等
         EQUAL
+        //不相等
+        , NOT_EQUAL
         //大于
         , GREATER_THAN
         //小于
@@ -46,16 +54,16 @@ public @interface Query {
         , GREATER_EQ
         //包含
         , IN
-        //不相等
-        ,NOT_EQUAL
+        //不包含
+        , NOT_IN
         //between
-        ,BETWEEN
+        , BETWEEN
         //not between
-        ,NOT_BETWEEN
+        , NOT_BETWEEN
         //不为空
-        ,NOT_NULL
+        , NOT_NULL
         //为空
-        ,IS_NULL
+        , IS_NULL
     }
 
     //查询方式
@@ -63,6 +71,17 @@ public @interface Query {
         //匹配
         MATCHING,
         //使用原始sql
-        SQL
+        SQL,
+        //自定义处理器
+        CUSTOM
     }
+
+    //联接方式
+    enum LinkType{
+        //and查询
+        AND,
+        //or查询
+        OR
+    }
+
 }

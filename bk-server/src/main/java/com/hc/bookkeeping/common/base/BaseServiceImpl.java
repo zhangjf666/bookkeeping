@@ -70,7 +70,7 @@ public class BaseServiceImpl<S extends BaseMapstruct<D,E>,D,M extends BaseMapper
 
     @Transactional(rollbackFor = Throwable.class)
     @Override
-    public boolean delete(Collection<? extends Serializable> ids) {
+    public boolean deleteByIds(Collection<? extends Serializable> ids) {
         return baseMapper.deleteBatchIds(ids) > 0;
     }
 }

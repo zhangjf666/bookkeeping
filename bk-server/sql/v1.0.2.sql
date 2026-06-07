@@ -1,0 +1,30 @@
+--用户标签表
+CREATE TABLE `user_tag` (
+                               `id` bigint(20) NOT NULL AUTO_INCREMENT COMMENT 'id',
+                               `code` bigint(10) NOT NULL COMMENT '标签代码',
+                               `user_id` bigint(20) NOT NULL COMMENT '用户id',
+                               `name` varchar(100) NOT NULL COMMENT '标签名称',
+                               `color` varchar(50) NOT NULL COMMENT '标签颜色',
+                               `sort` int NOT NULL DEFAULT 0 COMMENT '排序号',
+                               `create_time` datetime NOT NULL COMMENT '创建时间',
+                               `update_time` datetime NOT NULL COMMENT '更新时间',
+                               PRIMARY KEY (`id`)
+) ENGINE=InnoDB AUTO_INCREMENT=10 DEFAULT CHARSET=utf8mb4 COMMENT='用户标签表';
+
+--增加标签tag_codes列
+ALTER TABLE income_expense ADD tag_codes varchar(512) NULL COMMENT '所属标签代码,逗号分隔';
+
+-- 为历史用户补齐 theme 和 language 默认配置
+INSERT INTO user_config (user_id, name, value, description, enable)
+SELECT u.id, 'theme', 'system', '主题设置(system:跟随系统,light:浅色,dark:深色)', '1'
+FROM bookkeeping_user u
+WHERE NOT EXISTS (
+    SELECT 1 FROM user_config uc WHERE uc.user_id = u.id AND uc.name = 'theme'
+);
+
+INSERT INTO user_config (user_id, name, value, description, enable)
+SELECT u.id, 'language', 'system', '语言设置(system:跟随系统,zh-CN:简体中文,en:英文)', '1'
+FROM bookkeeping_user u
+WHERE NOT EXISTS (
+    SELECT 1 FROM user_config uc WHERE uc.user_id = u.id AND uc.name = 'language'
+);

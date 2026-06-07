@@ -7,6 +7,7 @@ import com.baomidou.mybatisplus.core.conditions.Wrapper;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 
 import com.hc.bookkeeping.common.annotation.Query;
+import com.hc.bookkeeping.common.annotation.QueryHandler;
 import com.hc.bookkeeping.common.annotation.Sort;
 import com.hc.bookkeeping.common.constants.Constants;
 import com.hc.bookkeeping.common.exception.BusinessException;
@@ -25,6 +26,7 @@ import java.util.*;
  */
 @Slf4j
 public class QueryUtil {
+    private static String COLUMN = "#{column}";
 
     public static<T,R> Wrapper<R> bulid(T query){
         QueryWrapper<R> wrapper = new QueryWrapper<>();
@@ -53,16 +55,46 @@ public class QueryUtil {
                 if(q != null){
                     String column = StringUtils.isBlank(q.column()) ? field.getName() : q.column();
                     Query.Type type = q.type();
+                    Query.LinkType linkType = q.linkType();
                     switch (type){
                         case SQL:
                             String sql = q.sql();
                             if(StringUtils.isNotBlank(sql)){
-                                wrapper.apply(sql,val);
+                                String finalSql = sql.replace(COLUMN, column).trim();
+                                if(isArray(val)){
+                                    if(linkType == Query.LinkType.AND){
+                                        for (Object o : (List<Object>) val) {
+                                            wrapper.apply(finalSql,o);
+                                        }
+                                    } else if(linkType == Query.LinkType.OR){
+                                        wrapper.and(r -> {
+                                            for (int i = 0; i < ((List<Object>) val).size(); i++) {
+                                                r.apply(finalSql,((List<Object>) val).get(i));
+                                                if(i != ((List<Object>) val).size()-1){
+                                                    r.or();
+                                                }
+                                            }
+                                        });
+                                    }
+                                } else {
+                                    wrapper.apply(finalSql,val);
+                                }
                             }
                             break;
                         case MATCHING:
                             Query.Matching match = q.match();
-                            setMatching(column,match,wrapper,val);
+                            setMatching(column,match,wrapper,linkType,val);
+                            break;
+                        case CUSTOM:
+                            try {
+                                QueryHandler handler = SpringContextUtil.getBean(q.customHandler());
+                                if(handler == null){
+                                    handler = q.customHandler().getDeclaredConstructor().newInstance();
+                                }
+                                handler.apply(wrapper, val);
+                            } catch (Exception e) {
+                                log.warn("自定义查询处理器 {} 初始化失败: {}", q.customHandler().getName(), e.getMessage());
+                            }
                             break;
                         default:
                             break;
@@ -85,18 +117,109 @@ public class QueryUtil {
         return wrapper;
     }
 
-    private static void setMatching(String column, Query.Matching matching, QueryWrapper wrapper, Object val){
+    private static<R> void setMatching(String column, Query.Matching matching, QueryWrapper<R> wrapper, Query.LinkType linkType, Object val){
         switch (matching){
             case EQUAL:
-                wrapper.eq(column,val);
-                break;
-            case IN:
-                if (CollUtil.isNotEmpty((Collection)val)) {
-                    wrapper.in(column,(Collection)val);
+            case NOT_EQUAL:
+            case LEFT_LIKE:
+            case INNER_LIKE:
+            case RIGHT_LIKE:
+            case GREATER_THAN:
+            case LESS_THAN:
+            case GREATER_EQ:
+            case LESS_EQ:
+            case IS_NULL:
+            case NOT_NULL:
+                if(isArray(val)){
+                    if(linkType == Query.LinkType.AND){
+                        ((List<Object>) val).forEach(o -> setWrapperValue(column, matching, wrapper, o));
+                    } else if(linkType == Query.LinkType.OR){
+                        wrapper.and(r -> {
+                            for (int i = 0; i < ((List<Object>) val).size(); i++) {
+                                setWrapperValue(column, matching, r, ((List<Object>) val).get(i));
+                                if(i != ((List<Object>) val).size()-1){
+                                    r.or();
+                                }
+                            }
+                        });
+                    }
+                } else {
+                    setWrapperValue(column, matching, wrapper, val);
                 }
                 break;
+            case IN:
+                if (isArray(val) && CollUtil.isNotEmpty((List)val)) {
+                    wrapper.in(column,(List)val);
+                }
+                break;
+            case NOT_IN:
+                if (isArray(val) && CollUtil.isNotEmpty((List)val)) {
+                    wrapper.notIn(column,(List)val);
+                }
+                break;
+            case BETWEEN:
+                if(isArray(val) && !((List<Object>) val).isEmpty()){
+                    List<Object> between = new ArrayList<>((List<Object>)val);
+                    if(between.size() == 1 && between.get(0) != null){
+                        setWrapperValue(column, Query.Matching.GREATER_EQ,wrapper,between.get(0));
+                    } else if(between.get(0) != null && between.get(1) == null){
+                        setWrapperValue(column, Query.Matching.GREATER_EQ,wrapper,between.get(0));
+                    } else if(between.get(0) != null && between.get(1) != null){
+                        wrapper.between(column,between.get(0),between.get(1));
+                    } else if(between.get(0) == null && between.get(1) != null){
+                        setWrapperValue(column, Query.Matching.LESS_EQ,wrapper,between.get(1));
+                    }
+                }
+                break;
+            case NOT_BETWEEN:
+                if(isArray(val) && !((List<Object>) val).isEmpty()){
+                    List<Object> nbetween = new ArrayList<>((List<Object>)val);
+                    if(nbetween.size() == 1 && nbetween.get(0) != null){
+                        setWrapperValue(column, Query.Matching.LESS_THAN,wrapper,nbetween.get(0));
+                    } else if(nbetween.get(0) != null && nbetween.get(1) == null){
+                        setWrapperValue(column, Query.Matching.LESS_THAN,wrapper,nbetween.get(0));
+                    } else if(nbetween.get(0) != null && nbetween.get(1) != null){
+                        wrapper.notBetween(column,nbetween.get(0),nbetween.get(1));
+                    } else if(nbetween.get(0) == null && nbetween.get(1) != null){
+                        setWrapperValue(column, Query.Matching.GREATER_THAN,wrapper,nbetween.get(1));
+                    }
+                }
+                if(isArray(val) && ((List)val).size() == 2) {
+                    List<Object> nbetween = new ArrayList<>((List<Object>) val);
+                    wrapper.notBetween(column, nbetween.get(0), nbetween.get(1));
+                }
+                break;
+            default:
+                log.warn("不支持的Query.Matching类型:{}", matching);
+                break;
+        }
+    }
+
+    private static <R> void setWrapperValue(String column, Query.Matching matching, QueryWrapper<R> wrapper, Object val) {
+        switch (matching) {
+            case EQUAL:
+                wrapper.eq(column, val);
+                break;
             case NOT_EQUAL:
-                wrapper.ne(column,val);
+                wrapper.ne(column, val);
+                break;
+            case IS_NULL:
+                wrapper.isNull(column);
+                break;
+            case NOT_NULL:
+                wrapper.isNotNull(column);
+                break;
+            case LESS_EQ:
+                wrapper.le(column, val);
+                break;
+            case GREATER_EQ:
+                wrapper.ge(column, val);
+                break;
+            case LESS_THAN:
+                wrapper.lt(column, val);
+                break;
+            case GREATER_THAN:
+                wrapper.gt(column, val);
                 break;
             case LEFT_LIKE:
                 wrapper.likeLeft(column,val);
@@ -106,32 +229,6 @@ public class QueryUtil {
                 break;
             case RIGHT_LIKE:
                 wrapper.likeRight(column,val);
-                break;
-            case GREATER_THAN:
-                wrapper.gt(column,val);
-                break;
-            case LESS_THAN:
-                wrapper.lt(column,val);
-                break;
-            case GREATER_EQ:
-                wrapper.ge(column,val);
-                break;
-            case LESS_EQ:
-                wrapper.le(column,val);
-                break;
-            case IS_NULL:
-                wrapper.isNull(column);
-                break;
-            case NOT_NULL:
-                wrapper.isNotNull(column);
-                break;
-            case BETWEEN:
-                List<Object> between = new ArrayList<>((List<Object>)val);
-                wrapper.between(column,between.get(0),between.get(1));
-                break;
-            case NOT_BETWEEN:
-                List<Object> nbetween = new ArrayList<>((List<Object>)val);
-                wrapper.notBetween(column,nbetween.get(0),nbetween.get(1));
                 break;
             default:
                 break;
@@ -182,5 +279,17 @@ public class QueryUtil {
             log.error(e.getMessage(), e);
             throw new BusinessException("检查树形查询条件错误:" + e.getMessage());
         }
+    }
+
+    /**
+     * 判断是否是数组
+     * @param obj 对象
+     * @return true:是,false:否
+     */
+    private static boolean isArray(Object obj) {
+        if (null == obj) {
+            return false;
+        }
+        return obj instanceof List || obj.getClass().isArray();
     }
 }

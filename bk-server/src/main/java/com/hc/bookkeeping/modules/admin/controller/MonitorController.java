@@ -1,7 +1,7 @@
 package com.hc.bookkeeping.modules.admin.controller;
 
 import com.hc.bookkeeping.common.annotation.Log;
-import com.hc.bookkeeping.common.model.Response;
+import com.hc.bookkeeping.modules.admin.dto.ServerInfoDto;
 import com.hc.bookkeeping.modules.admin.service.MonitorService;
 import io.swagger.annotations.Api;
 import io.swagger.annotations.ApiOperation;
@@ -31,15 +31,15 @@ public class MonitorController {
     @ApiOperation("获取服务器信息")
     @GetMapping("/server")
     @PreAuthorize("@ph.check('monitor:server:list')")
-    public Response getServerInfo(){
-        return Response.ok(monitorService.getServerInfo());
+    public ServerInfoDto getServerInfo(){
+        return monitorService.getServerInfo();
     }
 
     @Log("获取sql监控地址")
     @ApiOperation("获取sql监控地址")
     @GetMapping("/sqlApi")
     @PreAuthorize("@ph.check('monitor:sql:list')")
-    public Response getSqlMonitorUrl(){
-        return Response.ok(monitorService.getSqlMonitorUrl());
+    public String getSqlMonitorUrl(){
+        return monitorService.getSqlMonitorUrl();
     }
 }

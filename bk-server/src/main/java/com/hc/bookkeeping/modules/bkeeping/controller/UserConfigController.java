@@ -1,10 +1,8 @@
 package com.hc.bookkeeping.modules.bkeeping.controller;
 
-import cn.hutool.core.util.NumberUtil;
-import cn.hutool.core.util.StrUtil;
+import cn.hutool.core.lang.Validator;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.exception.BusinessException;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.model.ResponseCode;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
@@ -35,43 +33,38 @@ public class UserConfigController {
     @Log("查询用户配置")
     @ApiOperation("查询用户配置")
     @GetMapping
-    public Response get(@Validated UserConfigQueryDto queryDto){
-        List<UserConfigDto> list = userConfigService.queryList(QueryUtil.bulid(queryDto));
-        return Response.ok(list);
+    public List<UserConfigDto> get(@Validated UserConfigQueryDto queryDto){
+        return userConfigService.queryList(QueryUtil.bulid(queryDto));
     }
 
     @Log("创建用户配置")
     @ApiOperation("创建用户配置")
     @PostMapping
-    public Response create(@Validated(Insert.class) @RequestBody UserConfigDto dto){
-        userConfigService.create(dto);
-        return Response.ok();
+    public UserConfigDto create(@Validated(Insert.class) @RequestBody UserConfigDto dto){
+        return userConfigService.create(dto);
     }
 
     @Log("编辑用户配置")
     @ApiOperation("编辑用户配置")
     @PutMapping
-    public Response update(@Validated(Update.class) @RequestBody UserConfigDto dto){
-        userConfigService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody UserConfigDto dto){
+        return userConfigService.update(dto);
     }
 
     @Log("删除用户配置")
     @ApiOperation("删除用户配置")
     @DeleteMapping
-    public Response delete(@RequestBody Set<Long> ids){
-        userConfigService.delete(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids){
+        return userConfigService.deleteByIds(ids);
     }
 
     @Log("设置额外的支出限额")
     @ApiOperation("设置额外的支出限额")
     @PostMapping(value = "/additionalExpenseLimit")
-    public Response setAdditionalExpenseLimit(@RequestBody AdditionalExpenseLimitDto dto){
-        if(!StrUtil.isNumeric(dto.getExpenseLimit())){
+    public boolean setAdditionalExpenseLimit(@RequestBody AdditionalExpenseLimitDto dto){
+        if(!Validator.isMoney(dto.getExpenseLimit())){
             throw new BusinessException(ResponseCode.PARAM_ERROR, "支出限额格式错误");
         }
-        userConfigService.setAdditionalExpenseLimit(dto.getUserId(), dto.getType(), dto.getExpenseLimit());
-        return Response.ok();
+        return userConfigService.setAdditionalExpenseLimit(dto.getUserId(), dto.getType(), dto.getExpenseLimit());
     }
 }

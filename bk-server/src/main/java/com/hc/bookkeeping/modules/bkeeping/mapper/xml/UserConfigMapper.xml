@@ -17,4 +17,13 @@
         id, user_id, name, value, description, enable
     </sql>
 
+    <!-- 批量插入用户配置 -->
+    <insert id="batchInsert" parameterType="java.util.List">
+        INSERT INTO user_config (user_id, name, value, description, enable)
+        VALUES
+        <foreach collection="list" item="item" separator=",">
+            (#{item.userId}, #{item.name}, #{item.value}, #{item.description}, #{item.enable})
+        </foreach>
+    </insert>
+
 </mapper>

@@ -1,0 +1,408 @@
+buttons:
+  pureLoginOut: LoginOut
+  pureLogin: Login
+  pureOpenSystemSet: Open System Configs
+  pureReload: Reload
+  pureCloseCurrentTab: Close CurrentTab
+  pureCloseLeftTabs: Close LeftTabs
+  pureCloseRightTabs: Close RightTabs
+  pureCloseOtherTabs: Close OtherTabs
+  pureCloseAllTabs: Close AllTabs
+  pureContentFullScreen: Content FullScreen
+  pureContentExitFullScreen: Content ExitFullScreen
+  pureClickCollapse: Collapse
+  pureClickExpand: Expand
+  pureConfirm: Confirm
+  pureSwitch: Switch
+  pureClose: Close
+  pureBackTop: BackTop
+  pureOpenText: Open
+  pureCloseText: Close
+search:
+  pureTotal: Total
+  pureHistory: History
+  pureCollect: Collect
+  pureDragSort: （Drag Sort）
+  pureEmpty: Empty
+  purePlaceholder: Search Menu
+panel:
+  pureSystemSet: System Configs
+  pureCloseSystemSet: Close System Configs
+  pureClearCacheAndToLogin: Clear cache and return to login page
+  pureClearCache: Clear Cache
+  pureOverallStyle: Overall Style
+  pureOverallStyleLight: Light
+  pureOverallStyleLightTip: Set sail freshly and light up the comfortable work interface
+  pureOverallStyleDark: Dark
+  pureOverallStyleDarkTip: Moonlight Overture, indulge in the tranquility and elegance of the night
+  pureOverallStyleSystem: Auto
+  pureOverallStyleSystemTip: Synchronize time, the interface naturally responds to morning and dusk
+  pureThemeColor: Theme Color
+  pureLayoutModel: Layout Model
+  pureVerticalTip: The menu on the left is familiar and friendly
+  pureHorizontalTip: Top menu, concise overview
+  pureMixTip: Mixed menu, flexible
+  pureStretch: Stretch Page
+  pureStretchFixed: Fixed
+  pureStretchFixedTip: Compact pages make it easy to find the information you need
+  pureStretchCustom: Custom
+  pureStretchCustomTip: Minimum 1280, maximum 1600
+  pureTagsStyle: Tags Style
+  pureTagsStyleSmart: Smart
+  pureTagsStyleSmartTip: Smart tags add fun and brilliance
+  pureTagsStyleCard: Card
+  pureTagsStyleCardTip: Card tags for efficient browsing
+  pureTagsStyleChrome: Chrome
+  pureTagsStyleChromeTip: Chrome style is classic and elegant
+  pureInterfaceDisplay: Interface Display
+  pureGreyModel: Grey Model
+  pureWeakModel: Weak Model
+  pureHiddenTags: Hidden Tags
+  pureHiddenFooter: Hidden Footer
+  pureMultiTagsCache: MultiTags Cache
+menus:
+  pureHome: Home
+  pureLogin: Login
+  pureAbnormal: Abnormal Page
+  purePageNotFound: "404"
+  pureAccessDenied: "403"
+  pureServerError: "500"
+  purePermission: Permission Manage
+  purePermissionPage: Page Permission
+  purePermissionButton: Button Permission
+  purePermissionButtonRouter: Route return button permission
+  purePermissionButtonLogin: Login interface return button permission
+  pureSettings: Settings
+  pureAccountBookSetting: Account Book Setting
+  pureTagSetting: Tag Setting
+  pureRemarkSetting: Remark Setting
+  pureClassifySetting: Classify Setting
+  pureCommonSetting: Common Setting
+  pureRegister: Register
+  pureBill: Records
+  pureReport: Report
+  pureBillReport: Bill Report
+  pureClassifyReport: Classify Report
+  pureUser: User Center
+  pureUserProfile: Profile
+status:
+  pureLoad: Loading...
+  pureMessage: Message
+  pureNotify: Notify
+  pureTodo: Todo
+  pureNoMessage: No Message
+  pureNoNotify: No Notify
+  pureNoTodo: No Todo
+login:
+  pureUsername: Username
+  purePassword: Password
+  pureRememberMe: Remember me
+  pureLogin: Login
+  pureLoginSuccess: Login Success
+  pureLoginFail: Login Fail
+  pureUsernameReg: Please enter username
+  purePassWordReg: Please enter password
+  purePassWordRuleReg: The password format should be any combination of 8-18 digits
+  pureCaptcha: Please enter captcha
+  pureCaptchaReg: Please enter captcha
+  pureUsernameLengthReg: Username must be 3-20 characters
+  purePasswordLengthReg: Password must be 6-20 characters
+  pureRepeatPasswordReg: Please confirm password
+  pureNoAccount: No account?
+  pureGoRegister: Register now
+  pureRegisterSuccess: Register Success
+  pureRegisterFail: Register Fail
+  purePasswordNotMatch: Passwords do not match
+register:
+  pureTitle: Register
+  pureUsername: Please enter username
+  purePassword: Please enter password
+  pureRepeatPassword: Please confirm password
+  pureCaptcha: Please enter captcha
+  pureRegister: Register
+  pureHasAccount: Already have an account? Login
+  pureGoLogin: Login now
+dashboard:
+  pureAdd: Add Record
+  pureExpense: Expense
+  pureIncome: Income
+  pureExpenseLimit: Budget
+  pureExpenseSurplus: Remaining
+  pureTrend: Trend
+  pureRecentRecords: Recent Records (3 Days)
+  pureDate: Date
+  pureClassify: Classify
+  pureRemark: Remark
+  pureAmount: Amount
+  pureType: Type
+  pureNoRecords: No records
+  pureCurrentBook: Current Book
+  pureDefault: Default
+  pureTotalExpense: Total Expense
+  pureTotalIncome: Total Income
+  pureBalance: Balance
+  pureMonthlyExpenseLimit: Monthly Budget
+  pureYearlyExpenseLimit: Yearly Budget
+  pureMonthlyExpenseSurplus: Monthly Remaining
+  pureYearlyExpenseSurplus: Yearly Remaining
+  pureMonth: Month
+  pureQuarter: Quarter
+  pureHalfYear: Half Year
+  pureYear: Year
+bill:
+  pureTitle: Records
+  pureAddRecord: Add Record
+  pureAdd: Add
+  pureEdit: Edit
+  pureRecord: Add Record
+  pureEditRecord: Edit Record
+  pureRecordDetail: Record Details
+  pureSearch: Search
+  pureDelete: Delete
+  pureBatchDelete: Batch Delete
+  pureQuery: Query
+  pureReset: Reset
+  pureMoreFilter: More Filter
+  pureAccountBook: Book
+  pureType: Type
+  pureDate: Date
+  pureStartDate: Start Date
+  pureEndDate: End Date
+  pureAmount: Amount
+  pureClassify: Classify
+  pureMainClassify: Main Classify
+  pureSubClassify: Sub Classify
+  pureRemark: Remark
+  pureTag: Tag
+  pureSelectPlaceholder: Select
+  pureRemarkPlaceholder: Enter remark
+  pureOperation: Operation
+  pureExpense: Expense
+  pureIncome: Income
+  pureCancel: Cancel
+  pureConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureSelectFirst: Please select records first
+  pureAddToCommon: Add to common remark
+  pureCreditCard: Credit Card
+  pureAccountBookRequired: Please select account book
+  pureAmountRequired: Please enter amount
+  pureAmountInvalid: Amount must be greater than 0
+  pureTypeRequired: Please select type
+  pureClassifyRequired: Please select classify
+  pureDateRequired: Please select date
+  pureDateRangeRequired: Please select date range
+  pureYes: Yes
+  pureNo: No
+  pureSearchRemark: Search Remark
+  pureBillType: Bill Type
+  pureTimeSelect: Time
+  pureByTime: By Time
+  pureByAmount: By Amount
+  purePercent: Percent
+  pureRecordCount: Records
+  pureMonthBill: Monthly Bill
+  pureYearBill: Yearly Bill
+  pureMonth: Month
+  pureYear: Year
+  pureCustom: Custom
+  pureSelectedClassify: Selected {count} classifies
+  pureAllExpense: All Expense
+  pureAllIncome: All Income
+  exportDateRequired: Please select export date range
+  exportDateLimit: Export date range cannot exceed 1 year
+  exportSuccess: Export successful
+  exportFailed: Export failed
+  pureExport: Export
+  pureWarning: Warning
+  pureDeleteConfirm: Are you sure you want to delete this record?
+  pureBatchDeleteConfirm: Are you sure you want to delete the selected {count} records?
+
+tag:
+  pureAddTag: Add Tag
+  pureTagName: Tag Name
+  pureColor: Color
+  pureSort: Sort
+  pureTagOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureTagConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureTagWarning: Warning
+  pureTagNameRequired: Please enter tag name
+  pureTagNameLength: Tag name cannot exceed 20 characters
+  pureColorRequired: Please select color
+  pureTagNamePlaceholder: Enter tag name
+  pureColorHint: Supports RGBA format, e.g. #FF6B6B80
+  purePreview: Preview
+  pureDeleteTagConfirm: Are you sure to delete this tag?
+  pureBatchDelete: Batch Delete
+  pureTagNameQuery: Tag Name
+  pureSelectFirst: Please select tags to delete
+  pureBatchDeleteConfirm: Are you sure to delete the selected {count} tags?
+
+remark:
+  pureAddRemark: Add Remark
+  pureRemarkName: Remark Content
+  pureRemarkClassify: Category
+  pureRemarkOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureRemarkConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureRemarkWarning: Warning
+  pureRemarkNameRequired: Please enter remark content
+  pureRemarkNameLength: Remark content cannot exceed 20 characters
+  pureClassifyRequired: Please select category
+  pureRemarkNamePlaceholder: Enter remark content
+  pureRemarkNameQuery: Remark Content
+  pureRemarkClassifyQuery: Category
+  pureSelectFirst: Please select remarks to delete
+  pureDeleteRemarkConfirm: Are you sure to delete this remark?
+  pureBatchDeleteConfirm: Are you sure to delete the selected {count} remarks?
+
+accountBook:
+  pureAddAccountBook: Add Account Book
+  pureAccountBookName: Account Book Name
+  pureAccountBookImage: Account Book Icon
+  pureIsDefault: Set as Default
+  pureAccountBookOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureAccountBookConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureAccountBookWarning: Warning
+  pureAccountBookNameRequired: Please enter account book name
+  pureAccountBookNameLength: Account book name cannot exceed 20 characters
+  pureAccountBookImagePlaceholder: Select account book icon
+  pureAccountBookNameQuery: Account Book Name
+  pureAccountBookSelectFirst: Please select account books to delete
+  pureDeleteAccountBookConfirm: Are you sure to delete this account book?
+  pureAccountBookBatchDeleteConfirm: Are you sure to delete the selected {count} account books?
+  pureCannotDeleteDefault: Cannot delete default account book, please set another account book as default first
+  pureSetAsDefault: Set as Default
+  pureDefault: Default
+
+classify:
+  pureAddClassify: Add Classify
+  pureEditClassify: Edit Classify
+  pureClassifyName: Classify Name
+  pureClassifyIcon: Classify Icon
+  pureParentClassify: Parent Classify
+  pureType: Type
+  pureSort: Sort
+  pureEnable: Enable
+  pureClassifyOperation: Operation
+  pureAdd: Add
+  pureEdit: Edit
+  pureDelete: Delete
+  pureCancel: Cancel
+  pureClassifyConfirm: Confirm
+  pureCreateSuccess: Created Successfully
+  pureUpdateSuccess: Updated Successfully
+  pureDeleteSuccess: Deleted Successfully
+  pureOperationFail: Operation Failed
+  pureClassifyWarning: Warning
+  pureClassifyNameRequired: Please enter classify name
+  pureClassifyNameLength: Classify name cannot exceed 20 characters
+  pureIconRequired: Please select classify icon
+  pureTypeRequired: Please select classify type
+  pureClassifyNameQuery: Classify Name
+  pureSelectFirst: Please select classifies to delete
+  pureDeleteClassifyConfirm: Are you sure to delete this classify? (If there are sub-classifies, they will also be deleted)
+  pureBatchDeleteConfirm: Are you sure to delete the selected {count} classifies?
+  pureTypePlaceholder: Select type
+  pureIconPlaceholder: Select icon
+  pureParentClassifyPlaceholder: Select parent classify
+  pureParentClassifyHint: Empty for top-level classify, can only select main classify
+  pureTopLevel: Top Level (No Parent)
+  pureSelectClassifyToEdit: Select a classify on the left to edit or add new
+
+commonConfig:
+  pureGeneralConfig: General Config
+  pureLimitConfig: Limit Config
+  pureDefaultCreditCard: Default Credit Card When Adding Record
+  pureShowExpenseLimit: Expense Limit Display Mode
+  pureNotDisplay: Not Display
+  pureMonthlyLimit: Monthly Limit
+  pureYearlyLimit: Yearly Limit
+  pureDefaultMonthlyLimit: Default Monthly Expense Limit
+  pureDefaultYearlyLimit: Default Yearly Expense Limit
+  pureAmountPlaceholder: Enter amount
+  pureInvalidAmount: Please enter valid amount
+  pureUpdateSuccess: Saved Successfully
+  pureOperationFail: Operation Failed
+  pureSetMonthlyLimit: Set Monthly Expense Limit
+  pureSetYearlyLimit: Set Yearly Expense Limit
+  pureTheme: "Theme"
+  pureThemeSystem: "System"
+  pureThemeLight: "Light"
+  pureThemeDark: "Dark"
+  pureLanguage: "Language"
+  pureLanguageSystem: "System"
+  pureLanguageZh: "简体中文"
+  pureLanguageEn: "English"
+
+profile:
+  pureTitle: Profile
+  pureLoadUserInfoFailed: Failed to load user info
+  pureNicknameRequired: Nickname cannot be empty
+  pureUpdateSuccess: Saved Successfully
+  pureUpdateFailed: Failed to save
+  pureClickToChangeAvatar: Click to change avatar
+  pureInvalidImageType: Please select an image file
+  pureImageTooLarge: Image size cannot exceed 2MB
+  pureAvatarUpdateSuccess: Avatar updated successfully
+  pureAvatarUpdateFailed: Failed to update avatar
+  pureUsername: Username
+  purePassword: Password
+  pureNickname: Nickname
+  pureNicknamePlaceholder: Enter nickname
+  pureGender: Gender
+  pureMale: Male
+  pureFemale: Female
+  pureEmail: Email
+  pureEmailPlaceholder: Enter email
+  purePhone: Phone
+  purePhonePlaceholder: Enter phone number
+  pureEdit: Edit
+  pureCancel: Cancel
+  pureSave: Save
+  pureChangePassword: Change Password
+  pureOldPassword: Current Password
+  pureOldPasswordPlaceholder: Enter current password
+  pureNewPassword: New Password
+  pureNewPasswordPlaceholder: Enter new password
+  pureConfirmPassword: Confirm New Password
+  pureConfirmPasswordPlaceholder: Enter new password again
+  pureOldPasswordRequired: Please enter current password
+  pureNewPasswordRequired: Please enter new password
+  pureConfirmPasswordRequired: Please enter new password again
+  purePasswordLength: Password must be 6-20 characters
+  purePasswordNotMatch: Passwords do not match
+  purePasswordChangeSuccess: Password changed successfully
+  purePasswordChangeFailed: Failed to change password
+  pureNicknameLength: Nickname cannot exceed 20 characters
+  pureEmailFormatError: Please enter a valid email address
+  purePhoneFormatError: Please enter a valid phone number
+  pureAbout: About
+
+

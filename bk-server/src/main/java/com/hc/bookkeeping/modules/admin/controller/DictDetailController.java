@@ -1,13 +1,11 @@
 package com.hc.bookkeeping.modules.admin.controller;
 
 import cn.hutool.core.bean.BeanUtil;
-import cn.hutool.core.collection.CollUtil;
 import cn.hutool.core.map.MapUtil;
 import com.baomidou.mybatisplus.core.conditions.query.QueryWrapper;
 import com.hc.bookkeeping.common.annotation.Log;
 import com.hc.bookkeeping.common.constants.Constants;
 import com.hc.bookkeeping.common.model.Page;
-import com.hc.bookkeeping.common.model.Response;
 import com.hc.bookkeeping.common.support.valid.Insert;
 import com.hc.bookkeeping.common.support.valid.Update;
 import com.hc.bookkeeping.common.utils.TreeUtil;
@@ -50,7 +48,7 @@ public class DictDetailController {
     @ApiOperation("查询字典详情")
     @GetMapping
     @PreAuthorize("@ph.check('system:dict:list')")
-    public Response getDictDetail(@Validated DictDetailQueryDto queryDto, Page pageable) {
+    public Page getDictDetail(@Validated DictDetailQueryDto queryDto, Page pageable) {
         String type = null;
         if(queryDto.getDictId() != null){
             Dict dict = dictService.getById(queryDto.getDictId());
@@ -71,14 +69,14 @@ public class DictDetailController {
             }
         }
         page.setRecord(volist);
-        return Response.ok(page);
+        return page;
     }
 
     @Log("字典名查询字典详情")
     @ApiOperation("字典名查询字典详情")
     @GetMapping("/map")
     @PreAuthorize("@ph.check('system:dict:list')")
-    public Response getDictDetailByName(@RequestParam String dictName){
+    public Map<String, List<DictDetailDto>> getDictDetailByName(@RequestParam String dictName){
         String[] names = dictName.split("[,，]");
         Map<String, List<DictDetailDto>> dicts = MapUtil.newHashMap();
         for (String name: names) {
@@ -87,45 +85,42 @@ public class DictDetailController {
                 continue;
             }
             List<DictDetailDto> dtos = dictDetailService.queryList(new QueryWrapper<DictDetail>().lambda().eq(
-                    DictDetail::getDictId, dict.getId()).orderByAsc(DictDetail::getSort));
+                DictDetail::getDictId, dict.getId()).orderByAsc(DictDetail::getSort));
             dicts.put(name,dtos);
         }
 
-        return Response.ok(dicts);
+        return dicts;
     }
 
     @Log("创建字典详情")
     @ApiOperation("创建字典详情")
     @PostMapping
     @PreAuthorize("@ph.check('system:dict:add')")
-    public Response create(@Validated(Insert.class) @RequestBody DictDetailDto dto) {
-        dictDetailService.create(dto);
-        return Response.ok();
+    public DictDetailDto create(@Validated(Insert.class) @RequestBody DictDetailDto dto) {
+        return dictDetailService.create(dto);
     }
 
     @Log("编辑字典详情")
     @ApiOperation("编辑字典详情")
     @PutMapping
     @PreAuthorize("@ph.check('system:dict:edit')")
-    public Response update(@Validated(Update.class) @RequestBody DictDetailDto dto) {
-        dictDetailService.update(dto);
-        return Response.ok();
+    public boolean update(@Validated(Update.class) @RequestBody DictDetailDto dto) {
+        return dictDetailService.update(dto);
     }
 
     @Log("删除字典详情")
     @ApiOperation("删除字典详情")
     @DeleteMapping
     @PreAuthorize("@ph.check('system:dict:del')")
-    public Response delete(@RequestBody Set<Long> ids) {
-        dictDetailService.removeByIds(ids);
-        return Response.ok();
+    public boolean delete(@RequestBody Set<Long> ids) {
+        return dictDetailService.removeByIds(ids);
     }
 
     @Log("查询字典详情")
     @ApiOperation("查询字典详情:根据ID获取同级与上级数据")
     @PostMapping("/superior")
     @PreAuthorize("@ph.check('system:dict:list')")
-    public Response getSuperior(@RequestBody List<Long> ids) {
+    public List<DictDetailVo> getSuperior(@RequestBody List<Long> ids) {
         Set<DictDetailDto> dictDetailDtos  = new LinkedHashSet<>();
         for (Long id : ids) {
             DictDetailDto dictDetailDto = dictDetailService.queryById(id);
@@ -136,6 +131,6 @@ public class DictDetailController {
                 dictDetailDtos.stream().map(dto -> BeanUtil.toBean(dto,DictDetailVo.class)).collect(Collectors.toList());
         volist = TreeUtil.build(volist, Constants.TREE_ROOT);
         dictDetailService.superiorCheckChildren(volist);
-        return Response.ok(volist);
+        return volist;
     }
 }
